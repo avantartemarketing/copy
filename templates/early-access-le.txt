@@ -1,0 +1,38 @@
+{#
+  EARLY ACCESS (LE) - 48-hour private pre-order window before the public draw.
+  Voice: deliberately hybrid ("we're offering … I thought"). That is house style; keep it.
+  Audience: past purchasers and engaged sign-ups. The framing offer is a HubSpot smart-content block.
+#}
+[INTERNAL NAME] {{ release.early_access_at|ddmmyy }}_CUS_{{ release.campaign_code }} - Early Access (LE)
+[SUBJECT] {{ artist.name }} – Early access 🔓
+[PREVIEW] A first look, plus access to a limited number of pre-orders.
+
+[BODY]
+Hi {{ "{{ personalization_token('contact.firstname', 'there') }}" }},
+
+{{ EA_OPENERS[context.early_access_opener] }} our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }}, {{ artworks|titles }}.
+
+{{ context.early_access_note }}
+
+The edition will launch publicly on {{ release.launch_at|ukdate }} and will be allocated by a randomised draw; however, for the next {{ release.early_access_hours }} hours we're offering a small group of collectors a first look, plus access to a limited number of pre-orders. Based on your order history and the artists you've expressed an interest in, I thought the edition would be a good fit for your collection.
+
+{% if release.framing_code %}
+[SMART CONTENT: first-time purchasers only]
+As a welcome gesture, I'd also like to offer you 10% off our in-house framing on your first purchase when you use the code {{ release.framing_code }} at checkout.
+[/SMART CONTENT]
+
+{% endif %}
+Explore the artwork and place your order via the private link below. Use code {{ release.early_access_code }} to unlock early access.
+
+[CTA] Unlock early access
+
+Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here.
+
+If you have any questions, please don't hesitate to get in touch by replying to this email.
+
+{% for a in artworks %}
+[CARD] {{ a.title }}
+{{ a.card_line }}
+
+{% endfor %}
+[FOOTER] Especially for you.

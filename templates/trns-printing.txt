@@ -1,0 +1,31 @@
+{#
+  PRINTING IN PROGRESS (post-purchase, TRNS). Two variants, framed and unframed, from one brief.
+  Zero free text. The delay wording switches on one field.
+#}
+{% for variant in ["unframed", "framed"] %}
+{% set w = post_purchase.ship_window_framed if variant == "framed" else post_purchase.ship_window_unframed %}
+[INTERNAL NAME] {{ post_purchase.printing_update_at|ddmmyy }}_TRNS_{{ release.campaign_code }} - Printing PP ({{ variant }})
+[SUBJECT] {{ artist.name }} · Printing in progress
+[PREVIEW] An update on your order.
+
+[HEADLINE] Printing in progress
+
+[BODY]
+For the last few weeks, your artwork by {{ artist.name }} has been underway at Make-Ready, our specialist fine art printmaking studio based in North London. Once complete, it will be signed by the artist{% if variant == "framed" %}, professionally framed,{% endif %} and carefully prepared for dispatch.
+
+{% if post_purchase.delay_phrase %}
+We're currently tracking {{ post_purchase.delay_phrase }} behind schedule and we now expect to ship your {% if variant == "framed" %}framed {% endif %}edition by {{ w|ship_window }}.
+
+We're very sorry for this slight delay and appreciate your patience and understanding.
+{% else %}
+We're currently on track to ship your {% if variant == "framed" %}framed {% endif %}edition by {{ w|ship_window }}.
+{% endif %}
+
+You can expect more updates along the way, but please don't hesitate to contact us if you have any questions.
+
+[FOOTER] An update on your order
+
+{% if not loop.last %}
+════════════════════════════════════════════════
+{% endif %}
+{% endfor %}

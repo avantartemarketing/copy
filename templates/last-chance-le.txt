@@ -1,0 +1,26 @@
+{#
+  LAST CHANCE (LE) - sent 24 hours before the draw closes. Brand "we" voice.
+  No new copy at all: the recap is the Announcement hook unless the brief overrides it.
+#}
+[INTERNAL NAME] {{ release.closes_at|day_before|ddmmyy }}_CUS_{{ release.campaign_code }} - Last Chance (LE)
+[SUBJECT] {{ artist.name }} – Last chance to enter the draw
+[PREVIEW] The draw closes tomorrow at {{ release.closes_at|uktime }}.
+
+[KICKER] {{ artist.name }}
+[HEADLINE] 24 hours left to collect
+
+[BODY]
+This is your final opportunity to enter the draw for {{ artworks|titles }}, {{ edition|recap_phrase }} by {{ artist.name }}.
+
+{{ context.recap or context.hook }}
+
+For a chance to collect, click the link below to enter the draw. The draw closes tomorrow at {{ release.closes_at|uktime }}.
+
+[CTA] Enter the draw
+
+{% for a in artworks %}
+[CARD] {{ a.title }}
+{{ a.card_line }}
+
+{% endfor %}
+[FOOTER] 24 hours to go

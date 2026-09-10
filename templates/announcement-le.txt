@@ -1,0 +1,45 @@
+{#
+  ANNOUNCEMENT (LE) - the mass send on public launch day of a draw-allocated limited edition.
+  Voice: brand "we". Sent as GEN (whole list); segment variants are clones of this.
+
+  Legend, used in every template:
+    LOCKED    verbatim house text. Never edited, never sent to an AI.
+    FRAME     a fixed sentence whose slots are filled from the brief. No AI.
+    MENU      the human picks from a short list held in render.py. No AI.
+    BOUNDED   free text: a human writes it, or an AI does under prompts/slot-contract.md.
+              validate.py checks it either way.
+    VERBATIM  copied from the brief exactly (quotes, titles). Never AI.
+#}
+[INTERNAL NAME] {{ release.launch_at|ddmmyy }}_GEN_{{ release.campaign_code }} - Announcement (LE)
+[SUBJECT] {{ artist.name }} – {{ context.subject_hook }}
+[PREVIEW] Enter the draw for a chance to collect. Closes {{ release.closes_at|ukdate }}.
+
+[KICKER] Enter the draw
+{% if artworks|length == 1 %}
+[HEADLINE] {{ artworks[0].title }}
+{% else %}
+[HEADLINE] A {{ GROUP[artworks|length] }} of {{ edition.unit }}s by {{ artist.name }}
+{% endif %}
+
+[BODY]
+{{ OPENERS[context.opener] }} our {{ artist.collaboration_ordinal }} collaboration with {{ artist.collab_with }} – {{ edition|edition_phrase }}.
+
+{{ context.hook }}
+
+{{ production_paragraph(edition, artist) }}
+
+Enter the draw for a chance to collect. Closes at {{ release.closes_at|uktime }} on {{ release.closes_at|ukdate }}.
+
+[CTA] Enter the draw
+
+{% for a in artworks %}
+[CARD] {{ a.title }}
+{{ a.card_line }}
+
+{% endfor %}
+{% if artist.quote %}
+[QUOTE] {{ artist.quote }}
+[QUOTE ATTRIBUTION] {{ artist.quote_attribution }}
+
+{% endif %}
+[FOOTER] Collect {{ edition|collect_phrase }}

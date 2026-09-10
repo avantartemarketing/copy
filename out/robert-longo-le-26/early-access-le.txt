@@ -1,0 +1,29 @@
+[INTERNAL NAME] 030926_CUS_RobertLongo_LE_26 - Early Access (LE)
+[SUBJECT] Robert Longo – Early access 🔓
+[PREVIEW] A first look, plus access to a limited number of pre-orders.
+
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+We're currently preparing the launch of our latest collaboration with Robert Longo, Untitled (Sandy, from the series “Men in the Cities”).
+
+It's an honour to be editioning Sandy, especially as this is only the second time that Longo has released images from Men in the Cities as silkscreen prints – the first time being our edition of Eric last year. The piece will be released in the same dimensions as Eric, for any collectors wishing to display the prints side by side.
+
+The edition will launch publicly on 7 September and will be allocated by a randomised draw; however, for the next 48 hours we're offering a small group of collectors a first look, plus access to a limited number of pre-orders. Based on your order history and the artists you've expressed an interest in, I thought the edition would be a good fit for your collection.
+
+[SMART CONTENT: first-time purchasers only]
+As a welcome gesture, I'd also like to offer you 10% off our in-house framing on your first purchase when you use the code Longo-0926-10 at checkout.
+[/SMART CONTENT]
+
+Explore the artwork and place your order via the private link below. Use code 377-985 to unlock early access.
+
+[CTA] Unlock early access
+
+Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here.
+
+If you have any questions, please don't hesitate to get in touch by replying to this email.
+
+[CARD] Untitled (Sandy, from the series “Men in the Cities”)
+One of the most iconic figures from a truly iconic series, Sandy is a striking exploration of urban alienation.
+
+[FOOTER] Especially for you.

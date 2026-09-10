@@ -1,0 +1,72 @@
+# Release brief: Robert Longo, Untitled (Sandy), limited edition allocated by draw.
+#
+# This is the whole input. Everything the emails say comes from here.
+# Fields marked BOUNDED are the only free text. A human writes them, or an AI does under
+# prompts/slot-contract.md. validate.py checks that every number and name in a BOUNDED field
+# is backed by the facts elsewhere in this file. Fields marked VERBATIM are copied exactly.
+#
+# Values below are lifted from the emails actually sent in September 2026, so the rendered
+# output can be compared with the real thing.
+
+emails: [announcement-le, early-access-le, last-chance-le, trns-printing]
+
+release:
+  campaign_code: RobertLongo_LE_26
+  mechanic: draw                          # draw | timed | ranked_auction
+  early_access_at: "2026-09-03 16:00"
+  early_access_hours: 48
+  early_access_code: "377-985"
+  launch_at: "2026-09-07 16:00"           # public announcement, UK time
+  closes_at: "2026-09-29 17:00"           # draw closes, UK time
+  framing_code: Longo-0926-10             # first-purchase framing offer; blank = block omitted
+  fundraiser: Vote.org
+
+artist:
+  name: Robert Longo
+  surname: Longo
+  collab_with: Brooklyn-born artist Robert Longo   # exact words after "collaboration with"
+  collaboration_ordinal: latest                    # debut | latest | second
+  partner: null                                    # e.g. "the Salvador Dalí Estate"
+  quote: "It was really important to me that as I got older as an artist, I could still make work that meant something. I wanna make work that matters."   # VERBATIM
+  quote_attribution: Robert Longo
+
+edition:
+  unit: print                             # print | sculpture | collectable | tapestry
+  count: 1
+  medium_prefix: silkscreen               # -> "a new limited edition silkscreen print"
+  size: null                              # edition size, when it is being published
+  signed_by: artist                       # artist | estate_stamp | engraved | none
+  numbered: true
+  technique_facts:
+    - made from the artist's original Kodak transparencies
+    - high fidelity silkscreen of the original piece
+  technique_sentence: "To craft this edition we have been granted access to the artist's original Kodak transparencies, enabling us to create a high fidelity silkscreen edition of the original piece."   # BOUNDED
+
+artworks:
+  - title: "Untitled (Sandy, from the series “Men in the Cities”)"
+    short_title: Sandy
+    series: Men in the Cities
+    facts:
+      - one of the best-known figures from Men in the Cities
+      - only the second silkscreen edition ever made from the series; the first was our edition of Eric last year
+      - released in the same dimensions as Eric, so the two prints can be displayed side by side
+      - a study of urban alienation
+    card_line: "One of the most iconic figures from a truly iconic series, Sandy is a striking exploration of urban alienation."   # BOUNDED, as sent
+
+context:
+  opener: delighted                       # MENU: delighted | proud | moon
+  early_access_opener: preparing          # MENU: preparing | share | unveil
+  artist_facts:
+    - renowned for works that engage with social structures and mass media
+    - has long maintained that making art is a political act
+    - Sandy is released in support of Vote.org
+  subject_hook: from his acclaimed 'Men in the Cities' series   # BOUNDED, 3 to 8 words after "Robert Longo – "
+  hook: "Longo is renowned for works that fiercely engage with social structures and mass media, long-maintaining that making art is a political act. Sandy is released in support of Vote.org and marks only the second ever edition of Men in the Cities in silkscreen form, the first being our release of Eric last year."   # BOUNDED, as sent
+  early_access_note: "It's an honour to be editioning Sandy, especially as this is only the second time that Longo has released images from Men in the Cities as silkscreen prints – the first time being our edition of Eric last year. The piece will be released in the same dimensions as Eric, for any collectors wishing to display the prints side by side."   # BOUNDED, as sent
+  recap: null                             # Last Chance reuses `hook` unless this is set
+
+post_purchase:
+  printing_update_at: "2026-11-05 15:00"
+  ship_window_unframed: {from: "2026-12-04", to: "2026-12-11"}
+  ship_window_framed: {from: "2027-01-08", to: "2027-01-15"}
+  delay_phrase: null                      # e.g. "a couple of weeks" switches to the delay wording

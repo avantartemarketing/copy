@@ -1,0 +1,643 @@
+<title>Release Email Builder</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#ffffff; --panel:#f4f4f1; --panel-2:#ebebe7; --line:#dcdcd6; --ink:#161615; --ink-2:#5b5b55; --ink-3:#8b8b84;
+  --btn-bg:#161615; --btn-fg:#ffffff; --btn-2-bg:#ffffff; --btn-2-fg:#161615;
+  --mark-bg:#fff0a3; --mark-fg:#3a2f00; --mark-line:#d9bd3a; --frame-line:#8b8b84; --empty-bg:#fff8d6;
+  --ok:#1e7a4b; --ok-bg:#e4f3ea; --warn:#8a5f00; --warn-bg:#fff3d1; --err:#b42318; --err-bg:#fbe8e5;
+  --focus:#1c4fd6; --shadow:0 1px 2px rgba(0,0,0,.06);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#151514; --panel:#1e1e1c; --panel-2:#272725; --line:#35352f; --ink:#f1f1ec; --ink-2:#b3b3ab; --ink-3:#7f7f78;
+  --btn-bg:#f1f1ec; --btn-fg:#151514; --btn-2-bg:#1e1e1c; --btn-2-fg:#f1f1ec;
+  --mark-bg:#4d3f04; --mark-fg:#ffe89a; --mark-line:#8f7612; --frame-line:#8f8f86; --empty-bg:#3a3009;
+  --ok:#6fd39c; --ok-bg:#153122; --warn:#efc35a; --warn-bg:#3b2d07; --err:#ff8a80; --err-bg:#42160f;
+  --focus:#7ea2ff; --shadow:none;
+}}
+:root[data-theme="dark"]{
+  --bg:#151514; --panel:#1e1e1c; --panel-2:#272725; --line:#35352f; --ink:#f1f1ec; --ink-2:#b3b3ab; --ink-3:#7f7f78;
+  --btn-bg:#f1f1ec; --btn-fg:#151514; --btn-2-bg:#1e1e1c; --btn-2-fg:#f1f1ec;
+  --mark-bg:#4d3f04; --mark-fg:#ffe89a; --mark-line:#8f7612; --frame-line:#8f8f86; --empty-bg:#3a3009;
+  --ok:#6fd39c; --ok-bg:#153122; --warn:#efc35a; --warn-bg:#3b2d07; --err:#ff8a80; --err-bg:#42160f;
+  --focus:#7ea2ff; --shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding-block:10px;padding-inline:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.top h1{font-size:16px;font-weight:600;letter-spacing:-.01em;margin:0}
+.top .sub{color:var(--ink-3);font-size:13px}
+.top .grow{flex:1}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{background:transparent;border:0;color:var(--ink-2);padding:6px 10px;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;border:1px solid var(--line)}
+.chip.ok{color:var(--ok);background:var(--ok-bg);border-color:transparent}
+.chip.warn{color:var(--warn);background:var(--warn-bg);border-color:transparent}
+.chip.err{color:var(--err);background:var(--err-bg);border-color:transparent}
+.tabs{display:none}
+
+/* layout */
+.app{display:grid;grid-template-columns:460px minmax(0,1fr);min-height:calc(100dvh - 54px)}
+.pane{min-width:0}
+.brief{border-right:1px solid var(--line);background:var(--panel);padding-block:16px 40px;padding-inline:20px}
+.out{padding-block:16px 60px;padding-inline:28px}
+@media (min-width: 900px){
+  .app{height:calc(100dvh - 54px)}
+  .pane{overflow:auto}
+}
+@media (max-width: 899px){
+  .app{grid-template-columns:1fr}
+  .top{padding-inline:16px;gap:8px}
+  .top .sub{display:none}
+  .seg{flex-wrap:wrap}
+  .brief{border-right:0;border-bottom:1px solid var(--line)}
+  .tabs{display:inline-flex}
+  body.show-out .brief{display:none}
+  body:not(.show-out) .out{display:none}
+  .fields,.artwork{grid-template-columns:1fr}
+  .out{padding-inline:16px}
+  .brief{padding-inline:16px}
+}
+
+/* form */
+.brief h2{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin:0}
+details{border-top:1px solid var(--line);padding-block:10px}
+details:first-of-type{border-top:0;padding-top:0}
+summary{display:flex;align-items:center;justify-content:space-between;cursor:pointer;list-style:none;padding-block:4px}
+summary::-webkit-details-marker{display:none}
+summary .n{font-size:12px;color:var(--ink-3)}
+summary::after{content:"+";color:var(--ink-3);font-size:16px;margin-left:8px}
+details[open] summary::after{content:"–"}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;padding-top:8px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field.wide{grid-column:1 / -1}
+.field label{font-size:12px;color:var(--ink-2);display:flex;justify-content:space-between;gap:8px}
+.field label .cap{color:var(--ink-3);font-variant-numeric:tabular-nums}
+.field label .cap.over{color:var(--err);font-weight:500}
+.field input[type=text],.field input[type=number],.field input[type=date],.field input[type=datetime-local],.field select,.field textarea{
+  font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;min-width:0}
+.field textarea{resize:vertical;min-height:58px;line-height:1.4}
+.field textarea.bounded{background:var(--empty-bg)}
+.field textarea.bounded.filled{background:var(--bg);border-left:3px solid var(--mark-line)}
+.field .hint{font-size:11.5px;color:var(--ink-3)}
+.field .check{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink)}
+.findings{display:flex;flex-direction:column;gap:3px;font-size:12px}
+.findings .e{color:var(--err)}
+.findings .w{color:var(--warn)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--ink);background:var(--btn-bg);color:var(--btn-fg);border-radius:6px;padding:6px 11px;font-size:13px;font-weight:500}
+.btn.secondary{background:var(--btn-2-bg);color:var(--btn-2-fg);border-color:var(--line)}
+.btn.small{padding:4px 9px;font-size:12px}
+.btn[disabled]{opacity:.5;cursor:default}
+.artwork{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--bg);display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.artwork .field.wide{grid-column:1 / -1}
+.artwork header{grid-column:1 / -1;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-2);font-weight:500}
+.stack{display:flex;flex-direction:column;gap:10px;padding-top:8px}
+.candidates{border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:8px;display:flex;flex-direction:column;gap:6px}
+.cand{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;padding:6px;border-radius:6px;border:1px solid transparent}
+.cand:hover{border-color:var(--line)}
+.cand .t{font-size:13px}
+.cand .st{font-size:11.5px;margin-top:3px}
+.cand .st.ok{color:var(--ok)} .cand .st.bad{color:var(--err)}
+.note{font-size:12px;color:var(--ink-3)}
+
+/* output */
+.out .lead{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+.out h2{font-size:18px;font-weight:600;letter-spacing:-.01em;margin:0;text-wrap:balance}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);margin-bottom:18px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:26px;height:12px;border-radius:2px}
+.legend i.l{background:var(--panel-2)}
+.legend i.f{border-bottom:2px dotted var(--frame-line);height:10px;background:transparent}
+.legend i.b{background:var(--mark-bg);border-bottom:2px solid var(--mark-line)}
+.seq{display:flex;flex-direction:column;gap:22px;max-width:760px}
+.email{border:1px solid var(--line);border-radius:10px;background:var(--bg);box-shadow:var(--shadow);overflow:hidden}
+.email .head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.email .head .title{font-weight:600;font-size:14px}
+.email .head .when{color:var(--ink-3);font-size:12px;margin-left:8px}
+.meta{padding:10px 16px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:82px 1fr;gap:4px 12px;font-size:13px}
+.meta .k{color:var(--ink-3);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding-top:3px}
+.meta .v.mono{font-size:12px;padding-top:2px}
+.body{padding:16px 16px 6px;max-width:66ch}
+.blk{margin:0 0 12px}
+.blk.kicker{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.blk.headline{font-size:20px;font-weight:600;letter-spacing:-.01em;line-height:1.25;text-wrap:balance;margin-bottom:14px}
+.blk.para{font-size:14.5px;line-height:1.55}
+.blk.cta{display:inline-block;border:1px solid var(--ink);border-radius:4px;padding:6px 14px;font-weight:500;font-size:13px;margin-block:2px 16px}
+.blk.card{border-top:1px solid var(--line);padding-top:10px}
+.blk.card .ct{font-weight:600;margin-bottom:3px}
+.blk.quote{border-left:3px solid var(--line);padding-left:12px;font-style:italic;color:var(--ink-2)}
+.blk.quote .qa{font-style:normal;font-size:12.5px;margin-top:4px;color:var(--ink-3)}
+.blk.footer{font-size:12px;color:var(--ink-3);border-top:1px solid var(--line);padding-top:10px}
+.blk.smart{border:1px dashed var(--line);border-radius:6px;padding:8px 10px;font-size:14px}
+.blk.smart .sl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px}
+.blk.rule{border:0;border-top:1px dashed var(--line);margin-block:16px}
+mark.b{background:var(--mark-bg);color:var(--mark-fg);border-bottom:2px solid var(--mark-line);padding:0 1px;border-radius:1px}
+mark.b.empty{background:var(--empty-bg);color:var(--warn);font-style:italic;border-bottom-style:dashed}
+span.f{border-bottom:2px dotted var(--frame-line)}
+.status{display:flex;gap:10px;align-items:flex-start;padding:10px 16px;border-top:1px solid var(--line);font-size:12.5px}
+.status.ok{background:var(--ok-bg);color:var(--ok)}
+.status.warn{background:var(--warn-bg);color:var(--warn)}
+.status.err{background:var(--err-bg);color:var(--err)}
+.status ul{margin:0;padding-left:16px}
+.status .lab{font-weight:600;white-space:nowrap}
+.foot{color:var(--ink-3);font-size:12px;margin-top:28px;max-width:66ch}
+</style>
+
+<div class="top">
+  <h1>Release Email Builder</h1>
+  <span class="sub">Avant Arte · proof of concept</span>
+  <span class="grow"></span>
+  <span class="seg" role="group" aria-label="Load an example brief">
+    <button type="button" id="ex-longo" aria-pressed="true">Robert Longo · draw</button>
+    <button type="button" id="ex-crewdson" aria-pressed="false">Gregory Crewdson · timed</button>
+    <button type="button" id="ex-blank" aria-pressed="false">Blank</button>
+  </span>
+  <span class="seg tabs" role="tablist">
+    <button type="button" id="tab-brief" aria-pressed="true">Brief</button>
+    <button type="button" id="tab-out" aria-pressed="false">Emails</button>
+  </span>
+  <span class="chip" id="summary">…</span>
+</div>
+
+<div class="app">
+  <section class="pane brief" id="pane-brief" aria-label="Release brief">
+    <div id="form"></div>
+    <p class="note" style="margin-top:16px">Your edits stay in this browser. Load an example to start over. Every sentence in the emails is house text or a fixed frame except the five highlighted slots.</p>
+  </section>
+  <section class="pane out" id="pane-out" aria-label="Generated emails">
+    <div class="lead">
+      <h2 id="out-title">Emails for this release</h2>
+      <span class="note" id="out-count"></span>
+    </div>
+    <div class="legend">
+      <span><i class="l"></i>Locked house text</span>
+      <span><i class="f"></i>Filled from your facts</span>
+      <span><i class="b"></i>Free text: written or suggested, checked, yours to approve</span>
+    </div>
+    <div class="seq" id="seq"></div>
+    <p class="foot">Each email is laid out by HubSpot module (kicker, headline, body, CTA, cards, quote, footer) and carries its internal name in the <span class="mono">DDMMYY_TYPE_Campaign - Sub-type</span> convention. Copy for HubSpot copies the email as plain text with module markers.</p>
+  </section>
+</div>
+
+<script>
+/* ------------------------------------------------------------------ data */
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const OPENERS={delighted:"We're delighted to announce",proud:"We're proud to present",moon:"We are over the moon to announce"};
+const EA_OPENERS={preparing:"We're currently preparing the launch of",share:"I'm delighted to share",unveil:"We will soon be unveiling"};
+const GROUP={2:"pair",3:"trio",4:"quartet",5:"quintet",6:"sextet",7:"septet"};
+const NEW={1:"a new",2:"a pair of new",3:"a trio of new",4:"a quartet of new",5:"five new",6:"six new",7:"a septet of new"};
+const COLLECT={1:"a",2:"a pair of",3:"a trio of",4:"a quartet of",5:"five",6:"six",7:"a septet of"};
+const WORDS={1:"one",2:"two",3:"three",4:"four",5:"five",6:"six",7:"seven"};
+const BOUNDED_KEYS=new Set(["hook","card_line","subject_hook","early_access_note","technique_sentence","recap","quote_sentence","footer","delay_phrase","delay_reason","frame_description"]);
+const SLOTS={
+  subject_hook:{cap:8,min:3,label:"Subject hook",task:"three to eight words that follow \"[Artist] – \" in a subject line. A noun phrase, not a sentence. No verbs of urgency. No punctuation except an ampersand or quotation marks around a series name."},
+  hook:{cap:60,min:15,label:"Hook",task:"one or two sentences, 60 words at most, placing the artist and this work for a reader who follows contemporary art. Use the surname alone; the full name is already used in the sentence before."},
+  card_line:{cap:30,min:12,label:"Card line",task:"one sentence, 15 to 30 words, describing this one artwork for a small card under its image. Mention that it is a limited edition once."},
+  early_access_note:{cap:60,min:15,label:"Early Access note",task:"one to three sentences, 60 words at most, on why this particular release matters, addressed to one collector. First person plural (\"we\")."},
+  technique_sentence:{cap:35,min:8,label:"Technique sentence",task:"one sentence, 35 words at most, on how the edition was made, from the technique facts only."},
+  delay_reason:{cap:25,min:5,label:"Delay reason",task:"one sentence, 25 words at most, stating plainly what caused the delay."},
+  frame_description:{cap:60,min:15,label:"Frame description",task:"one or two sentences, 60 words at most, describing the bespoke frame made for this release and why it suits the work."},
+};
+const FEWSHOT={
+  hook:["Known for a genre-defying practice that's almost impossible to pin down, Schnabel works across painting, sculpture, film, architecture and furniture.",
+    "Since acquiring 30 tonnes of buttons from a South London factory in 2019, Weiwei has repeatedly returned to the everyday object, transforming it into a symbol of identity, power and resistance.",
+    "Originally painted between 1933 and 1934, Millet's Architectonic Angelus, The Spectre of Sex-Appeal and The Phantom Cart are striking examples of Dalí's fascination with dreams, desire and the subconscious – each charged with surreal and erotic suggestion.",
+    "Revisiting Ligon's landmark Stranger series, the editions translate passages from James Baldwin's renowned essay, Stranger in the Village, into layered compositions where language becomes pure abstraction.",
+    "Originally created in 2013, the work draws on the artist's former career as a lieutenant colonel in the Saudi Arabian military and explores the shifting relationship between Islamic tradition and contemporary cultural identity.",
+    "Based on two panels from the artist's sixteen-part artwork Ephemerality, the editions preserve the depth and materiality of the original paintings.",
+    "First photographed in Beijing's Tiananmen Square in 1995, the middle finger has become a defining motif in Weiwei's conceptual practice – not as provocation for its own sake, but as a declaration of presence in the face of institutional authority.",
+    "Created between 1921 and 1925, they distil form and colour to their essentials, capturing Mondrian's radical vision of balance, harmony and abstraction."],
+  card_line:["Zeng Fanzhi transforms one of his haunting skull paintings into a limited edition print, exploring impermanence, life and death through richly layered lines, textures and colour.",
+    "A 37-layer limited edition print finished with matte varnish, crafted to capture the depth, texture and painterly complexity of Zeng's original work.",
+    "Inspired by the dual hemispheres of the brain, Gharem's piece uses ancient stamp-printing techniques to explore the disconnect between Islamic tradition and modern cultural identities.",
+    "Produced as a limited edition of just 75, this silkscreen print captures the depth and materiality of Ligon's layered, text-based compositions.",
+    "A shimmering group portrait fusing 1970s pop culture, classical composition, and the artist's unapologetic celebration of Black femininity.",
+    "Red Arm is a bold sculptural edition that channels the artist's landmark Study of Perspective series into a luminescent statement of resistance.",
+    "In Guardian (Blue), Ai Weiwei depicts himself as a Door God, a traditional Chinese figurine placed at the entrance of the home to protect the people inside.",
+    "The hypnotic mark-making of Lee Ufan's From Point series is translated to a new limited edition silkscreen print."],
+  subject_hook:["the button takes on a new form","Three renowned works","from his seminal 'Stranger' series","Islamic tradition & contemporary identity","A pair of early works, editioned for the first time","Life, death & impermanence","Three landmark works","Six intertwined cherubic faces","a dizzying chromatic sculpture","Discover 'Utopia'"],
+  early_access_note:["To Maurizio, Therapy represents the ultimate equaliser: luxury and banality, excess and necessity, all collapsing into one shared human experience.",
+    "In 2023, LY introduced her amorphous, wandering muse, LUV, to a world of colour – breaking free from the monochromatic legacy that once defined her practice. Now, our latest print collaboration sees LY venture into a new palette again.",
+    "Johnson Tsang's surreal porcelain sculptures balance illusionary compositions with hyperreal aesthetics. His tender and unusual work has a powerful ability to distil complex subjects, thoughts and emotions into calm, arresting beauty.",
+    "Originally conceived in 2021, Alliance reflects Tsang's fascination with the complexities of human relationships, capturing the ways love, support, dependence, and tension can exist side by side.",
+    "This limited edition silkscreen-printed cardboard collectable will be available in three colours and two orientations, including a limited edition replica collectable built at a 1:1 scale with the original."],
+  technique_sentence:["Each edition is a 2-colour silkscreen with a metallic glitter base layer that shifts with the light, printed on Somerset Tub Sized Radiant White 410gsm paper.",
+    "Each print is produced on 310gsm Hahnemühle German Etching paper and created in close collaboration with the Lucian Freud Estate at Make-Ready, our London print studio.",
+    "To create the edition, printers at Make-Ready translated each hue into a rich, 22-colour silkscreen print.",
+    "The edition is crafted as an 11-colour silkscreen print with satin varnish and highlights.",
+    "Each print features a matte varnish seal and 4 silkscreen layers, produced in an edition of 100.",
+    "Each edition is an 18-colour silkscreen printed in 32 layers, featuring bespoke metallic and fluorescent inks and hand-applied collage elements on every print."],
+  delay_reason:["Unfortunately, a shipment of our glazing was damaged in transit.","As your edition was undergoing final checks, our art-handling team noticed a minor defect in the frame and decided to reframe your print.","The artist's availability for the initial signing dates has changed."],
+  frame_description:["Created exclusively for this collaboration, our silver aluminium frame has been designed to complement the distinctly American psychological landscapes of the works. Its sleek metallic finish enhances the cinematic quality of each image."],
+};
+const BANNED=["don't miss out","don’t miss out","miss out","hurry","act now","act fast","grab","snag","shop now","get yours","secure yours","treat yourself","last call","final hours","ends soon","selling fast","going fast","almost gone","while stocks last","limited time offer","exclusive offer","own a piece of","bring home","make a statement","conversation starter","investment","appreciate in value","elevate","delve","dive into","tapestry of","testament to","journey through","realm","unleash","embark","captivating","mesmerising","mesmerizing","breathtaking","stunning","amazing","must-have","unmissable","prestigious","world-class","seamless","seamlessly","effortless","effortlessly","game-changing","cutting-edge","nestled","boasts","showcases","whether you're","whether you’re","look no further","it's not just","it’s not just","not only","in a world where","in today's","in today’s","at its core","at the heart of","imagine","picture this","perfect for","the perfect gift","what are you waiting","we're thrilled","we’re thrilled","thrilled to","excited to announce","excitingly","we hope you'll agree","as you know","truly special","one-of-a-kind","product","item","merch","drop","raffle","lottery","giveaway","customer","shopper"];
+const CAPPED={iconic:1,truly:1,unique:1,meticulous:1,meticulously:1,very:1,celebrated:1,renowned:1,landmark:1,seminal:1,striking:1};
+const US_SPELLING={color:"colour",colors:"colours",colorway:"colourway",realize:"realise",center:"centre",gray:"grey",jewelry:"jewellery",favorite:"favourite",honor:"honour",catalog:"catalogue",program:"programme"};
+const HOUSE_PROPER=new Set("UK Make-Ready North London Amsterdam Avant Arte Estate Foundation Trust Insiders January February March April May June July August September October November December Monday Tuesday Wednesday Thursday Friday Saturday Sunday I I'm I'd I've It's".split(" "));
+
+const EXAMPLES={
+ longo:{
+  emails:["early-access-le","announcement-le","last-chance-le","printing-pp"],
+  release:{campaign_code:"RobertLongo_LE_26",mechanic:"draw",window:"48 hours",early_access_at:"2026-09-03 16:00",early_access_hours:48,early_access_code:"377-985",launch_at:"2026-09-07 16:00",closes_at:"2026-09-29 17:00",framing_code:"Longo-0926-10",fundraiser:"Vote.org",last_chance_hours:5},
+  artist:{name:"Robert Longo",first_name:"Robert",surname:"Longo",collab_with:"Brooklyn-born artist Robert Longo",ordinal:"latest",partner:"",quote:"It was really important to me that as I got older as an artist, I could still make work that meant something. I wanna make work that matters.",quote_attribution:"Robert Longo",
+    facts:["renowned for works that engage with social structures and mass media","has long maintained that making art is a political act","Sandy is released in support of Vote.org"]},
+  edition:{unit:"print",count:1,medium_prefix:"silkscreen",suffix:"",size:"",signed_by:"artist",numbered:true,facts:["made from the artist's original Kodak transparencies","high fidelity silkscreen of the original piece"],
+    technique_sentence:"To craft this edition we have been granted access to the artist's original Kodak transparencies, enabling us to create a high fidelity silkscreen edition of the original piece."},
+  artworks:[{title:"Untitled (Sandy, from the series “Men in the Cities”)",short_title:"Sandy",year:"1981",series:"Men in the Cities",facts:["one of the best-known figures from Men in the Cities","only the second silkscreen edition ever made from the series; the first was our edition of Eric last year","released in the same dimensions as Eric, so the two prints can be displayed side by side","a study of urban alienation"],
+    card_line:"One of the most iconic figures from a truly iconic series, Sandy is a striking exploration of urban alienation."}],
+  context:{opener:"delighted",early_access_opener:"preparing",subject_hook:"from his acclaimed 'Men in the Cities' series",
+    hook:"Longo is renowned for works that fiercely engage with social structures and mass media, long-maintaining that making art is a political act. Sandy is released in support of Vote.org and marks only the second ever edition of Men in the Cities in silkscreen form, the first being our release of Eric last year.",
+    early_access_note:"It's an honour to be editioning Sandy, especially as this is only the second time that Longo has released images from Men in the Cities as silkscreen prints – the first time being our edition of Eric last year. The piece will be released in the same dimensions as Eric, for any collectors wishing to display the prints side by side.",
+    recap:"",quote_sentence:"",footer:"",frame_description:""},
+  post_purchase:{printing_update_at:"2026-11-05",ship_unframed_from:"2026-12-04",ship_unframed_to:"2026-12-11",ship_framed_from:"2027-01-08",ship_framed_to:"2027-01-15",delay_phrase:"",delay_reason:""}
+ },
+ crewdson:{
+  emails:["announcement-tl","now-live-tl","halfway-tl","last-chance-tl","printing-pp"],
+  release:{campaign_code:"GregoryCrewd_TL_26",mechanic:"timed",window:"48 hours",early_access_at:"2026-06-29 13:00",early_access_hours:24,early_access_code:"",launch_at:"2026-06-30 17:00",closes_at:"2026-07-02 17:00",framing_code:"Crewdson-0626-10",fundraiser:"",last_chance_hours:5,announce_at:"2026-06-10 15:00"},
+  artist:{name:"Gregory Crewdson",first_name:"Gregory",surname:"Crewdson",collab_with:"New York-based artist Gregory Crewdson",ordinal:"latest",partner:"",quote:"that moment of transcendence, where one is transported into another place, into a perfect, still world.",quote_attribution:"Gregory Crewdson",
+    facts:["Dream House was originally commissioned by the New York Times in 2002","shot inside an abandoned Vermont home","cast included Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow","the series transforms suburban America into a cinematic psychological landscape","twelve meticulously staged photographs"]},
+  edition:{unit:"print",count:6,medium_prefix:"",suffix:"from his iconic Dream House series",size:"",signed_by:"artist",numbered:true,facts:["faithfully translated into print by Make-Ready","signed and numbered","free worldwide shipping"],technique_sentence:""},
+  artworks:[{title:"Untitled",short_title:"Untitled",year:"2002",series:"Dream House",facts:["six new limited edition prints","meticulous, still and unsettling","a distinctly American psychological landscape with a Lynchian atmosphere","between the familiar and the uncanny"],
+    card_line:"This collection brings together six new limited edition prints. Meticulous, still, and unsettling, Crewdson's photographs construct a distinctly American psychological landscape with a Lynchian atmosphere, existing somewhere between the familiar and the uncanny."}],
+  context:{opener:"delighted",early_access_opener:"preparing",subject_hook:"Discover 'Dream House'",
+    hook:"Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape.",
+    early_access_note:"",recap:"",quote_sentence:"To Gregory, Dream House represents “that moment of transcendence, where one is transported into another place, into a perfect, still world.”",footer:"From his iconic 'Dream House' series",
+    frame_description:"Created exclusively for this collaboration, our silver aluminium frame has been designed to complement the distinctly American psychological landscapes of the works. Its sleek metallic finish enhances the cinematic quality of each image."},
+  post_purchase:{printing_update_at:"2026-08-06",ship_unframed_from:"2026-10-02",ship_unframed_to:"2026-10-09",ship_framed_from:"2026-10-30",ship_framed_to:"2026-11-06",delay_phrase:"",delay_reason:""}
+ },
+ blank:{
+  emails:[],
+  release:{campaign_code:"",mechanic:"draw",window:"48 hours",early_access_at:"",early_access_hours:48,early_access_code:"",launch_at:"",closes_at:"",framing_code:"",fundraiser:"",last_chance_hours:5,announce_at:""},
+  artist:{name:"",first_name:"",surname:"",collab_with:"",ordinal:"latest",partner:"",quote:"",quote_attribution:"",facts:[]},
+  edition:{unit:"print",count:1,medium_prefix:"",suffix:"",size:"",signed_by:"artist",numbered:true,facts:[],technique_sentence:""},
+  artworks:[{title:"",short_title:"",year:"",series:"",facts:[],card_line:""}],
+  context:{opener:"delighted",early_access_opener:"preparing",subject_hook:"",hook:"",early_access_note:"",recap:"",quote_sentence:"",footer:"",frame_description:""},
+  post_purchase:{printing_update_at:"",ship_unframed_from:"",ship_unframed_to:"",ship_framed_from:"",ship_framed_to:"",delay_phrase:"",delay_reason:""}
+ }
+};
+const clone=o=>JSON.parse(JSON.stringify(o));
+let brief=clone(EXAMPLES.longo), which="longo";
+try{const s=localStorage.getItem("aa-release-brief"); if(s){const p=JSON.parse(s); if(p&&p.brief){brief=p.brief; which=p.which||"custom";}}}catch(e){}
+
+/* ------------------------------------------------------------------ formatting */
+function parseDT(s){ if(!s) return null; const m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/); if(!m) return null; return new Date(+m[1],+m[2]-1,+m[3],+(m[4]||0),+(m[5]||0)); }
+const pad=n=>String(n).padStart(2,"0");
+function uktime(s){const d=parseDT(s); return d?`${pad(d.getHours())}:${pad(d.getMinutes())} UK time`:"__:__ UK time";}
+function ukdate(s){const d=parseDT(s); return d?`${d.getDate()} ${MONTHS[d.getMonth()]}`:"D Month";}
+function ukdateDD(s){const d=parseDT(s); return d?`${pad(d.getDate())} ${MONTHS[d.getMonth()]}`:"DD Month";}
+function weekday(s){const d=parseDT(s); return d?DAYS[d.getDay()]:"Weekday";}
+function ddmmyy(s){const d=parseDT(s); return d?`${pad(d.getDate())}${pad(d.getMonth()+1)}${String(d.getFullYear()).slice(2)}`:"DDMMYY";}
+function dayBefore(s){const d=parseDT(s); if(!d) return ""; d.setDate(d.getDate()-1); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;}
+function shipWindow(a,b){const x=parseDT(a),y=parseDT(b); if(!x||!y) return "DD - DD Month"; return x.getMonth()===y.getMonth()?`${pad(x.getDate())} - ${pad(y.getDate())} ${MONTHS[y.getMonth()]}`:`${pad(x.getDate())} ${MONTHS[x.getMonth()]} - ${pad(y.getDate())} ${MONTHS[y.getMonth()]}`;}
+function noun(e,plural){const m=(e.medium_prefix||"").trim(); return (m?m+" ":"")+(e.unit||"print")+(plural?"s":"");}
+const cnt=e=>Math.min(Math.max(parseInt(e.count)||1,1),7);
+function editionPhrase(e){const n=cnt(e); return `${NEW[n]} limited edition ${noun(e,n>1)}`;}
+function collectPhrase(e){const n=cnt(e); return `${COLLECT[n]} limited edition ${noun(e,n>1)}`;}
+function recapPhrase(e){const n=cnt(e); return n===1?editionPhrase(e):`${WORDS[n]} limited edition ${noun(e,true)}`;}
+function titles(aw){const t=aw.map(a=>a.title||"Untitled"); return t.length===1?t[0]:t.slice(0,-1).join(", ")+" and "+t[t.length-1];}
+function authPhrase(e,a){return {artist:"signed by the artist",estate_stamp:`authenticated with a bespoke debossed ${a.partner||"Estate"} stamp`,engraved:"authenticated with the artist's engraved signature",none:""}[e.signed_by]||"";}
+function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
+function halfwayLine(w){return {"24 hours":"12 hours down, 12 to go","48 hours":"24 hours down, 24 to go","one week":"2 days down, 5 days to go"}[w]||"Halfway there";}
+function halfwaySubject(w){return {"24 hours":"12 hours to go","48 hours":"24 hours to go","one week":"5 days to go"}[w]||"Halfway";}
+
+/* ------------------------------------------------------------------ segments and templates */
+const L=t=>({k:"l",t}), F=t=>({k:"f",t}), V=t=>({k:"v",t});
+const B=(t,key,slot)=>({k:"b",t:t||"",key,slot,empty:!(t&&t.trim())});
+const blk=(kind,...lines)=>({kind,lines});
+function productionSegs(e,a){
+  const out=[]; if(e.technique_sentence&&e.technique_sentence.trim()) out.push(B(e.technique_sentence,"edition.technique_sentence","technique_sentence"));
+  const size=String(e.size||"").trim();
+  if(size){ const bits=[`Each ${e.unit||"print"} is released in a limited edition of ${size}`]; if(e.numbered) bits.push("individually numbered"); const au=authPhrase(e,a); if(au) bits.push(au);
+    const s=bits.length>1?bits.slice(0,-1).join(", ")+" and "+bits[bits.length-1]+".":bits[0]+"."; if(out.length) out.push(L(" ")); out.push(F(s)); }
+  return out;
+}
+function cards(b){return b.artworks.map((w,i)=>blk("card",[V(w.title||"Untitled")],[B(w.card_line,`artworks.${i}.card_line`,"card_line")]));}
+const T={};
+T["early-access-le"]=b=>{const {release:r,artist:a,edition:e,context:c}=b; const bl=[];
+  bl.push(blk("internal",[F(`${ddmmyy(r.early_access_at)}_CUS_${r.campaign_code||"Campaign"} - Early Access (LE)`)]));
+  bl.push(blk("subject",[F(a.name||"Artist"),L(" – Early access 🔓")]));
+  bl.push(blk("preview",[L("A first look, plus access to a limited number of pre-orders.")]));
+  bl.push(blk("para",[L("Hi {{ personalization_token('contact.firstname', 'there') }},")]));
+  bl.push(blk("para",[L(EA_OPENERS[c.early_access_opener]||EA_OPENERS.preparing),L(" our "),F(a.ordinal),L(" collaboration with "),F(a.name||"Artist"),L(", "),V(titles(b.artworks)),L(".")]));
+  bl.push(blk("para",[B(c.early_access_note,"context.early_access_note","early_access_note")]));
+  bl.push(blk("para",[L("The edition will launch publicly on "),F(ukdate(r.launch_at)),L(" and will be allocated by a randomised draw; however, for the next "),F(String(r.early_access_hours||48)),L(" hours we're offering a small group of collectors a first look, plus access to a limited number of pre-orders. Based on your order history and the artists you've expressed an interest in, I thought the edition would be a good fit for your collection.")]));
+  if(r.framing_code) bl.push(blk("smart",[L("As a welcome gesture, I'd also like to offer you 10% off our in-house framing on your first purchase when you use the code "),F(r.framing_code),L(" at checkout.")]));
+  bl.push(blk("para",[L("Explore the artwork and place your order via the private link below. Use code "),F(r.early_access_code||"000-000"),L(" to unlock early access.")]));
+  bl.push(blk("cta",[L("Unlock early access")]));
+  bl.push(blk("para",[L("Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here.")]));
+  bl.push(blk("para",[L("If you have any questions, please don't hesitate to get in touch by replying to this email.")]));
+  bl.push(...cards(b)); bl.push(blk("footer",[L("Especially for you.")]));
+  return {id:"early-access-le",name:"Early Access (LE)",when:"48-hour private window before the announcement",blocks:bl};};
+T["announcement-le"]=b=>{const {release:r,artist:a,edition:e,context:c,artworks:aw}=b; const bl=[];
+  bl.push(blk("internal",[F(`${ddmmyy(r.launch_at)}_GEN_${r.campaign_code||"Campaign"} - Announcement (LE)`)]));
+  bl.push(blk("subject",[F(a.name||"Artist"),L(" – "),B(c.subject_hook,"context.subject_hook","subject_hook")]));
+  bl.push(blk("preview",[L("Enter the draw for a chance to collect. Closes "),F(ukdate(r.closes_at)),L(".")]));
+  bl.push(blk("kicker",[L("Enter the draw")]));
+  bl.push(blk("headline",aw.length===1?[V(aw[0].title||"Untitled")]:[F(`A ${GROUP[Math.min(aw.length,7)]||"set"} of ${e.unit||"print"}s by ${a.name||"Artist"}`)]));
+  bl.push(blk("para",[L(OPENERS[c.opener]||OPENERS.delighted),L(" our "),F(a.ordinal),L(" collaboration with "),F(a.collab_with||a.name||"Artist"),L(" – "),F(editionPhrase(e)),L(".")]));
+  bl.push(blk("para",[B(c.hook,"context.hook","hook")]));
+  const p=productionSegs(e,a); if(p.length) bl.push(blk("para",p));
+  bl.push(blk("para",[L("Enter the draw for a chance to collect. Closes at "),F(uktime(r.closes_at)),L(" on "),F(ukdate(r.closes_at)),L(".")]));
+  bl.push(blk("cta",[L("Enter the draw")]));
+  bl.push(...cards(b));
+  if(a.quote) bl.push(blk("quote",[V(a.quote)],[V(a.quote_attribution||a.name)]));
+  bl.push(blk("footer",[L("Collect "),F(collectPhrase(e))]));
+  return {id:"announcement-le",name:"Announcement (LE)",when:"Launch day, whole list",blocks:bl};};
+T["last-chance-le"]=b=>{const {release:r,artist:a,edition:e,context:c}=b; const bl=[];
+  bl.push(blk("internal",[F(`${ddmmyy(dayBefore(r.closes_at))}_CUS_${r.campaign_code||"Campaign"} - Last Chance (LE)`)]));
+  bl.push(blk("subject",[F(a.name||"Artist"),L(" – Last chance to enter the draw")]));
+  bl.push(blk("preview",[L("The draw closes tomorrow at "),F(uktime(r.closes_at)),L(".")]));
+  bl.push(blk("kicker",[F(a.name||"Artist")])); bl.push(blk("headline",[L("24 hours left to collect")]));
+  bl.push(blk("para",[L("This is your final opportunity to enter the draw for "),V(titles(b.artworks)),L(", "),F(recapPhrase(e)),L(" by "),F(a.name||"Artist"),L(".")]));
+  bl.push(blk("para",[c.recap&&c.recap.trim()?B(c.recap,"context.recap","hook"):B(c.hook,"context.hook","hook")]));
+  bl.push(blk("para",[L("For a chance to collect, click the link below to enter the draw. The draw closes tomorrow at "),F(uktime(r.closes_at)),L(".")]));
+  bl.push(blk("cta",[L("Enter the draw")])); bl.push(...cards(b)); bl.push(blk("footer",[L("24 hours to go")]));
+  return {id:"last-chance-le",name:"Last Chance (LE)",when:"24 hours before the draw closes",blocks:bl};};
+T["announcement-tl"]=b=>{const {release:r,artist:a,edition:e,context:c,artworks:aw}=b; const bl=[]; const at=r.announce_at||r.launch_at;
+  bl.push(blk("internal",[F(`${ddmmyy(at)}_GEN_${r.campaign_code||"Campaign"} - Announcement (TL Non-flow)`)]));
+  bl.push(blk("subject",[F(a.name||"Artist"),L(" – "),B(c.subject_hook,"context.subject_hook","subject_hook")]));
+  bl.push(blk("preview",[L("Launching "),F(ukdate(r.launch_at)),L(". Register for updates and early access.")]));
+  bl.push(blk("kicker",[L("Launching "),F(ukdate(r.launch_at))]));
+  bl.push(blk("headline",aw.length===1&&cnt(e)===1?[V(aw[0].title||"Untitled")]:[F(`${cap(NEW[cnt(e)].replace(/^a /,"a ").replace(" new",""))} ${e.unit||"print"}s by ${a.name||"Artist"}`.replace(/^A /,"A "))]));
+  bl.push(blk("para",[L(OPENERS[c.opener]||OPENERS.delighted),L(" our "),F(a.ordinal),L(" collaboration with "),F(a.collab_with||a.name||"Artist"),L(" – "),F(editionPhrase(e)),e.suffix?L(" "):L(""),e.suffix?F(e.suffix):L(""),L(".")]));
+  bl.push(blk("para",[B(c.hook,"context.hook","hook")]));
+  const p=productionSegs(e,a); if(p.length) bl.push(blk("para",p));
+  bl.push(blk("para",[L("The editions will be available to collect for "),F(r.window||"48 hours"),L(" only, beginning at "),F(uktime(r.launch_at)),L(" on "),F(ukdate(r.launch_at)),L(". Click below to register for updates and set a reminder for the launch.")]));
+  bl.push(blk("cta",[L("Discover the collaboration")])); bl.push(...cards(b));
+  if(a.quote) bl.push(blk("quote",[V(a.quote)],[V(a.quote_attribution||a.name)]));
+  bl.push(blk("footer",[L("Launching "),F(ukdate(r.launch_at)),L(" for "),F(r.window||"48 hours"),L(" only")]));
+  return {id:"announcement-tl",name:"Announcement (TL)",when:"About three weeks before launch, whole list",blocks:bl};};
+T["now-live-tl"]=b=>{const {release:r,artist:a,edition:e,context:c,artworks:aw}=b; const bl=[];
+  bl.push(blk("internal",[F(`${ddmmyy(r.launch_at)}_GEN_${r.campaign_code||"Campaign"} - Now Live (TL Non-flow)`)]));
+  bl.push(blk("subject",[F(a.name||"Artist"),L(" – Available now, for "),F(r.window||"48 hours"),L(" only")]));
+  bl.push(blk("preview",[F(cap(r.window||"48 hours")),L(", starting now.")]));
+  bl.push(blk("kicker",[F(a.name||"Artist")])); bl.push(blk("headline",[F(cap(r.window||"48 hours")),L(", starting now")]));
+  bl.push(blk("para",[L("Our "),F(a.ordinal),L(" collaboration with "),F(a.name||"Artist"),L(" is now available to collect for "),F(r.window||"48 hours"),L(" only – "),F(editionPhrase(e)),e.suffix?L(" "):L(""),e.suffix?F(e.suffix):L(""),L(", each signed and numbered, with free worldwide shipping.")]));
+  bl.push(blk("para",[B(c.hook,"context.hook","hook")]));
+  if(c.quote_sentence&&c.quote_sentence.trim()) bl.push(blk("para",[B(c.quote_sentence,"context.quote_sentence","quote_sentence")]));
+  bl.push(blk("para",[L("The opportunity to collect an edition ends at "),F(uktime(r.closes_at)),L(" on "),F(weekday(r.closes_at)),L(", "),F(ukdateDD(r.closes_at)),L(". Click the link below to add "),F(aw.length>1||cnt(e)>1?"a print":(aw[0].title||"Untitled")),L(" to your collection.")]));
+  bl.push(blk("cta",[L("Buy now")])); bl.push(...cards(b));
+  bl.push(blk("footer",c.footer&&c.footer.trim()?[B(c.footer,"context.footer","footer")]:[L("Collect "),F(collectPhrase(e))]));
+  return {id:"now-live-tl",name:"Now Live (TL)",when:"The moment the window opens, whole list",blocks:bl};};
+T["halfway-tl"]=b=>{const {release:r,artist:a,context:c}=b; const bl=[]; const w=r.window||"48 hours";
+  bl.push(blk("internal",[F(`AUT_${r.campaign_code||"Campaign"} - Halfway (TL Flow)`)]));
+  bl.push(blk("subject",[F(a.name||"Artist"),L(" – "),F(halfwaySubject(w))]));
+  bl.push(blk("preview",[L("There's still time to add a print to your collection.")]));
+  bl.push(blk("kicker",[L("Collect a print by "),F(a.name||"Artist")])); bl.push(blk("headline",[F(halfwayLine(w))]));
+  bl.push(blk("cta",[L("Buy now")]));
+  if(c.frame_description&&c.frame_description.trim()){ bl.push(blk("kicker",[L("Framer's choice")])); bl.push(blk("para",[B(c.frame_description,"context.frame_description","frame_description")])); }
+  bl.push(blk("footer",[L("There's still time to add a print to your collection")]));
+  return {id:"halfway-tl",name:"Halfway (TL flow)",when:"Inside the window, to sign-ups",blocks:bl};};
+T["last-chance-tl"]=b=>{const {release:r,artist:a,edition:e,context:c}=b; const bl=[]; const h=r.last_chance_hours||5;
+  bl.push(blk("internal",[F(`AUT_${r.campaign_code||"Campaign"} - Last Chance (TL Flow)`)]));
+  bl.push(blk("subject",[F(a.name||"Artist"),L(" – Last chance to collect")]));
+  bl.push(blk("preview",[F(`${h} hours`),L(" left to collect.")]));
+  bl.push(blk("kicker",[F(a.name||"Artist")])); bl.push(blk("headline",[F(`${h} hours left to collect`)]));
+  bl.push(blk("cta",[L("Buy now")]));
+  bl.push(blk("para",[L("It's now or never for our "),F(a.ordinal),L(" collaboration with "),F(a.name||"Artist"),L(" – "),F(recapPhrase(e)),e.suffix?L(" "):L(""),e.suffix?F(e.suffix):L(""),L(" will be available to order until "),F(uktime(r.closes_at)),L(" today, "),F(ukdateDD(r.closes_at)),L(".")]));
+  bl.push(blk("para",[L("After this time, the edition size for each artwork will be confirmed, and the works will no longer be available to purchase.")]));
+  if(r.framing_code) bl.push(blk("smart",[L("As a reminder, you can enjoy 10% off our in-house framing on your first purchase using the code "),F(r.framing_code),L(" at checkout.")]));
+  bl.push(blk("footer",[L("Time is almost up")]));
+  return {id:"last-chance-tl",name:"Last Chance (TL flow)",when:"Hours before the window closes",blocks:bl};};
+T["printing-pp"]=b=>{const {release:r,artist:a,post_purchase:p}=b; const bl=[];
+  ["unframed","framed"].forEach((variant,i)=>{ const framed=variant==="framed"; const win=framed?shipWindow(p.ship_framed_from,p.ship_framed_to):shipWindow(p.ship_unframed_from,p.ship_unframed_to);
+    if(i) bl.push(blk("rule"));
+    bl.push(blk("internal",[F(`${ddmmyy(p.printing_update_at)}_TRNS_${r.campaign_code||"Campaign"} - Printing PP (${variant})`)]));
+    bl.push(blk("subject",[F(a.name||"Artist"),L(" · Printing in progress")]));
+    bl.push(blk("preview",[L("An update on your order.")]));
+    bl.push(blk("headline",[L("Printing in progress")]));
+    bl.push(blk("para",[L("For the last few weeks, your artwork by "),F(a.name||"Artist"),L(" has been underway at Make-Ready, our specialist fine art printmaking studio based in North London. Once complete, it will be signed by the artist"),L(framed?", professionally framed,":""),L(" and carefully prepared for dispatch.")]));
+    if(p.delay_phrase&&p.delay_phrase.trim()){
+      if(p.delay_reason&&p.delay_reason.trim()) bl.push(blk("para",[B(p.delay_reason,"post_purchase.delay_reason","delay_reason")]));
+      bl.push(blk("para",[L("We're currently tracking "),B(p.delay_phrase,"post_purchase.delay_phrase","delay_phrase"),L(" behind schedule and we now expect to ship your "),L(framed?"framed ":""),L("edition by "),F(win),L(".")]));
+      bl.push(blk("para",[L("We're very sorry for this slight delay and appreciate your patience and understanding.")]));
+    } else bl.push(blk("para",[L("We're currently on track to ship your "),L(framed?"framed ":""),L("edition by "),F(win),L(".")]));
+    bl.push(blk("para",[L("You can expect more updates along the way, but please don't hesitate to contact us if you have any questions.")]));
+    bl.push(blk("footer",[L("An update on your order")]));
+  });
+  return {id:"printing-pp",name:"Printing in progress",when:"Post-purchase, framed and unframed variants",blocks:bl};};
+const SEQUENCE={draw:["early-access-le","announcement-le","last-chance-le","printing-pp"],timed:["announcement-tl","now-live-tl","halfway-tl","last-chance-tl","printing-pp"]};
+
+/* ------------------------------------------------------------------ validator */
+function factsOf(b){ const strip=o=>Array.isArray(o)?o.map(strip):(o&&typeof o==="object")?Object.fromEntries(Object.entries(o).filter(([k])=>!BOUNDED_KEYS.has(k)).map(([k,v])=>[k,strip(v)])):o;
+  const blob=JSON.stringify(strip(b)); const nums=new Set((blob.match(/\d+/g)||[]).map(Number)); const words=new Set(blob.match(/[\w'’.-]+/g)||[]); return {nums,words}; }
+const sentencesOf=t=>t.split("\n").flatMap(p=>p.trim().split(/(?<=[.!?])\s+/)).filter(Boolean);
+function dashSpelling(text,errors){ const low=text.toLowerCase();
+  if(text.includes("—")) errors.push("em dash (—): the house dash is a spaced en dash ( – )");
+  if(/\w[–—]\w/.test(text)) errors.push("unspaced dash: use a spaced en dash ( – )");
+  for(const [us,uk] of Object.entries(US_SPELLING)) if(new RegExp(`\\b${us}\\b`).test(low)) errors.push(`US spelling “${us}”: use “${uk}”`);
+  if(/limited-edition/.test(low)) errors.push("“limited-edition”: the house form is “limited edition”, no hyphen"); }
+function checkBounded(slot,text,facts){ const errors=[],warnings=[]; const t=(text||"").trim(); const spec=SLOTS[slot]||{cap:60,min:1};
+  if(!t){ errors.push("empty: write it or ask for suggestions"); return {errors,warnings,words:0}; }
+  const low=t.toLowerCase(); const wc=t.split(/\s+/).length;
+  for(const p of BANNED) if(new RegExp(`(?<![\\w-])${p.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}(?![\\w-])`).test(low)) errors.push(`banned: “${p}”`);
+  dashSpelling(t,errors);
+  if(t.includes("!")) errors.push("exclamation mark"); if(t.includes("?")) errors.push("question mark: no rhetorical questions");
+  if(wc>spec.cap) errors.push(`${wc} words, cap is ${spec.cap}`); if(wc<spec.min) warnings.push(`${wc} words, house minimum is about ${spec.min}`);
+  for(const s of sentencesOf(t)){ const n=s.split(/\s+/).length; if(n>35) errors.push(`sentence of ${n} words (max 35)`); }
+  for(const [w,c] of Object.entries(CAPPED)){ const n=(low.match(new RegExp(`\\b${w}\\b`,"g"))||[]).length; if(n>c) warnings.push(`“${w}” used ${n}× in one slot`); }
+  for(const n of new Set((t.match(/\d+/g)||[]).map(Number))) if(!facts.nums.has(n)) errors.push(`number ${n} is not in the brief's facts`);
+  for(const s of sentencesOf(t)) for(const tok of s.split(/\s+/).slice(1)){ const w=tok.replace(/^[“”"'(),.;:]+|[“”"'(),.;:]+$/g,"").replace(/['’]s$/,""); if(w.length>1&&/^[A-Z][\w'’.-]*$/.test(w)&&!HOUSE_PROPER.has(w)&&!facts.words.has(w)) warnings.push(`“${w}” is not in the brief's facts`); }
+  return {errors,warnings:[...new Set(warnings)],words:wc}; }
+function checkEmail(plain){ const errors=[],warnings=[]; const body=plain.split("\n").filter(l=>!l.startsWith("[INTERNAL")).join("\n").replace(/^\[[^\]]+\]\s*/gm,"").replace(/\{\{.*?\}\}/g,""); const low=body.toLowerCase();
+  dashSpelling(body,errors);
+  if(/!/.test(body)) errors.push("exclamation mark"); if(/\?/.test(body)) errors.push("question mark");
+  if(/\b\d{1,2}\s?(am|pm)\b/.test(low)) errors.push("12-hour time: write 17:00 UK time"); if(/\b\d{1,2}(st|nd|rd|th)\b/.test(low)) errors.push("ordinal date: write 29 September"); if(/\b(gmt|bst)\b/.test(low)) errors.push("GMT/BST: write “UK time”");
+  for(const [w,c] of Object.entries(CAPPED)){ const n=(low.match(new RegExp(`\\b${w}\\b`,"g"))||[]).length; if(n>c) warnings.push(`“${w}” used ${n}× across the email (cap ${c})`); }
+  if(/(?<![\w'’])(?!a\b)[a-z] [a-z]{1,2}\b|\b[a-z]{1,2} (?!a\b)[a-z](?![\w'’])/.test(body)) warnings.push("possible split word (“o f”, “an d”): a known HubSpot editor artefact");
+  if(/__:__|D Month|DD Month|DDMMYY|000-000/.test(body)) errors.push("a date, time or code is missing from the brief");
+  return {errors,warnings}; }
+
+/* ------------------------------------------------------------------ rendering */
+const $=s=>document.querySelector(s); const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function segHTML(segs){ return segs.map(s=>{ if(s.k==="b") return s.empty?`<mark class="b empty">[${esc((SLOTS[s.slot]||{}).label||s.slot)}: write it in the brief]</mark>`:`<mark class="b">${esc(s.t)}</mark>`; if(s.k==="f") return `<span class="f">${esc(s.t)}</span>`; return esc(s.t); }).join(""); }
+const segText=segs=>segs.map(s=>s.k==="b"&&s.empty?`[${(SLOTS[s.slot]||{}).label||s.slot}]`:s.t).join("");
+const MARK={internal:"INTERNAL NAME",subject:"SUBJECT",preview:"PREVIEW",kicker:"KICKER",headline:"HEADLINE",para:"",cta:"CTA",card:"CARD",quote:"QUOTE",footer:"FOOTER",smart:"SMART CONTENT: first-time purchasers",rule:"────────"};
+function plainText(email){ return email.blocks.map(b=>{ if(b.kind==="rule") return "\n"+MARK.rule+"\n"; const lines=b.lines.map(segText); const m=MARK[b.kind]; return (m?`[${m}] `:"")+lines.join("\n"); }).join("\n\n").replace(/\n{3,}/g,"\n\n")+"\n"; }
+function emailHTML(email,facts){ const meta=email.blocks.filter(b=>["internal","subject","preview"].includes(b.kind)); let html=`<article class="email" id="em-${email.id}"><div class="head"><div><span class="title">${esc(email.name)}</span><span class="when">${esc(email.when)}</span></div><button type="button" class="btn secondary small copy" data-id="${email.id}">Copy for HubSpot</button></div>`;
+  let started=false; for(const b of email.blocks){ if(["internal","subject","preview"].includes(b.kind)){ if(!started||b.kind==="internal"){ if(started) html+=`</div>`; html+=`<div class="meta">`; started=true; } if(b.kind==="internal"&&html.endsWith(`<div class="meta">`)===false&&false){} 
+      html+=`<div class="k">${b.kind==="internal"?"Name":b.kind==="subject"?"Subject":"Preview"}</div><div class="v${b.kind==="internal"?" mono":""}">${segHTML(b.lines[0])}</div>`; continue; }
+    if(started){ html+=`</div><div class="body">`; started=false; }
+    if(b.kind==="rule"){ html+=`</div><hr class="blk rule">`; started=false; continue; }
+    if(b.kind==="card") html+=`<div class="blk card"><div class="ct">${segHTML(b.lines[0])}</div><div>${segHTML(b.lines[1])}</div></div>`;
+    else if(b.kind==="quote") html+=`<div class="blk quote">“${segHTML(b.lines[0])}”<div class="qa">${segHTML(b.lines[1])}</div></div>`;
+    else if(b.kind==="smart") html+=`<div class="blk smart"><div class="sl">Smart content · first-time purchasers only</div>${segHTML(b.lines[0])}</div>`;
+    else html+=`<div class="blk ${b.kind}">${segHTML(b.lines[0])}</div>`; }
+  if(started) html+=`</div>`; else html+=`</div>`;
+  const plain=plainText(email); const ev=checkEmail(plain); const bounded=[]; for(const b of email.blocks) for(const line of b.lines) for(const s of line) if(s.k==="b"&&!bounded.some(x=>x.key===s.key)) bounded.push(s);
+  const errs=[...ev.errors], warns=[...ev.warnings]; for(const s of bounded){ const r=checkBounded(s.slot,s.t,facts); errs.push(...r.errors.map(e=>`${(SLOTS[s.slot]||{}).label||s.slot}: ${e}`)); warns.push(...r.warnings.map(w=>`${(SLOTS[s.slot]||{}).label||s.slot}: ${w}`)); }
+  const E=[...new Set(errs)],W=[...new Set(warns)]; const cls=E.length?"err":W.length?"warn":"ok"; const lab=E.length?`Blocked · ${E.length} to fix`:W.length?`Ready with ${W.length} warning${W.length>1?"s":""}`:"Ready";
+  html+=`<div class="status ${cls}"><span class="lab">${lab}</span>${E.length||W.length?`<ul>${E.map(e=>`<li>${esc(e)}</li>`).join("")}${W.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>`:`<span>Every sentence is house text, a filled frame, or a checked slot.</span>`}</div></article>`;
+  return {html,plain,errors:E.length,warnings:W.length}; }
+let lastPlain={};
+function renderOut(){ const facts=factsOf(brief); const ids=(SEQUENCE[brief.release.mechanic]||SEQUENCE.draw); const emails=ids.map(id=>T[id](brief)); let html="",E=0,W=0; lastPlain={};
+  for(const em of emails){ const r=emailHTML(em,facts); html+=r.html; E+=r.errors; W+=r.warnings; lastPlain[em.id]=r.plain; }
+  $("#seq").innerHTML=html; $("#out-title").textContent=`${brief.artist.name||"Untitled release"} · ${brief.release.mechanic==="timed"?"time-limited edition":"limited edition, allocated by draw"}`;
+  $("#out-count").textContent=`${emails.length} emails, ${ids.includes("printing-pp")?"framed and unframed variants included":""}`;
+  const chip=$("#summary"); chip.className="chip "+(E?"err":W?"warn":"ok"); chip.textContent=E?`${E} to fix before send`:W?`${W} warning${W>1?"s":""}`:"All emails ready";
+  document.querySelectorAll(".copy").forEach(btn=>btn.addEventListener("click",async()=>{ const t=lastPlain[btn.dataset.id]; try{ await navigator.clipboard.writeText(t); btn.textContent="Copied"; }catch(e){ const ta=document.createElement("textarea"); ta.value=t; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy"); btn.textContent="Copied";}catch(_){btn.textContent="Select and copy manually";} ta.remove(); } setTimeout(()=>btn.textContent="Copy for HubSpot",1600); })); }
+
+/* ------------------------------------------------------------------ form */
+const get=(o,path)=>path.split(".").reduce((x,k)=>x==null?undefined:x[k],o);
+const set=(o,path,v)=>{const ks=path.split("."); let x=o; for(const k of ks.slice(0,-1)){ if(x[k]==null) x[k]=/^\d+$/.test(k)?[]:{}; x=x[k]; } x[ks[ks.length-1]]=v;};
+const FORM=[
+ {title:"Release",fields:[
+  {k:"release.campaign_code",label:"Campaign code",type:"text",hint:"ArtistSurname_Work_YY, as in HubSpot"},
+  {k:"release.mechanic",label:"Mechanic",type:"select",opts:[["draw","Limited edition, draw"],["timed","Time-limited edition"]]},
+  {k:"release.window",label:"Window",type:"select",opts:[["24 hours","24 hours"],["48 hours","48 hours"],["one week","One week"]],show:b=>b.release.mechanic==="timed"},
+  {k:"release.announce_at",label:"Announcement send",type:"datetime-local",show:b=>b.release.mechanic==="timed"},
+  {k:"release.launch_at",label:b=>b.release.mechanic==="timed"?"Window opens (UK)":"Public launch (UK)",type:"datetime-local"},
+  {k:"release.closes_at",label:b=>b.release.mechanic==="timed"?"Window closes (UK)":"Draw closes (UK)",type:"datetime-local"},
+  {k:"release.early_access_at",label:"Early access send",type:"datetime-local",show:b=>b.release.mechanic==="draw"},
+  {k:"release.early_access_hours",label:"Early access hours",type:"number",show:b=>b.release.mechanic==="draw"},
+  {k:"release.early_access_code",label:"Early access code",type:"text",show:b=>b.release.mechanic==="draw"},
+  {k:"release.last_chance_hours",label:"Last chance, hours before close",type:"number",show:b=>b.release.mechanic==="timed"},
+  {k:"release.framing_code",label:"First-purchase framing code",type:"text",hint:"Blank removes the smart-content block"},
+  {k:"release.fundraiser",label:"Fundraiser or beneficiary",type:"text"},
+ ]},
+ {title:"Artist",fields:[
+  {k:"artist.name",label:"Full name",type:"text"},{k:"artist.first_name",label:"First name",type:"text"},{k:"artist.surname",label:"Surname",type:"text"},
+  {k:"artist.ordinal",label:"Collaboration",type:"select",opts:[["debut","debut"],["latest","latest"],["second","second"]]},
+  {k:"artist.collab_with",label:"Exact words after “collaboration with”",type:"text",wide:true,hint:"“Brooklyn-born artist Robert Longo”, or an estate or foundation"},
+  {k:"artist.partner",label:"Partner estate or foundation",type:"text",wide:true},
+  {k:"artist.quote",label:"Quote, verbatim",type:"textarea",wide:true},{k:"artist.quote_attribution",label:"Quote attribution",type:"text"},
+  {k:"artist.facts",label:"Artist facts, one per line",type:"lines",wide:true,hint:"Free text may only claim what is here"},
+ ]},
+ {title:"Edition",fields:[
+  {k:"edition.unit",label:"Unit",type:"select",opts:[["print","print"],["sculpture","sculpture"],["collectable","collectable"],["tapestry","tapestry"],["embroidery","embroidery"]]},
+  {k:"edition.count",label:"Number of works",type:"number"},
+  {k:"edition.medium_prefix",label:"Medium phrase",type:"text",hint:"“silkscreen” gives “limited edition silkscreen print”"},
+  {k:"edition.size",label:"Edition size",type:"text",hint:"Leave blank for timed editions"},
+  {k:"edition.signed_by",label:"Authentication",type:"select",opts:[["artist","signed by the artist"],["estate_stamp","estate stamp"],["engraved","engraved signature"],["none","none"]]},
+  {k:"edition.numbered",label:"Individually numbered",type:"check"},
+  {k:"edition.suffix",label:"Phrase after the edition",type:"text",wide:true,hint:"“from his iconic Dream House series”"},
+  {k:"edition.facts",label:"Technique facts, one per line",type:"lines",wide:true},
+  {k:"edition.technique_sentence",label:"Technique sentence",type:"bounded",slot:"technique_sentence",wide:true,hint:"Only when the edition is unusual; otherwise the edition-size frame is enough"},
+ ]},
+ {title:"Artworks",artworks:true},
+ {title:"Bespoke copy",fields:[
+  {k:"context.opener",label:"Announcement opener",type:"select",opts:[["delighted","We're delighted to announce"],["proud","We're proud to present"],["moon","We are over the moon to announce"]]},
+  {k:"context.early_access_opener",label:"Early access opener",type:"select",opts:[["preparing","We're currently preparing the launch of"],["share","I'm delighted to share"],["unveil","We will soon be unveiling"]],show:b=>b.release.mechanic==="draw"},
+  {k:"context.subject_hook",label:"Subject hook",type:"bounded",slot:"subject_hook",wide:true,hint:"Follows “Artist – ” in the announcement subject"},
+  {k:"context.hook",label:"Hook",type:"bounded",slot:"hook",wide:true,hint:"Who the artist is and why this work. Reused in Last Chance and Now Live"},
+  {k:"context.early_access_note",label:"Early Access note",type:"bounded",slot:"early_access_note",wide:true,show:b=>b.release.mechanic==="draw"},
+  {k:"context.quote_sentence",label:"Quote sentence, optional",type:"bounded",slot:"quote_sentence",wide:true,hint:"“To Gregory, Dream House represents “…””",show:b=>b.release.mechanic==="timed"},
+  {k:"context.frame_description",label:"Frame description, optional",type:"bounded",slot:"frame_description",wide:true,show:b=>b.release.mechanic==="timed"},
+  {k:"context.footer",label:"Now Live footer, optional",type:"bounded",slot:"footer",wide:true,show:b=>b.release.mechanic==="timed"},
+  {k:"context.recap",label:"Last Chance recap, optional",type:"bounded",slot:"recap",wide:true,hint:"Leave blank to reuse the hook",show:b=>b.release.mechanic==="draw"},
+ ]},
+ {title:"Post-purchase",fields:[
+  {k:"post_purchase.printing_update_at",label:"Printing update send",type:"date"},
+  {k:"post_purchase.ship_unframed_from",label:"Unframed ships from",type:"date"},{k:"post_purchase.ship_unframed_to",label:"Unframed ships to",type:"date"},
+  {k:"post_purchase.ship_framed_from",label:"Framed ships from",type:"date"},{k:"post_purchase.ship_framed_to",label:"Framed ships to",type:"date"},
+  {k:"post_purchase.delay_phrase",label:"Delay, optional",type:"text",hint:"“a couple of weeks” switches to the delay wording"},
+  {k:"post_purchase.delay_reason",label:"Delay reason, optional",type:"bounded",slot:"delay_reason",wide:true},
+ ]},
+];
+const toLocal=s=>s?s.replace(" ","T"):""; const fromLocal=s=>s?s.replace("T"," "):"";
+let sampleNS=null, sampleState="pending";
+function fieldHTML(f,b){ const v=get(b,f.k); const id="f-"+f.k.replace(/\./g,"-"); const label=typeof f.label==="function"?f.label(b):f.label; const w=f.wide?" wide":"";
+  const hint=f.hint?`<span class="hint">${esc(f.hint)}</span>`:"";
+  if(f.type==="select") return `<div class="field${w}"><label for="${id}">${esc(label)}</label><select id="${id}" data-k="${f.k}">${f.opts.map(([val,t])=>`<option value="${esc(val)}"${val===v?" selected":""}>${esc(t)}</option>`).join("")}</select>${hint}</div>`;
+  if(f.type==="check") return `<div class="field${w}"><label for="${id}">${esc(label)}</label><span class="check"><input type="checkbox" id="${id}" data-k="${f.k}"${v?" checked":""}> ${v?"Yes":"No"}</span></div>`;
+  if(f.type==="textarea") return `<div class="field${w}"><label for="${id}">${esc(label)}</label><textarea id="${id}" data-k="${f.k}">${esc(v||"")}</textarea>${hint}</div>`;
+  if(f.type==="lines") return `<div class="field${w}"><label for="${id}">${esc(label)}</label><textarea id="${id}" data-k="${f.k}" data-lines="1">${esc((v||[]).join("\n"))}</textarea>${hint}</div>`;
+  if(f.type==="bounded"){ const spec=SLOTS[f.slot]||{cap:60,min:1}; const t=v||""; const wc=t.trim()?t.trim().split(/\s+/).length:0; const r=t.trim()?checkBounded(f.slot,t,factsOf(b)):{errors:[],warnings:[]};
+    return `<div class="field${w}"><label for="${id}"><span>${esc(label)}</span><span class="cap${wc>spec.cap?" over":""}">${wc} / ${spec.cap} words</span></label><textarea id="${id}" class="bounded${t.trim()?" filled":""}" data-k="${f.k}" data-slot="${f.slot}">${esc(t)}</textarea>${hint}<div class="findings">${r.errors.map(e=>`<span class="e">✕ ${esc(e)}</span>`).join("")}${r.warnings.map(x=>`<span class="w">△ ${esc(x)}</span>`).join("")}</div><div class="row"><button type="button" class="btn secondary small suggest" data-k="${f.k}" data-slot="${f.slot}"${sampleState==="unavailable"?" hidden":""}>Suggest three with Claude</button><span class="note suggest-note" data-k="${f.k}"></span></div><div class="candidates" data-k="${f.k}" hidden></div></div>`; }
+  const type=f.type==="datetime-local"?"datetime-local":f.type; const val=f.type==="datetime-local"?toLocal(v||""):(v??"");
+  return `<div class="field${w}"><label for="${id}">${esc(label)}</label><input type="${type}" id="${id}" data-k="${f.k}" value="${esc(val)}"></div>`; }
+function artworkHTML(a,i,b){ const f=x=>fieldHTML(x,b); return `<div class="artwork"><header><span>Artwork ${i+1}</span>${b.artworks.length>1?`<button type="button" class="btn secondary small rm-art" data-i="${i}">Remove</button>`:""}</header>
+  ${f({k:`artworks.${i}.title`,label:"Title, exactly as it will appear",type:"text",wide:true})}${f({k:`artworks.${i}.short_title`,label:"Short title for prose",type:"text"})}${f({k:`artworks.${i}.year`,label:"Year",type:"text"})}${f({k:`artworks.${i}.series`,label:"Series",type:"text",wide:true})}
+  ${f({k:`artworks.${i}.facts`,label:"Facts about the work, one per line",type:"lines",wide:true})}${f({k:`artworks.${i}.card_line`,label:"Card line",type:"bounded",slot:"card_line",wide:true})}</div>`; }
+const openState={};
+function renderForm(){ const html=FORM.map((s,si)=>{ const open=openState[s.title]??(si<5); const body=s.artworks?`<div class="stack">${brief.artworks.map((a,i)=>artworkHTML(a,i,brief)).join("")}<div><button type="button" class="btn secondary small" id="add-art">Add an artwork</button></div></div>`:`<div class="fields">${s.fields.filter(f=>!f.show||f.show(brief)).map(f=>fieldHTML(f,brief)).join("")}</div>`;
+    const n=s.artworks?`${brief.artworks.length} work${brief.artworks.length>1?"s":""}`:s.title==="Bespoke copy"?"the free-text slots":""; return `<details${open?" open":""} data-s="${esc(s.title)}"><summary><h2>${esc(s.title)}</h2><span class="n">${n}</span></summary>${body}</details>`; }).join("");
+  const form=$("#form"); form.innerHTML=html; }
+function save(){ try{ localStorage.setItem("aa-release-brief",JSON.stringify({brief,which})); }catch(e){} }
+let t=null; const rerenderOut=()=>{ clearTimeout(t); t=setTimeout(()=>{ renderOut(); save(); },120); };
+function refreshBoundedMeta(ta){ const f=ta.closest(".field"); const slot=ta.dataset.slot; const spec=SLOTS[slot]||{cap:60,min:1}; const v=ta.value; const wc=v.trim()?v.trim().split(/\s+/).length:0; const capEl=f.querySelector(".cap"); if(capEl){ capEl.textContent=`${wc} / ${spec.cap} words`; capEl.classList.toggle("over",wc>spec.cap); } ta.classList.toggle("filled",!!v.trim());
+  const r=v.trim()?checkBounded(slot,v,factsOf(brief)):{errors:[],warnings:[]}; f.querySelector(".findings").innerHTML=r.errors.map(e=>`<span class="e">✕ ${esc(e)}</span>`).join("")+r.warnings.map(x=>`<span class="w">△ ${esc(x)}</span>`).join(""); }
+$("#form").addEventListener("input",e=>{ const el=e.target; const k=el.dataset.k; if(!k) return;
+  if(el.type==="checkbox"){ set(brief,k,el.checked); el.nextSibling.textContent=el.checked?" Yes":" No"; }
+  else if(el.dataset.lines) set(brief,k,el.value.split("\n").map(s=>s.trim()).filter(Boolean));
+  else if(el.type==="datetime-local") set(brief,k,fromLocal(el.value));
+  else if(el.type==="number") set(brief,k,el.value===""?"":Number(el.value));
+  else set(brief,k,el.value);
+  if(el.classList.contains("bounded")) refreshBoundedMeta(el);
+  if(k.endsWith(".facts")||k==="artist.facts"||k==="edition.facts") document.querySelectorAll("textarea.bounded").forEach(refreshBoundedMeta);
+  rerenderOut(); });
+$("#form").addEventListener("change",e=>{ const el=e.target; if(el.dataset.k==="release.mechanic"||el.dataset.k==="edition.count"){ setWhich("custom"); renderForm(); renderOut(); save(); } });
+$("#form").addEventListener("toggle",e=>{ const d=e.target; if(d.tagName==="DETAILS") openState[d.dataset.s]=d.open; },true);
+$("#form").addEventListener("click",async e=>{ const btn=e.target.closest("button"); if(!btn) return;
+  if(btn.id==="add-art"){ brief.artworks.push({title:"",short_title:"",year:"",series:"",facts:[],card_line:""}); brief.edition.count=Math.max(cnt(brief.edition),brief.artworks.length); renderForm(); renderOut(); save(); return; }
+  if(btn.classList.contains("rm-art")){ brief.artworks.splice(+btn.dataset.i,1); renderForm(); renderOut(); save(); return; }
+  if(btn.classList.contains("suggest")) suggest(btn); });
+function setWhich(w){ which=w; for(const id of ["longo","crewdson","blank"]) $("#ex-"+id).setAttribute("aria-pressed",String(id===w)); }
+for(const id of ["longo","crewdson","blank"]) $("#ex-"+id).addEventListener("click",()=>{ brief=clone(EXAMPLES[id]); setWhich(id); renderForm(); renderOut(); save(); });
+$("#tab-brief").addEventListener("click",()=>{ document.body.classList.remove("show-out"); $("#tab-brief").setAttribute("aria-pressed","true"); $("#tab-out").setAttribute("aria-pressed","false"); window.scrollTo(0,0); });
+$("#tab-out").addEventListener("click",()=>{ document.body.classList.add("show-out"); $("#tab-brief").setAttribute("aria-pressed","false"); $("#tab-out").setAttribute("aria-pressed","true"); window.scrollTo(0,0); });
+
+/* ------------------------------------------------------------------ AI suggestions under the slot contract */
+function factsText(b,artIndex){ const lines=[]; const a=b.artist,e=b.edition,r=b.release;
+  lines.push(`Artist: ${a.name}${a.surname?` (surname ${a.surname})`:""}. This is our ${a.ordinal} collaboration with ${a.collab_with||a.name}.${a.partner?` Partner: ${a.partner}.`:""}`);
+  for(const f of a.facts||[]) lines.push(`- ${f}`);
+  lines.push(`Edition: ${editionPhrase(e)}${e.suffix?" "+e.suffix:""}${e.size?`, edition of ${e.size}`:""}, ${authPhrase(e,a)||"unsigned"}${e.numbered?", individually numbered":""}. Mechanic: ${r.mechanic==="timed"?`time-limited, ${r.window} window`:"limited edition allocated by draw"}.${r.fundraiser?` Released in support of ${r.fundraiser}.`:""}`);
+  for(const f of e.facts||[]) lines.push(`- ${f}`);
+  b.artworks.forEach((w,i)=>{ if(artIndex!=null&&i!==artIndex) return; lines.push(`Artwork: ${w.title}${w.year?` (${w.year})`:""}${w.series?`, from the series ${w.series}`:""}${w.short_title?`; call it ${w.short_title} in prose`:""}`); for(const f of w.facts||[]) lines.push(`- ${f}`); });
+  return lines.join("\n"); }
+function buildPrompt(slot,b,artIndex){ const spec=SLOTS[slot]; const ex=(FEWSHOT[slot]||[]).map((s,i)=>`${i+1}. ${s}`).join("\n");
+  return `You are completing ONE slot in an Avant Arte email. The rest of the email is already written and locked. You are not writing an email, an introduction or a call to action.
+
+SLOT: ${slot}
+TASK: ${spec.task}
+
+FACTS. Use only these. If a fact is not here, it does not exist:
+${factsText(b,artIndex)}
+
+REGISTER. Match these published examples of the same slot. Do not reuse their phrases:
+${ex}
+
+RULES.
+1. Every name, place, year, number and claim must come from FACTS above. No superlatives ("first ever", "most celebrated") unless FACTS state them.
+2. British spelling. The only dash is a spaced en dash ( – ). No em dashes.
+3. No exclamation marks. No questions. No emoji. No colons for effect. No ellipses.
+4. Sentences of 35 words or fewer. Every sentence has a verb. At most ${spec.cap} words in total.
+5. One adjective per noun. Never three descriptors in a row.
+6. Do not use any of these words or phrases: ${BANNED.join("; ")}.
+7. Do not use "iconic", "truly", "unique", "meticulous", "very", "celebrated", "renowned", "landmark", "seminal" or "striking" at all; the template already spends its allowance.
+8. Do not address the reader's feelings. Do not tell them what they will love, need or miss.
+9. Do not summarise, conclude, or add a call to action. The template has one.
+10. Do not rename the artwork, the artist, or the series. Copy titles exactly as given.
+11. Do not open with "This", "In", "With", "As" or the artist's full name.
+12. Do not start two sentences with the same word.
+
+OUTPUT. Return JSON only, no commentary: {"candidates": ["first candidate", "second candidate", "third candidate"]}`; }
+async function suggest(btn){ const k=btn.dataset.k, slot=btn.dataset.slot; const note=document.querySelector(`.suggest-note[data-k="${k}"]`); const box=document.querySelector(`.candidates[data-k="${k}"]`);
+  if(!sampleNS){ note.textContent=sampleState==="pending"?"Connecting to Claude…":"Claude suggestions are not available in this view."; return; }
+  const m=k.match(/^artworks\.(\d+)\./); const artIndex=m?+m[1]:null;
+  btn.disabled=true; note.textContent="Asking Claude for three candidates under the slot contract…"; box.hidden=true;
+  try{ const data=await sampleNS.json(buildPrompt(slot,brief,artIndex),{modelTier:"default",cache:false}); const cands=(Array.isArray(data)?data:(data&&data.candidates)||[]).filter(s=>typeof s==="string").slice(0,3);
+    if(!cands.length) throw {code:"invalid_json"}; const facts=factsOf(brief);
+    box.innerHTML=cands.map((c,i)=>{ const r=checkBounded(slot,c,facts); const ok=!r.errors.length; return `<div class="cand"><div><div class="t">${esc(c)}</div><div class="st ${ok?"ok":"bad"}">${ok?(r.warnings.length?`Passes, ${r.warnings.length} warning${r.warnings.length>1?"s":""}: ${esc(r.warnings.join("; "))}`:"Passes every check"):`Rejected: ${esc(r.errors.join("; "))}`}</div></div><button type="button" class="btn small${ok?"":" secondary"}" data-use="${i}">Use</button></div>`; }).join("");
+    box.hidden=false; note.textContent="Checked against the rules. Pick one, or write your own.";
+    box.querySelectorAll("[data-use]").forEach(b=>b.addEventListener("click",()=>{ const c=cands[+b.dataset.use]; set(brief,k,c); const ta=document.getElementById("f-"+k.replace(/\./g,"-")); ta.value=c; refreshBoundedMeta(ta); box.hidden=true; note.textContent="Inserted. It stays highlighted in the email until you have read it."; rerenderOut(); }));
+  }catch(e){ const code=e&&e.code; note.textContent=code==="not_granted"?"You declined Claude suggestions for this page; slots are written by hand.":code==="rate_limited"?"Claude is busy. Try again in a moment.":code==="invalid_json"?"Couldn't read the reply. Try again.":`Couldn't get suggestions (${code||"error"}).`; if(code==="not_granted"){ sampleState="unavailable"; document.querySelectorAll(".suggest").forEach(b=>b.hidden=true); } }
+  finally{ btn.disabled=false; } }
+(async()=>{ try{ const use=window.claude&&window.claude.use?window.claude.use.bind(window.claude):null; sampleNS=use?await use("sample"):null; }catch(e){ sampleNS=null; }
+  sampleState=sampleNS?"ready":"unavailable"; if(!sampleNS) document.querySelectorAll(".suggest").forEach(b=>b.hidden=true); })();
+
+/* ------------------------------------------------------------------ boot */
+function start(){ setWhich(which); renderForm(); renderOut(); }
+try{ window.claude?.hot?.snapshot?.(()=>({brief,which})); }catch(e){}
+if(window.claude?.hot?.ready){ window.claude.hot.ready(d=>{ if(d&&d.brief){ brief=d.brief; which=d.which||"custom"; } start(); }); } else start();
+</script>

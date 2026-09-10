@@ -149,6 +149,20 @@ learns the register from.
 
 ## 5. The tool
 
+**Prototype:** https://claude.ai/code/artifact/4155f4ed-cc63-4cff-b439-68b540568319
+(private until shared from the page's share menu; source in `tool/index.html`).
+
+It is the brief form on the left and the generated sequence on the right. Load the Robert
+Longo (draw) or Gregory Crewdson (timed) brief, or start blank. Every sentence in the output
+is marked as locked house text, a frame filled from your facts, or a highlighted free-text
+slot. The validator runs as you type and blocks an email that breaks a rule. Each free-text
+slot has a "Suggest three with Claude" button that sends the slot contract, the facts and
+the published examples, and checks each candidate against the rules before you pick one.
+"Copy for HubSpot" copies the email as plain text with module markers. Edits stay in your
+browser; nothing is stored anywhere else. It is a proof of concept: the templates and rules
+in it mirror `templates/` and `validate.py`, and would be maintained in one place in a real
+build.
+
 What is in this repository:
 
 ```
@@ -157,8 +171,9 @@ templates/    announcement-le, early-access-le, last-chance-le, now-live-tl, trn
 render.py     brief + template → email text, with date, count and phrase filters
 validate.py   the mechanical rules
 prompts/      the AI slot contract
-docs/         the taxonomy of your emails, and the voice rules with evidence
+docs/         the taxonomy of your emails, the voice rules with evidence, the brief checklist
 out/          the two campaigns rendered, so you can compare with what was sent
+tool/         the prototype page: brief form, generated sequence, validator, Claude suggestions
 ```
 
 Run it:

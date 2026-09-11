@@ -58,10 +58,10 @@ for k, v, note in frags:
     ws.row_dimensions[row].height = 16 * max(2, math.ceil(len(v) / 80) + v.count("\n")); R[k] = row; row += 1
 row += 1; ws[f"A{row}"] = "Derived (formulas, do not edit)"; ws[f"A{row}"].font = BOLD; row += 1
 B = lambda k: f"$B${R[k]}"
-derived = ["named", "work", "Work", "work_email", "Work_email", "work_intro", "support", "beneficiary_tagged", "bio_tagged", "hook_short", "hook_names_beneficiary",
+derived = ["named", "work", "Work", "work_email", "Work_email", "work_intro", "support", "beneficiary_tagged", "bio_tagged", "hook_names_beneficiary",
            "features", "features_list", "features_list_support", "making_ours", "making_ours_tagged",
            "launch_date", "launch_time", "launch_weekday", "launch_date_dd", "close_date", "close_time", "close_weekday", "close_date_dd",
-           "collect_phrase", "edition_phrase_cap", "window_cap", "card_line", "card", "quote_line"]
+           "collect_phrase", "edition_phrase_cap", "window_cap", "card_line", "card", "quote_line", "each_artwork", "work_word", "add_what"]
 for k in derived:
     R[k] = row; ws[f"A{row}"] = k; ws[f"A{row}"].font = ARIAL; ws[f"B{row}"].font = ARIAL; ws[f"B{row}"].alignment = WRAP; row += 1
 F = {
@@ -74,7 +74,9 @@ F = {
  "support": f'=IF(OR({B("beneficiary")}="",{B("hook_names_beneficiary")}),"",", released in support of "&{B("beneficiary")})',
  "beneficiary_tagged": f'=IF({B("beneficiary")}="","",{B("beneficiary")}&IF({B("beneficiary_handle")}="",""," (@"&{B("beneficiary_handle")}&")"))',
  "bio_tagged": f'=IF({B("handle")}="",{B("bio")},SUBSTITUTE({B("bio")},{B("artist")},{B("named")},1))',
- "hook_short": f'=IF(ISNUMBER(FIND(". ",{B("hook")})),LEFT({B("hook")},FIND(". ",{B("hook")})),{B("hook")})',
+ "each_artwork": f'=IF({B("works")}>1," for each artwork","")',
+ "work_word": f'=IF({B("works")}>1,"works","work")',
+ "add_what": f'=IF({B("works")}>1,"a print",{B("work_email")})',
  "hook_names_beneficiary": f'=IF({B("beneficiary")}="",FALSE,ISNUMBER(SEARCH({B("beneficiary")},{B("hook")})))',
  "features": f'={B("feature_1")}&IF({B("feature_2")}="","",". "&{B("feature_2")})&IF({B("feature_3")}="","",". "&{B("feature_3")})&IF({B("feature_4")}="","",". "&{B("feature_4")})&IF({B("feature_5")}="","",". "&{B("feature_5")})&"."',
  "features_list": f'="· "&{B("feature_1")}&IF({B("feature_2")}="","",{NL}&"· "&{B("feature_2")})&IF({B("feature_3")}="","",{NL}&"· "&{B("feature_3")})&IF({B("feature_4")}="","",{NL}&"· "&{B("feature_4")})&IF({B("feature_5")}="","",{NL}&"· "&{B("feature_5")})',
@@ -133,11 +135,10 @@ lines = [
  ("EMAILS · welcome (TL flow)", None),
  ("email · welcome · 1", "Welcome {{ personalization_token('contact.firstname', 'to Avant Arte') }}!"),
  ("email · welcome · 2", "Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems."),
- ("email · welcome · 3", "Our upcoming collaboration with {artist} is the latest in this lineage – {work_intro}. {hook_short}"),
- ("email · welcome · 4", "If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?"),
- ("email · welcome · 5", "Let us know if you have any questions. We're excited to see what you collect."),
+ ("email · welcome · 3", "Our upcoming collaboration with {artist} is the latest in this lineage. If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?"),
+ ("email · welcome · 4", "Let us know if you have any questions. We're excited to see what you collect."),
  ("EMAILS · early access", None),
- ("email · early access, timed · opener", "Our {ordinal} collaboration with {artist} launches tomorrow at {launch_time} and will be available to collect for {window} only – {work_intro}."),
+ ("email · early access, timed · opener", "Our {ordinal} collaboration with {artist} launches tomorrow at {launch_time} and will be available to collect for {window} only."),
  ("email · early access, timed · registered line", "As a thank you for registering for updates, we're offering you the chance to collect the release 24 hours before everyone else."),
  ("email · early access, timed · past collectors line", "As a previous collector of the artist, we're offering you the chance to order the collaboration 24 hours before everyone else."),
  ("email · early access, timed · unlock line", "Unlock early access using the link below."),
@@ -152,7 +153,7 @@ lines = [
  ("email · insiders · sign-off", "Best regards,\n{advisor}\n\nArt Advisor at Avant Arte"),
  ("EMAILS · the window (TL)", None),
  ("email · live · opener", "Our {ordinal} collaboration with {artist} is now available to collect for {window} only – {work_intro}{support}."),
- ("email · live · closing line", "The opportunity to collect an edition ends at {close_time} on {close_weekday}, {close_date_dd}. Click the link below to add {work_email} to your collection."),
+ ("email · live · closing line", "The opportunity to collect an edition ends at {close_time} on {close_weekday}, {close_date_dd}. Click the link below to add {add_what} to your collection."),
  ("email · halfway · kicker", "Collect a print by {artist}"),
  ("email · halfway · headline", "24 hours down, 24 to go"),
  ("email · halfway · footer", "There's still time to add a print to your collection."),
@@ -164,7 +165,7 @@ lines = [
  ("email · 3 days · footer", "Add a print to your collection"),
  ("EMAILS · last chance", None),
  ("email · last chance, timed · 1", "It's now or never for our {ordinal} collaboration with {artist} – {collect_phrase} will be available to order until {close_time} on {close_weekday}, {close_date_dd}."),
- ("email · last chance, timed · 2", "After this time, the edition size will be confirmed, and the work will no longer be available to purchase."),
+ ("email · last chance, timed · 2", "After this time, the edition size{each_artwork} will be confirmed, and the {work_word} will no longer be available to purchase."),
  ("email · last chance, draw · 1", "This is your final opportunity to enter the draw for {work_email}, {collect_phrase} by {artist}."),
  ("email · last chance, draw · 2", "For a chance to collect, click the link below to enter the draw. The draw closes at {close_time} on {close_weekday}, {close_date_dd}."),
  ("EMAILS · surveys (LE)", None),
@@ -185,7 +186,7 @@ lines = [
 ]
 ph = {f"{{{k}}}": k for k in ["artist", "named", "work", "Work", "work_email", "Work_email", "work_intro", "support", "edition_phrase", "edition_phrase_cap", "collect_phrase", "ordinal", "window",
                              "launch_date", "launch_time", "launch_weekday", "launch_date_dd", "close_date", "close_time", "close_weekday", "close_date_dd",
-                             "beneficiary_tagged", "quote", "hashtag", "features", "hook_short", "advisor", "early_access_code"]}
+                             "beneficiary_tagged", "quote", "hashtag", "features", "advisor", "early_access_code", "each_artwork", "work_word", "add_what"]}
 L = {}; r = 4
 for k, text in lines:
     if text is None:
@@ -268,7 +269,7 @@ emails = [
   sel(T("Enter the draw"), T("Discover the collaboration")), card, qline,
   sel(T("Collect ")+"&"+IB("collect_phrase"), T("Launching ")+"&"+IB("launch_date"))),
  ("Welcome (TL Flow)", "timed", "timed", T("Welcome to Avant Arte"), T("Where the art world is more accessible."), E, E,
-  P(LC("email · welcome · 1"), LC("email · welcome · 2"), LC("email · welcome · 3"), LC("email · welcome · 4"), LC("email · welcome · 5")),
+  P(LC("email · welcome · 1"), LC("email · welcome · 2"), LC("email · welcome · 3"), LC("email · welcome · 4")),
   T("Complete collector profile"), E, E, T("Where the art world is more accessible")),
  ("Early Access (TL Flow)", "timed", "timed", A+'&" – Early access 🔓"', T("Collect 24 hours before everyone else."), E, E,
   P(LC("email · greeting"), LC("email · early access, timed · opener"), hook, IB("features_list_support"), LC("email · early access, timed · registered line"), LC("email · early access, timed · unlock line")),

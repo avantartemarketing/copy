@@ -38,9 +38,7 @@ Welcome {{ personalization_token('contact.firstname', 'to Avant Arte') }}!
 
 Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems.
 
-Our upcoming collaboration with Grayson Perry is the latest in this lineage – The Changeling, a new limited edition print. ‘The Changeling’ explores the impact of technology on a generation of digital natives.
-
-If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?
+Our upcoming collaboration with Grayson Perry is the latest in this lineage. If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?
 
 Let us know if you have any questions. We're excited to see what you collect.
 
@@ -94,7 +92,7 @@ A new limited edition print by Grayson Perry.
 [BODY]
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
-Our latest collaboration with Grayson Perry launches tomorrow at 14:00 UK time and will be available to collect for one week only – The Changeling, a new limited edition print.
+Our latest collaboration with Grayson Perry launches tomorrow at 14:00 UK time and will be available to collect for one week only.
 
 The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. It reimagines changeling folklore for the digital age, and is intended to be 'quite disturbing'.
 
@@ -118,7 +116,7 @@ Unlock early access using the link below.
 [BODY]
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
-Our latest collaboration with Grayson Perry launches tomorrow at 14:00 UK time and will be available to collect for one week only – The Changeling, a new limited edition print.
+Our latest collaboration with Grayson Perry launches tomorrow at 14:00 UK time and will be available to collect for one week only.
 
 The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. It reimagines changeling folklore for the digital age, and is intended to be 'quite disturbing'.
 

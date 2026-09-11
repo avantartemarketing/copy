@@ -21,7 +21,6 @@
 {% set making = context.making|voice("ours") %}
 {% set advisor = release.advisor if release.advisor is defined and release.advisor else "Sam" %}
 {% set ea_code = release.early_access_code if release.early_access_code is defined and release.early_access_code else "000-000" %}
-{% set hook_short = context.hook_short if (context.hook_short is defined and context.hook_short) else context.hook|first_sentence %}
 {% set launch_line = release.launch_at|uktime ~ " on " ~ release.launch_at|weekday ~ ", " ~ release.launch_at|ukdate_dd %}
 {% set close_line = release.closes_at|uktime ~ " on " ~ release.closes_at|weekday ~ ", " ~ release.closes_at|ukdate_dd %}
 {% set draw_line = "Enter the draw for a chance to collect. Closes at " ~ release.closes_at|uktime ~ " on " ~ release.closes_at|ukdate ~ "." %}
@@ -93,9 +92,7 @@ Welcome {{ "{{ personalization_token('contact.firstname', 'to Avant Arte') }}" }
 
 Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems.
 
-Our upcoming collaboration with {{ artist.name }} is the latest in this lineage – {{ work_intro }}. {{ hook_short }}
-
-If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?
+Our upcoming collaboration with {{ artist.name }} is the latest in this lineage. If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?
 
 Let us know if you have any questions. We're excited to see what you collect.
 
@@ -107,7 +104,7 @@ Let us know if you have any questions. We're excited to see what you collect.
 [BODY]
 {{ greeting }}
 
-Our {{ ordinal }} collaboration with {{ artist.name }} launches tomorrow at {{ release.launch_at|uktime }} and will be available to collect for {{ release.window }} only – {{ work_intro }}.
+Our {{ ordinal }} collaboration with {{ artist.name }} launches tomorrow at {{ release.launch_at|uktime }} and will be available to collect for {{ release.window }} only.
 
 {{ context.hook }}
 

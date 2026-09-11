@@ -4,7 +4,7 @@
 [KICKER] Launching 28 January
 [HEADLINE] Self-Portrait Embroidery by Ai Weiwei
 [BODY]
-We're delighted to announce our latest collaboration with Ai Weiwei – Self-Portrait Embroidery, a quartet of new limited edition embroideries.
+We're delighted to announce our latest collaboration with Ai Weiwei – a quartet of new limited edition embroideries.
 
 Self-Portrait Embroidery pixelates an image of the artist with a shaved head and a scar, the result of police brutality following a Citizens' Investigation he led into the 2008 earthquake in Sichuan. The defiant self-portrait becomes four textile works of approximately 460,000 stitches each, in the pixelated style of his 2016 toy brick works.
 
@@ -47,7 +47,7 @@ Let us know if you have any questions. We're excited to see what you collect.
 ════════════════════════════════════════════════════════════════
 [EMAIL 3 · Monthly Preview, this release's paragraph · 140126]
 [PARAGRAPH] this release's paragraph, for the advisor's monthly email
-From Ai Weiwei comes Self-Portrait Embroidery, a quartet of new limited edition embroideries.
+From Ai Weiwei comes a quartet of new limited edition embroideries.
 
 Self-Portrait Embroidery pixelates an image of the artist with a shaved head and a scar, the result of police brutality following a Citizens' Investigation he led into the 2008 earthquake in Sichuan. The defiant self-portrait becomes four textile works of approximately 460,000 stitches each, in the pixelated style of his 2016 toy brick works.
 
@@ -62,7 +62,7 @@ The edition will be available to collect for one week only, from 14:00 UK time o
 [BODY]
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
-I'm delighted to share our latest collaboration with Ai Weiwei – Self-Portrait Embroidery, a quartet of new limited edition embroideries.
+I'm delighted to share our latest collaboration with Ai Weiwei – a quartet of new limited edition embroideries.
 
 Self-Portrait Embroidery pixelates an image of the artist with a shaved head and a scar, the result of police brutality following a Citizens' Investigation he led into the 2008 earthquake in Sichuan. The defiant self-portrait becomes four textile works of approximately 460,000 stitches each, in the pixelated style of his 2016 toy brick works.
 
@@ -149,7 +149,7 @@ A quartet of new limited edition embroideries by Ai Weiwei.
 [KICKER] Collect an embroidery by Ai Weiwei
 [HEADLINE] One week, starting now
 [BODY]
-Our latest collaboration with Ai Weiwei is now available to collect for one week only – Self-Portrait Embroidery, a quartet of new limited edition embroideries.
+Our latest collaboration with Ai Weiwei is now available to collect for one week only – a quartet of new limited edition embroideries.
 
 Self-Portrait Embroidery pixelates an image of the artist with a shaved head and a scar, the result of police brutality following a Citizens' Investigation he led into the 2008 earthquake in Sichuan. The defiant self-portrait becomes four textile works of approximately 460,000 stitches each, in the pixelated style of his 2016 toy brick works.
 

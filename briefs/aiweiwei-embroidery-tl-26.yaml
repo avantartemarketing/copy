@@ -60,4 +60,5 @@ artworks:
 context:
   artist_bio: "Ai Weiwei is one of the most influential artists and activists of his generation. Across sculpture, installation, photography and film, his work confronts power, freedom and the individual's place within the state."
   hook: "Self-Portrait Embroidery pixelates an image of the artist with a shaved head and a scar, the result of police brutality following a Citizens' Investigation he led into the 2008 earthquake in Sichuan. The defiant self-portrait becomes four textile works of approximately 460,000 stitches each, in the pixelated style of his 2016 toy brick works."
+  qualifier: ", offered individually, in pairs or as a complete quartet"   # a few words after the edition phrase in the email opener; blank for none
   making: "Each embroidery was produced in close collaboration with the artist, translating the pixelated texture and bold presence of the original toy brick works into approximately 460,000 stitches."

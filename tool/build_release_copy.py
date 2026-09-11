@@ -40,7 +40,7 @@ def from_brief(path):
         beneficiary=g(rel, "fundraiser"), beneficiary_handle=g(rel, "beneficiary_handle"), advisor=g(rel, "advisor", "Sam"),
         early_access_code=g(rel, "early_access_code", "000-000"), framing_code=g(rel, "framing_code"), framing_percent=int(g(rel, "framing_percent", 10)),
         feature_1=feats[0], feature_2=feats[1], feature_3=feats[2], feature_4=feats[3], feature_5=feats[4],
-        bio=g(ctx, "artist_bio"), hook=ctx["hook"], making=ctx["making"], quote=g(art, "quote"),
+        bio=g(ctx, "artist_bio"), hook=ctx["hook"], making=ctx["making"], quote=g(art, "quote"), qualifier=g(ctx, "qualifier"),
     )
 
 
@@ -98,6 +98,7 @@ row += 1; ws[f"A{row}"] = "Fragments, written once per release. Voice-neutral: n
 frags = [
     ("bio", V["bio"], "2 to 3 sentences on the artist, third person, no handle. Coming Soon post only."),
     ("hook", V["hook"], "1 to 2 sentences about the work only. Reused in every post and email."),
+    ("qualifier", V["qualifier"], "a few words after the edition phrase in the email opener, e.g. spanning five decades of the artist's career. Ten words at most, a phrase not a sentence, no we or our, no artist name, no beneficiary. Blank for none."),
     ("making", V["making"], "one sentence on how the edition was made; write 'printmakers at Make-Ready' and the sheet adds 'our'."),
     ("quote", V["quote"], "verbatim, a complete sentence, or blank"),
 ]
@@ -122,7 +123,7 @@ F = {
  "Work": f'=UPPER(LEFT({B("work")},1))&MID({B("work")},2,999)',
  "work_email": f'=IF({B("is_series")}="yes","the "&{B("title")}&" series",{B("title")})',
  "Work_email": f'=UPPER(LEFT({B("work_email")},1))&MID({B("work_email")},2,999)',
- "work_intro": f'=IF({B("is_series")}="yes",{B("edition_phrase")}&" from the "&{B("title")}&" series",IF({B("works")}=1,{B("title")}&", "&{B("edition_phrase")},{B("edition_phrase")}))',
+ "work_intro": f'=IF({B("works")}=1,{B("title")}&", ","")&{B("edition_phrase")}&IF({B("qualifier")}="","",IF(LEFT({B("qualifier")},1)=",",""," ")&{B("qualifier")})',
  "support": f'=IF(OR({B("beneficiary")}="",{B("hook_names_beneficiary")}),"",", released in support of "&{B("beneficiary")})',
  "beneficiary_tagged": f'=IF({B("beneficiary")}="","",{B("beneficiary")}&IF({B("beneficiary_handle")}="",""," (@"&{B("beneficiary_handle")}&")"))',
  "bio_tagged": f'=IF({B("handle")}="",{B("bio")},SUBSTITUTE({B("bio")},{B("artist")},{B("named")},1))',
@@ -420,7 +421,7 @@ rules = [
  ("Insiders", "The Insiders account posts the same caption as the main feed. The plan says which: Announcement, Now Live and Halfway for a timed edition, Announcement for a draw. The Channels column on Posts carries this. Stories are image-led and stay outside the sheet."),
  ("Twitter", "A tweet is the post's status line with the X handle, the hook on the announcement only, the beneficiary named once, and an action line that ends with the link: sign up for updates, enter the draw, or buy a print. No features line, no hashtag, no bio. Same deadline form. Coming soon names the artist and not the work."),
  ("Skeleton, emails", "Every email is: subject, preview, kicker, headline, body paragraphs, CTA, card, quote, footer. Bodies are fixed sentences from the Lines sheet with the same fragments dropped in. Halfway and 5 days to go have no body: they are image-led."),
- ("Naming the work", "The opener names the work only for a single print: 'The Changeling, a new limited edition print'. A pair or a quartet is just the edition phrase, and the hook names the work; many sets have no collective name anyway. Untitled works from a named series read 'six new limited edition prints from the Dream House series'."),
+ ("Naming the work", "The opener's tail is the title (single print only), the edition phrase, and the qualifier if one is written: 'The Changeling, a new limited edition print'; 'a quartet of new limited edition prints spanning five decades of the artist's career'; 'six new limited edition prints from his iconic Dream House series'. A pair or a quartet takes no title; the hook names the work. The same tail is used by the Insiders email, LE early access, Now Live and the Monthly Preview paragraph."),
  ("Fragments", "Four per release, written once: bio (2 to 3 sentences, Coming Soon only), hook (1 to 2 sentences about the work, in every post and email), making (one sentence on how it was made), quote (verbatim). The hook and bio must not repeat each other."),
  ("Voice", "Fragments are voice-neutral: no we or our, no artist name in the hook or the making line, and 'printmakers at Make-Ready' where it applies. The sheet adds 'our'. The Insiders email and the first-time survey are signed by the advisor named on Inputs. Features never say 'our'."),
  ("Who and what", "'by {artist}' is always the artist. 'collaboration with {collab_with}' is the artist's name, or the estate. 'unit' is what one is called (print, embroidery, sculpture), and the sheet writes 'a print' or 'an embroidery' wherever a line names one."),

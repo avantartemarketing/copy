@@ -4,7 +4,7 @@
 [KICKER] Launching 30 June
 [HEADLINE] The Dream House series by Gregory Crewdson
 [BODY]
-We're delighted to announce our latest collaboration with New York-based artist Gregory Crewdson – six new limited edition prints from the Dream House series.
+We're delighted to announce our latest collaboration with New York-based artist Gregory Crewdson – six new limited edition prints from his iconic Dream House series.
 
 Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape.
 
@@ -49,7 +49,7 @@ Let us know if you have any questions. We're excited to see what you collect.
 ════════════════════════════════════════════════════════════════
 [EMAIL 3 · Monthly Preview, this release's paragraph · 160626]
 [PARAGRAPH] this release's paragraph, for the advisor's monthly email
-From New York-based artist Gregory Crewdson comes six new limited edition prints from the Dream House series.
+From New York-based artist Gregory Crewdson comes six new limited edition prints from his iconic Dream House series.
 
 Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape.
 
@@ -64,7 +64,7 @@ The edition will be available to collect for 48 hours only, from 17:00 UK time o
 [BODY]
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
-I'm delighted to share our latest collaboration with New York-based artist Gregory Crewdson – six new limited edition prints from the Dream House series.
+I'm delighted to share our latest collaboration with New York-based artist Gregory Crewdson – six new limited edition prints from his iconic Dream House series.
 
 Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape.
 
@@ -151,7 +151,7 @@ Six new limited edition prints by Gregory Crewdson.
 [KICKER] Collect a print by Gregory Crewdson
 [HEADLINE] 48 hours, starting now
 [BODY]
-Our latest collaboration with New York-based artist Gregory Crewdson is now available to collect for 48 hours only – six new limited edition prints from the Dream House series.
+Our latest collaboration with New York-based artist Gregory Crewdson is now available to collect for 48 hours only – six new limited edition prints from his iconic Dream House series.
 
 Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape.
 

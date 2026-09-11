@@ -17,7 +17,7 @@ import yaml
 
 # The free-text fields. Everything else in the brief is a fact or a menu choice.
 BOUNDED_KEYS = {"hook", "card_line", "subject_hook", "early_access_note", "technique_sentence",
-                "recap", "quote_sentence", "footer", "delay_phrase", "artist_line", "artist_thanks", "artist_bio", "hook_short", "detail", "technique_clause", "making"}
+                "recap", "quote_sentence", "footer", "delay_phrase", "artist_line", "artist_thanks", "artist_bio", "hook_short", "detail", "technique_clause", "making", "qualifier"}
 
 BANNED = [
     # sales-page urgency the brand has never used
@@ -179,9 +179,29 @@ def check_email(text):
     return errors, warnings
 
 
+def check_qualifier(q, artist_name):
+    """The few words after the edition phrase in the email opener: a phrase, not a sentence."""
+    errors = []
+    words = q.strip(" ,").split()
+    if len(words) > 10:
+        errors.append(f"qualifier: {len(words)} words (max 10)")
+    if re.search(r"\b(we|our|we're|we’re)\b", q.lower()):
+        errors.append("qualifier: no we or our")
+    if artist_name and artist_name.lower() in q.lower():
+        errors.append("qualifier: no artist name; the frame has it")
+    if q.strip().endswith("."):
+        errors.append("qualifier: a phrase, no full stop")
+    if "support of" in q.lower():
+        errors.append("qualifier: the beneficiary is added by the frame")
+    return errors
+
+
 def validate(text, brief):
     fact_nums, fact_words = facts(brief)
     errors, warnings = [], []
+    q = (brief.get("context") or {}).get("qualifier")
+    if q and q.strip() in text:
+        errors += check_qualifier(q, (brief.get("artist") or {}).get("name"))
     for part in text.split("════"):                                 # a set file holds several emails: check each on its own
         if part.strip():
             e, w = check_email(part)

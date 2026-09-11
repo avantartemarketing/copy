@@ -82,6 +82,7 @@ context:
   subject_hook: a new limited edition silkscreen print
   artist_bio: "Grayson Perry has long been one of the most distinctive voices in contemporary British art.\n\nWorking across ceramics, tapestry, print and sculpture, his practice examines identity, class, and gender in modern society. Drawing on autobiography as well as social observation, Grayson often pairs the decorative language of traditional craft with direct commentary on the structures and contradictions that shape everyday life."
   hook: "The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. It reimagines changeling folklore for the digital age, and is intended to be 'quite disturbing'."   # about the work only, no artist name, no we/our: it is reused in the artist's and partner's voice
+  qualifier: ""   # a few words after the edition phrase in the email opener; blank for none
   hook_short: "‘The Changeling’ explores the impact of technology on a generation of digital natives."
   making: "To create the edition, printmakers at Make-Ready translated a new design into a 9-colour silkscreen, capturing the vivid detail of the original drawing."   # voice-neutral; each template adds "our" or "Avant Arte's"
   artist_line: ""

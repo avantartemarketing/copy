@@ -33,7 +33,8 @@
 {% set hook_names_beneficiary = fundraiser and fundraiser in context.hook %}
 {% set support = (", released in support of " ~ fundraiser) if (fundraiser and not hook_names_beneficiary) else "" %}
 {% set feats = edition.features if edition.features is defined and edition.features else ["Signed by the artist", "Individually numbered"] %}
-{% set work_intro = (ep ~ " from the " ~ series ~ " series") if untitled else (ep if plural else (work ~ ", " ~ ep)) %}
+{% set qualifier = context.qualifier if (context.qualifier is defined and context.qualifier) else "" %}
+{% set work_intro = (ep if plural else (work ~ ", " ~ ep)) ~ (("" if qualifier.startswith(",") else " ") ~ qualifier if qualifier else "") %}
 {% set greeting = "Hi " ~ "{{ personalization_token('contact.firstname', 'there') }}" ~ "," %}
 {% set questions = "If you have any questions, please don't hesitate to get in touch by replying to this email." %}
 {% set edition_numbers = "Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here." %}

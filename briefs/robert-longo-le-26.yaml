@@ -81,6 +81,7 @@ context:
     - Men in the Cities, begun in 1979, made him a defining figure of the Pictures Generation
   subject_hook: from his acclaimed 'Men in the Cities' series   # BOUNDED, 3 to 8 words after "Robert Longo – "
   hook: "Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year."   # about the work only, voice-neutral
+  qualifier: ""   # a few words after the edition phrase in the email opener; blank for none
   artist_bio: "Robert Longo is a New York artist known for monumental charcoal drawings that take their images from film, news and mass media. Men in the Cities, begun in 1979, made him a defining figure of the Pictures Generation, and he has long maintained that making art is a political act."
   making: "To craft the edition, printmakers at Make-Ready worked from the original Kodak transparencies, creating a high fidelity silkscreen of the original piece."
   early_access_note: "It's an honour to be editioning Sandy, especially as this is only the second time that Longo has released images from Men in the Cities as silkscreen prints – the first time being our edition of Eric last year. The piece will be released in the same dimensions as Eric, for any collectors wishing to display the prints side by side."   # BOUNDED, as sent

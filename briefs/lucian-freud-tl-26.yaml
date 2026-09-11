@@ -63,4 +63,5 @@ artworks:
 context:
   artist_bio: "Lucian Freud (1922–2011) built his reputation painting people exactly as he saw them. Working from life, often over months of sittings, he turned hours of looking into raw studies of flesh, time and psychological tension."
   hook: "Portraits, 1952–2002 brings together four seminal works spanning five decades of Freud's uncompromising portrait practice, from early intimacy to late self-scrutiny. The quartet is Girl in Bed, 1953; Reflection with Two Children (Self-Portrait), 1965; Double Portrait, 1988–90; and Self-Portrait (Reflection), 2002."
+  qualifier: "spanning five decades of the artist's career"   # a few words after the edition phrase in the email opener; blank for none
   making: "Each print was created in close collaboration with the Lucian Freud Estate by printmakers at Make-Ready, on 310gsm Hahnemühle German Etching paper, to faithfully preserve the texture, tonal depth and psychological intensity of the original paintings."

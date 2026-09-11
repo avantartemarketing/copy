@@ -59,4 +59,5 @@ artworks:
 context:
   artist_bio: "Joel Mesler is a Los Angeles-born, New York-based painter known for vivid colours and candid text-based works that merge personal memory with pop culture. His practice is built on radical directness, drawing statements and imagery straight from his own memory and emotion."
   hook: "I Love You is a declaration of love in four colourways, the colour of the text changing across the quartet. Drawing on personal memory and popular culture in equal measure, the work is disarmingly direct, and the title leaves no doubt."
+  qualifier: ""   # a few words after the edition phrase in the email opener; blank for none
   making: "Created in close collaboration with the artist by printmakers at Make-Ready, the edition unites a 9-colour split fountain silkscreen with an archival pigment overlay, metallic shimmer and high-gloss varnish."

@@ -1,0 +1,149 @@
+[EMAIL 1 · Announcement (TL) · 080426]
+[SUBJECT] Grayson Perry – A new limited edition print
+[PREVIEW] Launching 30 April. Register for updates.
+[KICKER] Launching 30 April
+[HEADLINE] The Changeling by Grayson Perry
+[BODY]
+We're delighted to announce our latest collaboration with Grayson Perry – a new limited edition print.
+
+Created exclusively for the Foundling Museum, this edition portrays a child as a symbol of modern youth, exploring how technology shapes today's generations and supporting the museum's mission to celebrate children in care.
+
+To create the edition, our printmakers at Make-Ready (@make__ready) translated a new design into a 9-colour silkscreen, capturing the vivid detail of Grayson's drawing style.
+
+The limited edition signed print will be available to collect for one week only, starting at 14:00 UK time on Thursday, 30 April.
+
+Click below to learn more and register for updates.
+
+[CTA] Discover the collaboration
+
+[CARD] The Changeling
+A new limited edition print by Grayson Perry, signed by the artist and individually numbered.
+
+[QUOTE] Beauty and seriousness are perhaps the most shocking tactics left to artists these days.
+[QUOTE ATTRIBUTION] Grayson Perry
+
+[FOOTER] Launching 30 April
+
+════════════════════════════════════════════════════════════════
+[EMAIL 2 · Signup Confirmation (flow) · 080426]
+[SUBJECT] Grayson Perry – You're signed up
+[PREVIEW] We'll remind you on launch day.
+[KICKER] You're signed up
+[HEADLINE] Grayson Perry
+[BODY]
+You asked us to keep you updated about our upcoming collaboration with Grayson Perry, and we will!
+
+Created exclusively for the Foundling Museum, this edition portrays a child as a symbol of modern youth, exploring how technology shapes today's generations and supporting the museum's mission to celebrate children in care.
+
+The edition will be available to collect for one week only, starting at 14:00 UK time on Thursday, 30 April.
+
+We'll send you a reminder on launch day, but if you have any questions before the collaboration launches, please reply to this email.
+
+[LOCKED BLOCK] the time-limited edition explainer, house text, unchanged
+[FOOTER] Thank you for your interest
+
+════════════════════════════════════════════════════════════════
+[EMAIL 3 · Deep dive 1, the artist (flow) · 200426]
+[SUBJECT] The Changeling by Grayson Perry
+[PREVIEW] The artist, the work, and the launch on 30 April.
+[KICKER] Grayson Perry
+[HEADLINE] The Changeling
+[BODY]
+Grayson Perry has long been one of the most distinctive voices in contemporary British art.
+
+Working across ceramics, tapestry, print and sculpture, his practice examines identity, class, and gender in modern society. Drawing on autobiography as well as social observation, Grayson often pairs the decorative language of traditional craft with direct commentary on the structures and contradictions that shape everyday life.
+
+Created exclusively for the Foundling Museum, this edition portrays a child as a symbol of modern youth, exploring how technology shapes today's generations and supporting the museum's mission to celebrate children in care.
+
+“Beauty and seriousness are perhaps the most shocking tactics left to artists these days.”
+
+The Changeling launches on 30 April at 14:00 UK time and will be available to collect for one week only. Click below to set a reminder.
+
+[CTA] Set a reminder
+[FOOTER] Launching 30 April
+
+════════════════════════════════════════════════════════════════
+[EMAIL 4 · Deep dive 2, behind the scenes at Make-Ready (flow) · 230426]
+[SUBJECT] Behind the scenes at Make-Ready
+[PREVIEW] How The Changeling was made.
+[KICKER] Behind the scenes at Make-Ready
+[HEADLINE] The Changeling
+[BODY]
+On 30 April, for one week only, collect a new limited edition print by Grayson Perry, The Changeling.
+
+To create the edition, our printmakers at Make-Ready (@make__ready) translated a new design into a 9-colour silkscreen, capturing the vivid detail of Grayson's drawing style.
+
+The print is signed by the artist and individually numbered.
+
+The Changeling launches on 30 April at 14:00 UK time and will be available to collect for one week only. Click below to set a reminder.
+
+[CTA] Set a reminder
+[FOOTER] Behind the scenes at Make-Ready
+
+════════════════════════════════════════════════════════════════
+[EMAIL 5 · Early Access (flow) · 290426]
+[SUBJECT] Grayson Perry – Early access 🔓
+[PREVIEW] Collect 24 hours before everyone else.
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+Our latest collaboration with Grayson Perry launches tomorrow at 14:00 UK time and will be available to collect for one week only. Each edition is individually numbered, signed by the artist, and includes free worldwide shipping.
+
+Created exclusively for the Foundling Museum, this edition portrays a child as a symbol of modern youth, exploring how technology shapes today's generations and supporting the museum's mission to celebrate children in care.
+
+As a thank you for registering for updates, we're offering you the chance to collect the release 24 hours before everyone else.
+
+Unlock early access using the link below.
+
+[CTA] Unlock early access
+[FOOTER] 24 hours ahead of the public launch
+
+════════════════════════════════════════════════════════════════
+[EMAIL 6 · Now Live · 300426]
+[SUBJECT] Grayson Perry – Available now, for one week only
+[PREVIEW] One week, starting now.
+[KICKER] Collect a print by Grayson Perry
+[HEADLINE] One week, starting now
+[BODY]
+Our latest collaboration with Grayson Perry is now available to collect for one week only – a new limited edition print, signed and numbered, with free worldwide shipping.
+
+Created exclusively for the Foundling Museum, this edition portrays a child as a symbol of modern youth, exploring how technology shapes today's generations and supporting the museum's mission to celebrate children in care.
+
+To create the edition, our printmakers at Make-Ready (@make__ready) translated a new design into a 9-colour silkscreen, capturing the vivid detail of Grayson's drawing style.
+
+The opportunity to collect an edition ends at 14:00 UK time on Thursday, 07 May. Click the link below to add The Changeling to your collection.
+
+[CTA] Buy now
+
+[CARD] The Changeling
+A new limited edition print by Grayson Perry, signed by the artist and individually numbered.
+
+[FOOTER] Collect a limited edition print
+
+════════════════════════════════════════════════════════════════
+[EMAIL 7 · Still time (flow) · 040526]
+[SUBJECT] Grayson Perry – There's still time to collect
+[PREVIEW] Closes 7 May at 14:00 UK time.
+[BODY]
+There's still time to collect a new limited edition print by Grayson Perry.
+
+Created exclusively for the Foundling Museum, this edition portrays a child as a symbol of modern youth, exploring how technology shapes today's generations and supporting the museum's mission to celebrate children in care.
+
+Click the link to collect before 14:00 UK time on Thursday, 07 May.
+
+[CTA] Buy a print
+[FOOTER] There's still time to add a print to your collection
+
+════════════════════════════════════════════════════════════════
+[EMAIL 8 · Last Chance (flow) · 070526]
+[SUBJECT] Grayson Perry – Last chance to collect
+[PREVIEW] Time is almost up.
+[KICKER] Grayson Perry
+[HEADLINE] Last chance to collect
+[BODY]
+It's now or never for our latest collaboration with Grayson Perry – a new limited edition print will be available to order until 14:00 UK time today, 07 May.
+
+After this time, the edition size will be confirmed, and the work will no longer be available to purchase.
+
+[CTA] Buy now
+[FOOTER] Time is almost up

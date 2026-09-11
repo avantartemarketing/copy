@@ -1,7 +1,7 @@
 # Release brief: Gregory Crewdson, Dream House, time-limited edition (48-hour window).
 # Values are lifted from the emails sent in June to August 2026.
 
-outputs: [now-live-tl, trns-printing, ig-set, artist-ig-last-chance]
+outputs: [ig-set, email-set, trns-printing, artist-ig-last-chance]
 
 release:
   campaign_code: GregoryCrewd_TL_26
@@ -55,6 +55,9 @@ context:
     - shot inside an abandoned Vermont home
     - cast included Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow
     - the series transforms suburban America into a cinematic psychological landscape
+    - makes elaborately staged photographs of small-town America, lit and cast like film stills
+    - since the 1990s his work has explored the unease beneath suburban life
+    - series planned for months and shot in a single moment
   artist_bio: "Gregory Crewdson makes elaborately staged photographs of small-town America, each one lit and cast like a film still. Since the 1990s his work has explored the unease beneath suburban life, in series that are planned for months and shot in a single moment."
   making: "Faithfully translated into print by Make-Ready (@make__ready), the six editions are drawn from the twelve staged photographs of the original series."
   hook: "Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape."   # BOUNDED, as sent

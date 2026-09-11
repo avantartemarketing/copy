@@ -24,9 +24,14 @@ release:
   framing_code: Longo-0926-10             # first-purchase framing offer; blank = block omitted
   fundraiser: Vote.org
   beneficiary_handle: votedotorg
+  beneficiary_name: Vote.org
+  advisor: Sam
+  artist_link: avantarte.co/robertlongo-privateroom
+  partner_link: ""
 
 artist:
   name: Robert Longo
+  first_name: Robert
   surname: Longo
   handle: robert_longo_studio               # Instagram; blank if the artist has no account
   hashtag: ""                              # e.g. robertlongo; blank for none
@@ -48,7 +53,7 @@ edition:
     - Signed by the artist
     - Individually numbered
     - Free worldwide shipping
-    - Same dimensions as our edition of Eric                          # e.g. "96 x 96cm", for the spec-bullet middle
+    - Same dimensions as Avant Arte's edition of Eric     # features are voice-neutral too: no we/our                          # e.g. "96 x 96cm", for the spec-bullet middle
   technique_facts:
     - made from the artist's original Kodak transparencies
     - high fidelity silkscreen of the original piece
@@ -76,9 +81,9 @@ context:
     - takes his images from film, news and mass media
     - Men in the Cities, begun in 1979, made him a defining figure of the Pictures Generation
   subject_hook: from his acclaimed 'Men in the Cities' series   # BOUNDED, 3 to 8 words after "Robert Longo – "
-  hook: "Longo is renowned for works that fiercely engage with social structures and mass media, long-maintaining that making art is a political act. Sandy is released in support of Vote.org and marks only the second ever edition of Men in the Cities in silkscreen form, the first being our release of Eric last year."   # BOUNDED, as sent
+  hook: "Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year."   # about the work only, voice-neutral
   artist_bio: "Robert Longo is a New York artist known for monumental charcoal drawings that take their images from film, news and mass media. Men in the Cities, begun in 1979, made him a defining figure of the Pictures Generation, and he has long maintained that making art is a political act."
-  making: "To craft the edition, our printmakers at Make-Ready (@make__ready) worked from the artist's original Kodak transparencies, creating a high fidelity silkscreen of the original piece."
+  making: "To craft the edition, printmakers at Make-Ready worked from the original Kodak transparencies, creating a high fidelity silkscreen of the original piece."
   early_access_note: "It's an honour to be editioning Sandy, especially as this is only the second time that Longo has released images from Men in the Cities as silkscreen prints – the first time being our edition of Eric last year. The piece will be released in the same dimensions as Eric, for any collectors wishing to display the prints side by side."   # BOUNDED, as sent
   recap: null                             # Last Chance reuses `hook` unless this is set
   artist_line: "It was really important to me that as I got older as an artist, I could still make work that meant something."   # first person, from the artist; defaults to the quote

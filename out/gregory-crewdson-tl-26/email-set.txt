@@ -8,7 +8,7 @@ We're delighted to announce our latest collaboration with Gregory Crewdson – s
 
 Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape.
 
-Faithfully translated into print by Make-Ready, the six editions are drawn from the twelve staged photographs of the original series.
+Faithfully translated by our printmakers at Make-Ready, the six editions are drawn from the twelve staged photographs of the original series.
 
 [FEATURES]
 · Signed by the artist
@@ -49,7 +49,21 @@ We'll send you a reminder on launch day, but if you have any questions before th
 [FOOTER] Thank you for your interest
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 3 · Deep dive 1, the artist (flow) · 230626]
+[EMAIL 3 · Welcome (flow) · 100626]
+[SUBJECT] Welcome to Avant Arte
+[PREVIEW] Where the art world is more accessible.
+[BODY]
+Welcome {{ personalization_token('contact.firstname', 'to Avant Arte') }}!
+
+Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems.
+
+Our upcoming collaboration with Gregory Crewdson is the latest in this lineage – six new limited edition prints from the Dream House series. Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H.
+
+[LOCKED BLOCK] the rest of the welcome email, house text, unchanged
+[FOOTER] We're excited to see what you collect.
+
+════════════════════════════════════════════════════════════════
+[EMAIL 4 · Deep dive 1, the artist (flow) · 230626]
 [SUBJECT] The Dream House series by Gregory Crewdson
 [PREVIEW] The artist, the work, and the launch on 30 June.
 [KICKER] Gregory Crewdson
@@ -67,7 +81,7 @@ The Dream House series launches on 30 June at 17:00 UK time and will be availabl
 [FOOTER] Launching 30 June
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 4 · Deep dive 2, behind the scenes at Make-Ready (flow) · 230626]
+[EMAIL 5 · Deep dive 2, behind the scenes at Make-Ready (flow) · 230626]
 [SUBJECT] Behind the scenes at Make-Ready
 [PREVIEW] How the Dream House series was made.
 [KICKER] Behind the scenes at Make-Ready
@@ -75,7 +89,7 @@ The Dream House series launches on 30 June at 17:00 UK time and will be availabl
 [BODY]
 On 30 June, for 48 hours only, collect six new limited edition prints by Gregory Crewdson, the Dream House series.
 
-Faithfully translated into print by Make-Ready, the six editions are drawn from the twelve staged photographs of the original series.
+Faithfully translated by our printmakers at Make-Ready, the six editions are drawn from the twelve staged photographs of the original series.
 
 [FEATURES]
 · Signed by the artist
@@ -89,7 +103,56 @@ The Dream House series launches on 30 June at 17:00 UK time and will be availabl
 [FOOTER] Behind the scenes at Make-Ready
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 5 · Early Access (flow) · 290626]
+[EMAIL 6 · Early Access for Insiders, advisor voice · 290626]
+[SUBJECT] Gregory Crewdson – Early access for Insiders 🔓
+[PREVIEW] A first look, plus early access to a limited number of pre-orders.
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+I'm delighted to share our latest collaboration with Gregory Crewdson – six new limited edition prints from the Dream House series.
+
+Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape.
+
+The edition launches tomorrow at 17:00 UK time and will be available to collect for 48 hours only. For the next 24 hours, I'm excited to offer you early access ahead of the public launch.
+
+Discover the artwork and place your order via the private link below. Use code 000-000 to unlock early access.
+
+[CTA] Unlock early access
+
+If you have any questions, please don't hesitate to get in touch by replying to this email.
+
+Best regards,
+Curtis
+
+Art Advisor at Avant Arte
+
+════════════════════════════════════════════════════════════════
+[EMAIL 7 · Artist email, early access, artist voice · 290626]
+[SUBJECT] Early Access: Avant Arte & Gregory Crewdson
+[BODY]
+Dear collector,
+
+I'm delighted to share that my latest collaboration with Avant Arte launches tomorrow at 17:00 UK time – six new limited edition prints from the Dream House series.
+
+Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape.
+
+Faithfully translated by Avant Arte's printmakers at Make-Ready, the six editions are drawn from the twelve staged photographs of the original series.
+
+[FEATURES]
+· Signed by the artist
+· Individually numbered
+· Free worldwide shipping
+· Bespoke silver aluminium frame available
+
+As a token of appreciation for your continued support, I'd like to offer you early access to purchase 24 hours before everyone else.
+
+Tap the link below to discover more about the work and to collect: avantarte.co/crewdson-privateroom
+
+Thank you,
+Gregory
+
+════════════════════════════════════════════════════════════════
+[EMAIL 8 · Early Access (flow) · 290626]
 [SUBJECT] Gregory Crewdson – Early access 🔓
 [PREVIEW] Collect 24 hours before everyone else.
 [BODY]
@@ -113,7 +176,7 @@ Unlock early access using the link below.
 [FOOTER] 24 hours ahead of the public launch
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 6 · Now Live · 300626]
+[EMAIL 9 · Now Live · 300626]
 [SUBJECT] Gregory Crewdson – Available now, for 48 hours only
 [PREVIEW] 48 hours, starting now.
 [KICKER] Collect a print by Gregory Crewdson
@@ -123,7 +186,7 @@ Our latest collaboration with Gregory Crewdson is now available to collect for 4
 
 Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape.
 
-Faithfully translated into print by Make-Ready, the six editions are drawn from the twelve staged photographs of the original series.
+Faithfully translated by our printmakers at Make-Ready, the six editions are drawn from the twelve staged photographs of the original series.
 
 [FEATURES]
 · Signed by the artist
@@ -141,7 +204,7 @@ Six new limited edition prints by Gregory Crewdson.
 [FOOTER] Collect six limited edition prints
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 7 · Still time (flow) · 010726]
+[EMAIL 10 · Still time (flow) · 010726]
 [SUBJECT] Gregory Crewdson – There's still time to collect
 [PREVIEW] Closes 2 July at 17:00 UK time.
 [BODY]
@@ -155,7 +218,7 @@ Click the link to collect before 17:00 UK time on Thursday, 02 July.
 [FOOTER] There's still time to add a print to your collection
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 8 · Last Chance (flow) · 020726]
+[EMAIL 11 · Last Chance (flow) · 020726]
 [SUBJECT] Gregory Crewdson – Last chance to collect
 [PREVIEW] Time is almost up.
 [KICKER] Gregory Crewdson
@@ -167,3 +230,19 @@ After this time, the edition size will be confirmed, and the works will no longe
 
 [CTA] Buy now
 [FOOTER] Time is almost up
+
+════════════════════════════════════════════════════════════════
+[EMAIL 12 · Edition Closed (flow) · 020726]
+[SUBJECT] Gregory Crewdson – Time is up
+[PREVIEW] Thank you for purchasing.
+[KICKER] Thank you for purchasing
+[HEADLINE] The Dream House series by Gregory Crewdson
+[BODY]
+The launch window for the Dream House series by Gregory Crewdson is now closed. Once the final edition size for each artwork has been confirmed, we will update the edition pages on our website.
+
+The expected dispatch window for unframed orders is 02 - 09 October, with framed editions expected to ship approximately four weeks later.
+
+We'll continue to share updates as your order progresses, but if you have any questions in the meantime, please don't hesitate to reply to this email.
+
+We hope you enjoy your new edition.
+[FOOTER] Thank you for purchasing

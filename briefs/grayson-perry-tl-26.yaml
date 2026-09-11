@@ -19,6 +19,10 @@ release:
   framing_code: ""
   fundraiser: the Foundling Museum
   beneficiary_handle: foundlingmuseum
+  beneficiary_name: The Foundling Museum      # as a sign-off
+  advisor: Sam                                # signs the Insiders email
+  artist_link: avantarte.co/graysonperry-privateroom
+  partner_link: avantarte.co/graysonperry-foundlingmuseum
 
 artist:
   name: Grayson Perry
@@ -78,9 +82,9 @@ context:
   early_access_opener: preparing
   subject_hook: a new limited edition silkscreen print
   artist_bio: "Grayson Perry has long been one of the most distinctive voices in contemporary British art.\n\nWorking across ceramics, tapestry, print and sculpture, his practice examines identity, class, and gender in modern society. Drawing on autobiography as well as social observation, Grayson often pairs the decorative language of traditional craft with direct commentary on the structures and contradictions that shape everyday life."
-  hook: "The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. Grayson describes the work as intentionally 'quite disturbing', a changeling reimagined for the digital age."   # about the work only; the templates place the beneficiary, medium and features
+  hook: "The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. It reimagines changeling folklore for the digital age, and is intended to be 'quite disturbing'."   # about the work only, no artist name, no we/our: it is reused in the artist's and partner's voice
   hook_short: "‘The Changeling’ explores the impact of technology on a generation of digital natives."
-  making: "To create the edition, our printmakers at Make-Ready (@make__ready) translated a new design into a 9-colour silkscreen, capturing the vivid detail of Grayson's drawing style."
+  making: "To create the edition, printmakers at Make-Ready translated a new design into a 9-colour silkscreen, capturing the vivid detail of the original drawing."   # voice-neutral; each template adds "our" or "Avant Arte's"
   artist_line: ""
   artist_thanks: ""
   quote_sentence: ""

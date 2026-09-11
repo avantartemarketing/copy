@@ -176,7 +176,11 @@ out/          the two campaigns rendered, so you can compare with what was sent
 tool/         the prototype page: brief form, generated sequence, validator, Claude suggestions
 ```
 
-`templates/ig-set.txt` is the whole Instagram feed set from one skeleton (status line, substance,
+`templates/email-set.txt` renders every email for a release from the same brief, in our voice, the
+advisor's, the artist's and a partner's. That works because the fragments are written voice-neutral:
+the hook is about the work with no artist name and no "we" or "our"; the making line says
+"printmakers at Make-Ready" and each template adds "our" or "Avant Arte's"; features never say
+"our". `templates/ig-set.txt` is the whole Instagram feed set from one skeleton (status line, substance,
 edition line, action line): five status lines, three CTAs, one deadline form, three fragments,
 no menus. `briefs/grayson-perry-tl-26.yaml` regenerates a real campaign with it.
 

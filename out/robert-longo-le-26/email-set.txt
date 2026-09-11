@@ -6,7 +6,7 @@ Hi {{ personalization_token('contact.firstname', 'there') }},
 
 We're currently preparing the launch of our latest collaboration with Robert Longo, Untitled (Sandy, from the series “Men in the Cities”).
 
-Longo is renowned for works that fiercely engage with social structures and mass media, long-maintaining that making art is a political act. Sandy is released in support of Vote.org and marks only the second ever edition of Men in the Cities in silkscreen form, the first being our release of Eric last year.
+Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year.
 
 The edition will launch publicly on 7 September and will be allocated by a randomised draw; however, for the next 48 hours we're offering a small group of collectors a first look, plus access to a limited number of pre-orders. Based on your order history and the artists you've expressed an interest in, I thought the edition would be a good fit for your collection.
 
@@ -24,23 +24,97 @@ A new limited edition silkscreen print by Robert Longo.
 [FOOTER] Especially for you.
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 2 · Announcement (LE) · 070926]
-[SUBJECT] Robert Longo – A new limited edition silkscreen print
-[PREVIEW] Enter the draw for a chance to collect. Closes 29 September.
-[KICKER] Enter the draw
-[HEADLINE] Untitled (Sandy, from the series “Men in the Cities”)
+[EMAIL 2 · Early Access for Insiders, advisor voice · 030926]
+[SUBJECT] Robert Longo – Early access for Insiders 🔓
+[PREVIEW] A first look, plus early access to a limited number of pre-orders.
 [BODY]
-We're delighted to announce our latest collaboration with Robert Longo – Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print.
+Hi {{ personalization_token('contact.firstname', 'there') }},
 
-Longo is renowned for works that fiercely engage with social structures and mass media, long-maintaining that making art is a political act. Sandy is released in support of Vote.org and marks only the second ever edition of Men in the Cities in silkscreen form, the first being our release of Eric last year.
+I'm delighted to share our latest collaboration with Robert Longo – Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print, released in support of Vote.org.
 
-To craft the edition, our printmakers at Make-Ready worked from the artist's original Kodak transparencies, creating a high fidelity silkscreen of the original piece.
+Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year.
+
+The edition will launch publicly on 7 September and will be allocated by a randomised draw. However, for the next 48 hours, I'm excited to offer you a first look, plus early access to a limited number of pre-orders.
+
+Discover the artwork and place your order via the private link below. Use code 377-985 to unlock early access.
+
+[CTA] Unlock early access
+
+If you have any questions, please don't hesitate to get in touch by replying to this email.
+
+Best regards,
+Sam
+
+Art Advisor at Avant Arte
+
+════════════════════════════════════════════════════════════════
+[EMAIL 3 · Artist email, early access, artist voice · 030926]
+[SUBJECT] Early Access: Avant Arte & Robert Longo
+[BODY]
+Dear collector,
+
+I'm delighted to share that my latest collaboration with Avant Arte launches on 7 September at 16:00 UK time – Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print, released in support of Vote.org.
+
+Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year.
+
+To craft the edition, Avant Arte's printmakers at Make-Ready worked from the original Kodak transparencies, creating a high fidelity silkscreen of the original piece.
 
 [FEATURES]
 · Signed by the artist
 · Individually numbered
 · Free worldwide shipping
-· Same dimensions as our edition of Eric
+· Same dimensions as Avant Arte's edition of Eric
+
+As a token of appreciation for your continued support, I'd like to offer you early access to skip the draw and purchase 24 hours before everyone else.
+
+Tap the link below to discover more about the work and to collect: avantarte.co/robertlongo-privateroom
+
+Thank you,
+Robert
+
+════════════════════════════════════════════════════════════════
+[EMAIL 4 · Partner email, early access, partner voice · 030926]
+[SUBJECT] Early Access: Avant Arte & Robert Longo
+[BODY]
+Dear collector,
+
+We're delighted to share that the latest collaboration between Robert Longo and Avant Arte launches on 7 September at 16:00 UK time – Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print.
+
+Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year.
+
+To craft the edition, Avant Arte's printmakers at Make-Ready worked from the original Kodak transparencies, creating a high fidelity silkscreen of the original piece.
+
+[FEATURES]
+· Signed by the artist
+· Individually numbered
+· Free worldwide shipping
+· Same dimensions as Avant Arte's edition of Eric
+
+As a token of appreciation for your continued support, we are offering early access to skip the draw and purchase 24 hours before everyone else.
+
+Tap the link below to discover more about the work and to collect: [private link]
+
+With thanks,
+Vote.org
+
+════════════════════════════════════════════════════════════════
+[EMAIL 5 · Announcement (LE) · 070926]
+[SUBJECT] Robert Longo – A new limited edition silkscreen print
+[PREVIEW] Enter the draw for a chance to collect. Closes 29 September.
+[KICKER] Enter the draw
+[HEADLINE] Untitled (Sandy, from the series “Men in the Cities”)
+[BODY]
+We're delighted to announce our latest collaboration with Robert Longo – Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print, released in support of Vote.org.
+
+Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year.
+
+To craft the edition, our printmakers at Make-Ready worked from the original Kodak transparencies, creating a high fidelity silkscreen of the original piece.
+
+[FEATURES]
+· Signed by the artist
+· Individually numbered
+· Free worldwide shipping
+· Same dimensions as Avant Arte's edition of Eric
 
 Enter the draw for a chance to collect. Closes at 17:00 UK time on 29 September.
 
@@ -55,7 +129,7 @@ A new limited edition silkscreen print by Robert Longo.
 [FOOTER] Collect a limited edition silkscreen print
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 3 · Sustain, the artist · 140926]
+[EMAIL 6 · Sustain, the artist · 140926]
 [SUBJECT] Untitled (Sandy, from the series “Men in the Cities”) by Robert Longo
 [PREVIEW] The artist, the work, and the draw.
 [KICKER] Robert Longo
@@ -63,7 +137,7 @@ A new limited edition silkscreen print by Robert Longo.
 [BODY]
 Robert Longo is a New York artist known for monumental charcoal drawings that take their images from film, news and mass media. Men in the Cities, begun in 1979, made him a defining figure of the Pictures Generation, and he has long maintained that making art is a political act.
 
-Longo is renowned for works that fiercely engage with social structures and mass media, long-maintaining that making art is a political act. Sandy is released in support of Vote.org and marks only the second ever edition of Men in the Cities in silkscreen form, the first being our release of Eric last year.
+Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year.
 
 “It was really important to me that as I got older as an artist, I could still make work that meant something. I wanna make work that matters.”
 
@@ -73,7 +147,7 @@ Enter the draw for a chance to collect. Closes at 17:00 UK time on 29 September.
 [FOOTER] Collect a limited edition silkscreen print
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 4 · Sustain, behind the scenes at Make-Ready · 190926]
+[EMAIL 7 · Sustain, behind the scenes at Make-Ready · 190926]
 [SUBJECT] Behind the scenes at Make-Ready
 [PREVIEW] How Untitled (Sandy, from the series “Men in the Cities”) was made.
 [KICKER] Behind the scenes at Make-Ready
@@ -81,13 +155,14 @@ Enter the draw for a chance to collect. Closes at 17:00 UK time on 29 September.
 [BODY]
 Enter the draw for a chance to collect a new limited edition silkscreen print by Robert Longo, Untitled (Sandy, from the series “Men in the Cities”).
 
-To craft the edition, our printmakers at Make-Ready worked from the artist's original Kodak transparencies, creating a high fidelity silkscreen of the original piece.
+To craft the edition, our printmakers at Make-Ready worked from the original Kodak transparencies, creating a high fidelity silkscreen of the original piece.
 
 [FEATURES]
 · Signed by the artist
 · Individually numbered
 · Free worldwide shipping
-· Same dimensions as our edition of Eric
+· Same dimensions as Avant Arte's edition of Eric
+· Released in support of Vote.org
 
 Enter the draw for a chance to collect. Closes at 17:00 UK time on 29 September.
 
@@ -95,7 +170,7 @@ Enter the draw for a chance to collect. Closes at 17:00 UK time on 29 September.
 [FOOTER] Behind the scenes at Make-Ready
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 5 · Last Chance (LE) · 280926]
+[EMAIL 8 · Last Chance (LE) · 280926]
 [SUBJECT] Robert Longo – Last chance to enter the draw
 [PREVIEW] The draw closes tomorrow at 17:00 UK time.
 [KICKER] Robert Longo
@@ -103,7 +178,7 @@ Enter the draw for a chance to collect. Closes at 17:00 UK time on 29 September.
 [BODY]
 This is your final opportunity to enter the draw for Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print by Robert Longo.
 
-Longo is renowned for works that fiercely engage with social structures and mass media, long-maintaining that making art is a political act. Sandy is released in support of Vote.org and marks only the second ever edition of Men in the Cities in silkscreen form, the first being our release of Eric last year.
+Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year.
 
 For a chance to collect, click the link below to enter the draw. The draw closes tomorrow at 17:00 UK time.
 

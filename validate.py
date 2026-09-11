@@ -44,7 +44,7 @@ CAPPED = {"iconic": 1, "truly": 1, "unique": 1, "meticulous": 1, "meticulously":
 US_SPELLING = {"color": "colour", "colors": "colours", "colorway": "colourway", "realize": "realise",
                "center": "centre", "gray": "grey", "jewelry": "jewellery", "favorite": "favourite",
                "honor": "honour", "catalog": "catalogue", "program": "programme"}
-LOCKED_OK = ["Great choice!", "and we will!"]      # locked house lines that legitimately break a rule
+LOCKED_OK = ["Great choice!", "and we will!", "Welcome "]      # locked house lines that legitimately break a rule
 HOUSE_PROPER = set("""UK Make-Ready North London Amsterdam Avant Arte Estate Foundation Trust Insiders
   January February March April May June July August September October November December
   Monday Tuesday Wednesday Thursday Friday Saturday Sunday I I'm I'd I've It's""".split())

@@ -52,7 +52,7 @@ Announcing {% if untitled %}{{ edition|edition_phrase }} by {{ named }}, from {{
 {% elif phase == "sustain" %}
 A closer look at {{ work }}, {{ edition|edition_phrase }} by {{ named }}.
 
-{{ context.making }}
+{{ context.making|voice("ours", true) }}
 
 {{ edition_line }}{{ (" " ~ ben_line) if ben_line else "" }}
 

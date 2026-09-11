@@ -80,27 +80,47 @@ def first_sentence(text):
     return m.group(1) if m else (text or "")
 
 
-def email_phases(release):
-    """The marketing emails a campaign gets, with send dates, from the brief or derived from the launch."""
+def email_phases(release, artist):
+    """Every email a release gets, with send dates, from the brief or derived from the launch."""
     launch, close = dt(release["launch_at"]), dt(release["closes_at"])
     draw = release.get("mechanic") == "draw"
     day = datetime.timedelta(days=1)
     when = lambda key, default: dt(release[key]) if release.get(key) else default
+    partner = bool(release.get("fundraiser") or artist.get("partner"))
     if draw:
-        return [("early_access_le", "Early Access (LE)", when("early_access_at", launch - 4 * day)),
-                ("announce_le", "Announcement (LE)", launch),
-                ("sustain_artist", "Sustain, the artist", when("sustain_at", launch + 7 * day)),
-                ("sustain_making", "Sustain, behind the scenes at Make-Ready", when("sustain2_at", launch + 12 * day)),
-                ("last_chance_le", "Last Chance (LE)", when("last_chance_at", close - day))]
+        ea = when("early_access_at", launch - 4 * day)
+        seq = [("early_access_le", "Early Access (LE)", ea),
+               ("insiders_ea", "Early Access for Insiders, advisor voice", ea),
+               ("artist_email", "Artist email, early access, artist voice", ea)]
+        if partner:
+            seq.append(("partner_email", "Partner email, early access, partner voice", ea))
+        return seq + [("announce_le", "Announcement (LE)", launch),
+                      ("sustain_artist", "Sustain, the artist", when("sustain_at", launch + 7 * day)),
+                      ("sustain_making", "Sustain, behind the scenes at Make-Ready", when("sustain2_at", launch + 12 * day)),
+                      ("last_chance_le", "Last Chance (LE)", when("last_chance_at", close - day))]
     announce = when("announce_at", launch - 21 * day)
-    return [("announce_tl", "Announcement (TL)", announce),
-            ("signup", "Signup Confirmation (flow)", announce),
-            ("sustain_artist", "Deep dive 1, the artist (flow)", when("sustain_at", launch - 13 * day)),
-            ("sustain_making", "Deep dive 2, behind the scenes at Make-Ready (flow)", when("sustain2_at", launch - 7 * day)),
-            ("early_access_tl", "Early Access (flow)", launch - day),
-            ("live", "Now Live", launch),
-            ("still_time", "Still time (flow)", when("halfway_at", launch + (close - launch) / 2)),
-            ("last_chance_tl", "Last Chance (flow)", close)]
+    seq = [("announce_tl", "Announcement (TL)", announce),
+           ("signup", "Signup Confirmation (flow)", announce),
+           ("welcome", "Welcome (flow)", announce),
+           ("sustain_artist", "Deep dive 1, the artist (flow)", when("sustain_at", launch - 13 * day)),
+           ("sustain_making", "Deep dive 2, behind the scenes at Make-Ready (flow)", when("sustain2_at", launch - 7 * day)),
+           ("insiders_ea", "Early Access for Insiders, advisor voice", launch - day),
+           ("artist_email", "Artist email, early access, artist voice", launch - day)]
+    if partner:
+        seq.append(("partner_email", "Partner email, early access, partner voice", launch - day))
+    return seq + [("early_access_tl", "Early Access (flow)", launch - day),
+                  ("live", "Now Live", launch),
+                  ("still_time", "Still time (flow)", when("halfway_at", launch + (close - launch) / 2)),
+                  ("last_chance_tl", "Last Chance (flow)", close),
+                  ("edition_closed", "Edition Closed (flow)", close)]
+
+
+def voice(text, who="ours", tag=False):
+    """Fragments are written voice-neutral ("printmakers at Make-Ready"); each template adds its own voice."""
+    text = text or ""
+    if who == "ours":
+        return text.replace("printmakers at Make-Ready", "our printmakers at Make-Ready" + (" (@make__ready)" if tag else ""))
+    return text.replace("printmakers at Make-Ready", "Avant Arte's printmakers at Make-Ready")
 
 
 def cap_first(text):
@@ -209,7 +229,7 @@ def build_env():
     env = Environment(loader=FileSystemLoader(str(ROOT / "templates")), undefined=StrictUndefined,
                       trim_blocks=True, lstrip_blocks=True)
     env.filters.update(uktime=uktime, ukdate=ukdate, ukdate_dd=ukdate_dd, weekday=weekday, ddmmyy=ddmmyy, month=month,
-                       day_before=day_before, rel_day=rel_day, tag_first=tag_first, cap_first=cap_first, first_sentence=first_sentence, ship_window=ship_window, edition_phrase=edition_phrase,
+                       day_before=day_before, rel_day=rel_day, tag_first=tag_first, cap_first=cap_first, first_sentence=first_sentence, voice=voice, ship_window=ship_window, edition_phrase=edition_phrase,
                        collect_phrase=collect_phrase, recap_phrase=recap_phrase, titles=titles, titles_q=titles_q)
     env.globals.update(OPENERS=OPENERS, EA_OPENERS=EA_OPENERS, GROUP=GROUP, WORDS=WORDS,
                        production_paragraph=production_paragraph, auth_phrase=auth_phrase, phases=phases, email_phases=email_phases)

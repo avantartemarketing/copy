@@ -4,11 +4,11 @@
 [KICKER] Launching 30 April
 [HEADLINE] The Changeling by Grayson Perry
 [BODY]
-We're delighted to announce our latest collaboration with Grayson Perry – The Changeling, a new limited edition print created especially for the Foundling Museum.
+We're delighted to announce our latest collaboration with Grayson Perry – The Changeling, a new limited edition print, released in support of the Foundling Museum.
 
-The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. Grayson describes the work as intentionally 'quite disturbing', a changeling reimagined for the digital age.
+The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. It reimagines changeling folklore for the digital age, and is intended to be 'quite disturbing'.
 
-To create the edition, our printmakers at Make-Ready translated a new design into a 9-colour silkscreen, capturing the vivid detail of Grayson's drawing style.
+To create the edition, our printmakers at Make-Ready translated a new design into a 9-colour silkscreen, capturing the vivid detail of the original drawing.
 
 [FEATURES]
 · Signed by the artist
@@ -48,7 +48,21 @@ We'll send you a reminder on launch day, but if you have any questions before th
 [FOOTER] Thank you for your interest
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 3 · Deep dive 1, the artist (flow) · 200426]
+[EMAIL 3 · Welcome (flow) · 080426]
+[SUBJECT] Welcome to Avant Arte
+[PREVIEW] Where the art world is more accessible.
+[BODY]
+Welcome {{ personalization_token('contact.firstname', 'to Avant Arte') }}!
+
+Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems.
+
+Our upcoming collaboration with Grayson Perry is the latest in this lineage – The Changeling, a new limited edition print. The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations.
+
+[LOCKED BLOCK] the rest of the welcome email, house text, unchanged
+[FOOTER] We're excited to see what you collect.
+
+════════════════════════════════════════════════════════════════
+[EMAIL 4 · Deep dive 1, the artist (flow) · 200426]
 [SUBJECT] The Changeling by Grayson Perry
 [PREVIEW] The artist, the work, and the launch on 30 April.
 [KICKER] Grayson Perry
@@ -58,7 +72,7 @@ Grayson Perry has long been one of the most distinctive voices in contemporary B
 
 Working across ceramics, tapestry, print and sculpture, his practice examines identity, class, and gender in modern society. Drawing on autobiography as well as social observation, Grayson often pairs the decorative language of traditional craft with direct commentary on the structures and contradictions that shape everyday life.
 
-The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. Grayson describes the work as intentionally 'quite disturbing', a changeling reimagined for the digital age.
+The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. It reimagines changeling folklore for the digital age, and is intended to be 'quite disturbing'.
 
 “Beauty and seriousness are perhaps the most shocking tactics left to artists these days.”
 
@@ -68,7 +82,7 @@ The Changeling launches on 30 April at 14:00 UK time and will be available to co
 [FOOTER] Launching 30 April
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 4 · Deep dive 2, behind the scenes at Make-Ready (flow) · 230426]
+[EMAIL 5 · Deep dive 2, behind the scenes at Make-Ready (flow) · 230426]
 [SUBJECT] Behind the scenes at Make-Ready
 [PREVIEW] How The Changeling was made.
 [KICKER] Behind the scenes at Make-Ready
@@ -76,7 +90,7 @@ The Changeling launches on 30 April at 14:00 UK time and will be available to co
 [BODY]
 On 30 April, for one week only, collect a new limited edition print by Grayson Perry, The Changeling.
 
-To create the edition, our printmakers at Make-Ready translated a new design into a 9-colour silkscreen, capturing the vivid detail of Grayson's drawing style.
+To create the edition, our printmakers at Make-Ready translated a new design into a 9-colour silkscreen, capturing the vivid detail of the original drawing.
 
 [FEATURES]
 · Signed by the artist
@@ -90,7 +104,79 @@ The Changeling launches on 30 April at 14:00 UK time and will be available to co
 [FOOTER] Behind the scenes at Make-Ready
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 5 · Early Access (flow) · 290426]
+[EMAIL 6 · Early Access for Insiders, advisor voice · 290426]
+[SUBJECT] Grayson Perry – Early access for Insiders 🔓
+[PREVIEW] A first look, plus early access to a limited number of pre-orders.
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+I'm delighted to share our latest collaboration with Grayson Perry – The Changeling, a new limited edition print, released in support of the Foundling Museum.
+
+The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. It reimagines changeling folklore for the digital age, and is intended to be 'quite disturbing'.
+
+The edition launches tomorrow at 14:00 UK time and will be available to collect for one week only. For the next 24 hours, I'm excited to offer you early access ahead of the public launch.
+
+Discover the artwork and place your order via the private link below. Use code 000-000 to unlock early access.
+
+[CTA] Unlock early access
+
+If you have any questions, please don't hesitate to get in touch by replying to this email.
+
+Best regards,
+Sam
+
+Art Advisor at Avant Arte
+
+════════════════════════════════════════════════════════════════
+[EMAIL 7 · Artist email, early access, artist voice · 290426]
+[SUBJECT] Early Access: Avant Arte & Grayson Perry
+[BODY]
+Dear collector,
+
+I'm delighted to share that my latest collaboration with Avant Arte launches tomorrow at 14:00 UK time – The Changeling, a new limited edition print, released in support of the Foundling Museum.
+
+The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. It reimagines changeling folklore for the digital age, and is intended to be 'quite disturbing'.
+
+To create the edition, Avant Arte's printmakers at Make-Ready translated a new design into a 9-colour silkscreen, capturing the vivid detail of the original drawing.
+
+[FEATURES]
+· Signed by the artist
+· Individually numbered
+· Free worldwide shipping
+
+As a token of appreciation for your continued support, I'd like to offer you early access to purchase 24 hours before everyone else.
+
+Tap the link below to discover more about the work and to collect: avantarte.co/graysonperry-privateroom
+
+Thank you,
+Grayson
+
+════════════════════════════════════════════════════════════════
+[EMAIL 8 · Partner email, early access, partner voice · 290426]
+[SUBJECT] Early Access: Avant Arte & Grayson Perry
+[BODY]
+Dear collector,
+
+We're delighted to share that the latest collaboration between Grayson Perry and Avant Arte launches tomorrow at 14:00 UK time – The Changeling, a new limited edition print.
+
+The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. It reimagines changeling folklore for the digital age, and is intended to be 'quite disturbing'.
+
+To create the edition, Avant Arte's printmakers at Make-Ready translated a new design into a 9-colour silkscreen, capturing the vivid detail of the original drawing.
+
+[FEATURES]
+· Signed by the artist
+· Individually numbered
+· Free worldwide shipping
+
+As a token of appreciation for your continued support, we are offering early access to purchase 24 hours before everyone else.
+
+Tap the link below to discover more about the work and to collect: avantarte.co/graysonperry-foundlingmuseum
+
+With thanks,
+The Foundling Museum
+
+════════════════════════════════════════════════════════════════
+[EMAIL 9 · Early Access (flow) · 290426]
 [SUBJECT] Grayson Perry – Early access 🔓
 [PREVIEW] Collect 24 hours before everyone else.
 [BODY]
@@ -98,7 +184,7 @@ Hi {{ personalization_token('contact.firstname', 'there') }},
 
 Our latest collaboration with Grayson Perry launches tomorrow at 14:00 UK time and will be available to collect for one week only – The Changeling, a new limited edition print.
 
-The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. Grayson describes the work as intentionally 'quite disturbing', a changeling reimagined for the digital age.
+The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. It reimagines changeling folklore for the digital age, and is intended to be 'quite disturbing'.
 
 [FEATURES]
 · Signed by the artist
@@ -114,7 +200,7 @@ Unlock early access using the link below.
 [FOOTER] 24 hours ahead of the public launch
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 6 · Now Live · 300426]
+[EMAIL 10 · Now Live · 300426]
 [SUBJECT] Grayson Perry – Available now, for one week only
 [PREVIEW] One week, starting now.
 [KICKER] Collect a print by Grayson Perry
@@ -122,9 +208,9 @@ Unlock early access using the link below.
 [BODY]
 Our latest collaboration with Grayson Perry is now available to collect for one week only – The Changeling, a new limited edition print.
 
-The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. Grayson describes the work as intentionally 'quite disturbing', a changeling reimagined for the digital age.
+The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. It reimagines changeling folklore for the digital age, and is intended to be 'quite disturbing'.
 
-To create the edition, our printmakers at Make-Ready translated a new design into a 9-colour silkscreen, capturing the vivid detail of Grayson's drawing style.
+To create the edition, our printmakers at Make-Ready translated a new design into a 9-colour silkscreen, capturing the vivid detail of the original drawing.
 
 [FEATURES]
 · Signed by the artist
@@ -142,7 +228,7 @@ A new limited edition print by Grayson Perry.
 [FOOTER] Collect a limited edition print
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 7 · Still time (flow) · 040526]
+[EMAIL 11 · Still time (flow) · 040526]
 [SUBJECT] Grayson Perry – There's still time to collect
 [PREVIEW] Closes 7 May at 14:00 UK time.
 [BODY]
@@ -156,7 +242,7 @@ Click the link to collect before 14:00 UK time on Thursday, 07 May.
 [FOOTER] There's still time to add a print to your collection
 
 ════════════════════════════════════════════════════════════════
-[EMAIL 8 · Last Chance (flow) · 070526]
+[EMAIL 12 · Last Chance (flow) · 070526]
 [SUBJECT] Grayson Perry – Last chance to collect
 [PREVIEW] Time is almost up.
 [KICKER] Grayson Perry
@@ -168,3 +254,19 @@ After this time, the edition size will be confirmed, and the work will no longer
 
 [CTA] Buy now
 [FOOTER] Time is almost up
+
+════════════════════════════════════════════════════════════════
+[EMAIL 13 · Edition Closed (flow) · 070526]
+[SUBJECT] Grayson Perry – Time is up
+[PREVIEW] Thank you for purchasing.
+[KICKER] Thank you for purchasing
+[HEADLINE] The Changeling by Grayson Perry
+[BODY]
+The launch window for The Changeling by Grayson Perry is now closed. Once the final edition size has been confirmed, we will update the edition page on our website.
+
+The expected dispatch window for unframed orders is 03 - 10 July, with framed editions expected to ship approximately four weeks later.
+
+We'll continue to share updates as your order progresses, but if you have any questions in the meantime, please don't hesitate to reply to this email.
+
+We hope you enjoy your new edition.
+[FOOTER] Thank you for purchasing

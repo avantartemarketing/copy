@@ -1,37 +1,43 @@
 {#
-  THE EMAIL SET — every marketing email for a release, from the same brief as the Instagram set.
-  Same fragments: bio, hook, making, quote. Everything else is a fact or locked house text.
-  Post-purchase, surveys, edition-closed and edition-size emails are facts only and stay in their own templates.
+  THE EMAIL SET — the emails in the comms plan, from the same brief as the Instagram set.
+  Same fragments: hook, making, quote. The bio belongs to the Coming Soon post only.
+  Emails: Announcement (TL Non-flow / LE) · Welcome (TL Flow) · Early Access (TL Flow) · Early access (TL Artist PP)
+  · Early Access (Insiders, TL and LE, signed by the advisor) · Early/Exclusive access (LE) · Now Live (TL Flow and Non-flow)
+  · Halfway (48-hour window) or 5 days to go + 3 days to go (one-week window) · Last chance (TL Flow / LE)
+  · First-time collector survey (LE) · Non-purchaser survey (LE) · this release's paragraph for the Monthly Preview.
+  The artist's own email is rare and stays hand-written. The same lines live in tool/release-copy.xlsx.
   Layout markers match the HubSpot modules: SUBJECT · PREVIEW · KICKER · HEADLINE · BODY · CTA · CARD · QUOTE · FOOTER
 #}
 {% set draw = release.mechanic == "draw" %}
+{% set ordinal = artist.collaboration_ordinal %}
 {% set fundraiser = release.fundraiser if release.fundraiser is defined and release.fundraiser else "" %}
 {% set series = artworks[0].series if artworks[0].series is defined and artworks[0].series else "" %}
 {% set untitled = artworks[0].title == "Untitled" and series %}
 {% set work = ("the " ~ series ~ " series") if untitled else artworks|titles %}
 {% set plural = artworks|length > 1 or edition.count|int > 1 %}
 {% set ep = edition|edition_phrase %}
+{% set cp = edition|collect_phrase %}
 {% set card_line = (ep|cap_first) ~ " by " ~ artist.name ~ "." %}
 {% set making = context.making|voice("ours") %}
-{% set making_theirs = context.making|voice("artist") %}
 {% set advisor = release.advisor if release.advisor is defined and release.advisor else "Sam" %}
-{% set artist_link = release.artist_link if release.artist_link is defined and release.artist_link else "[private link]" %}
-{% set partner_link = release.partner_link if release.partner_link is defined and release.partner_link else "[private link]" %}
-{% set partner_name = release.beneficiary_name if release.beneficiary_name is defined and release.beneficiary_name else (artist.partner if artist.partner is defined and artist.partner else "") %}
 {% set ea_code = release.early_access_code if release.early_access_code is defined and release.early_access_code else "000-000" %}
-{% set hook_short = context.hook|first_sentence %}
-{% set launch_line = "starting at " ~ release.launch_at|uktime ~ " on " ~ release.launch_at|weekday ~ ", " ~ release.launch_at|ukdate_dd %}
+{% set hook_short = context.hook_short if (context.hook_short is defined and context.hook_short) else context.hook|first_sentence %}
+{% set launch_line = release.launch_at|uktime ~ " on " ~ release.launch_at|weekday ~ ", " ~ release.launch_at|ukdate_dd %}
 {% set close_line = release.closes_at|uktime ~ " on " ~ release.closes_at|weekday ~ ", " ~ release.closes_at|ukdate_dd %}
-{% set draw_close = "Closes at " ~ release.closes_at|uktime ~ " on " ~ release.closes_at|ukdate ~ "." %}
-{% set support = (", released in support of " ~ fundraiser) if (fundraiser and fundraiser not in context.hook) else "" %}
+{% set draw_line = "Enter the draw for a chance to collect. Closes at " ~ release.closes_at|uktime ~ " on " ~ release.closes_at|ukdate ~ "." %}
+{% set hook_names_beneficiary = fundraiser and fundraiser in context.hook %}
+{% set support = (", released in support of " ~ fundraiser) if (fundraiser and not hook_names_beneficiary) else "" %}
 {% set feats = edition.features if edition.features is defined and edition.features else ["Signed by the artist", "Individually numbered"] %}
 {% set work_intro = (ep ~ " from the " ~ series ~ " series") if untitled else ((artworks[0].title ~ ", " ~ ep) if (artworks|length == 1 and not plural) else ep) %}
+{% set greeting = "Hi " ~ "{{ personalization_token('contact.firstname', 'there') }}" ~ "," %}
+{% set questions = "If you have any questions, please don't hesitate to get in touch by replying to this email." %}
+{% set edition_numbers = "Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here." %}
 {% macro features(with_support) %}
 [FEATURES]
 {% for f in feats %}
 · {{ f }}
 {% endfor %}
-{% if with_support and fundraiser %}
+{% if with_support and fundraiser and not hook_names_beneficiary %}
 · Released in support of {{ fundraiser }}
 {% endif %}
 {% endmacro %}
@@ -53,90 +59,32 @@
 ════════════════════════════════════════════════════════════════
 {% endif %}
 [EMAIL {{ loop.index }} · {{ name }} · {{ send|ddmmyy }}]
-{% if key == "early_access_le" %}
-[SUBJECT] {{ artist.name }} – Early access 🔓
-[PREVIEW] A first look, plus access to a limited number of pre-orders.
+{% if key == "announce" %}
+[SUBJECT] {{ artist.name }} – {{ ep|cap_first }}
+[PREVIEW] {{ ("Enter the draw for a chance to collect. Closes " ~ release.closes_at|ukdate ~ ".") if draw else ("Launching " ~ release.launch_at|ukdate ~ ". Register for updates.") }}
+[KICKER] {{ "Enter the draw" if draw else "Launching " ~ release.launch_at|ukdate }}
+[HEADLINE] {{ work|cap_first if draw else work|cap_first ~ " by " ~ artist.name }}
 [BODY]
-Hi {{ "{{ personalization_token('contact.firstname', 'there') }}" }},
-
-We're currently preparing the launch of our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }}, {{ work }}.
+We're delighted to announce our {{ ordinal }} collaboration with {{ artist.name }} – {{ work_intro }}{{ support }}.
 
 {{ context.hook }}
 
-The edition will launch publicly on {{ release.launch_at|ukdate }} and will be allocated by a randomised draw; however, for the next {{ release.early_access_hours|default(48) }} hours we're offering a small group of collectors a first look, plus access to a limited number of pre-orders. Based on your order history and the artists you've expressed an interest in, I thought the edition would be a good fit for your collection.
+{{ making }}
 
-Explore the artwork and place your order via the private link below. Use code {{ release.early_access_code|default("000-000") }} to unlock early access.
-
-[CTA] Unlock early access
-
-Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here.
-
-If you have any questions, please don't hesitate to get in touch by replying to this email.
-
-{{ cards() }}
-[FOOTER] Especially for you.
-{% elif key == "insiders_ea" %}
-[SUBJECT] {{ artist.name }} – Early access for Insiders 🔓
-[PREVIEW] A first look, plus early access to a limited number of pre-orders.
-[BODY]
-Hi {{ "{{ personalization_token('contact.firstname', 'there') }}" }},
-
-I'm delighted to share our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} – {{ work_intro }}{{ support }}.
-
-{{ context.hook }}
-
+{{ features(false) }}
 {% if draw %}
-The edition will launch publicly on {{ release.launch_at|ukdate }} and will be allocated by a randomised draw. However, for the next 48 hours, I'm excited to offer you a first look, plus early access to a limited number of pre-orders.
+{{ draw_line }}
 {% else %}
-The edition launches tomorrow at {{ release.launch_at|uktime }} and will be available to collect for {{ release.window }} only. For the next 24 hours, I'm excited to offer you early access ahead of the public launch.
+The edition will be available to collect for {{ release.window }} only, starting at {{ launch_line }}.
+
+Click below to learn more and register for updates.
 {% endif %}
 
-Discover the artwork and place your order via the private link below. Use code {{ ea_code }} to unlock early access.
+[CTA] {{ "Enter the draw" if draw else "Discover the collaboration" }}
 
-[CTA] Unlock early access
-
-If you have any questions, please don't hesitate to get in touch by replying to this email.
-
-Best regards,
-{{ advisor }}
-
-Art Advisor at Avant Arte
-{% elif key == "artist_email" %}
-[SUBJECT] Early Access: Avant Arte & {{ artist.name }}
-[BODY]
-Dear collector,
-
-I'm delighted to share that my {{ artist.collaboration_ordinal }} collaboration with Avant Arte launches {{ ("on " ~ release.launch_at|ukdate) if draw else "tomorrow" }} at {{ release.launch_at|uktime }} – {{ work_intro }}{{ support }}.
-
-{{ context.hook }}
-
-{{ making_theirs }}
-
-{{ features(false) }}
-As a token of appreciation for your continued support, I'd like to offer you early access to {{ "skip the draw and " if draw else "" }}purchase 24 hours before everyone else.
-
-Tap the link below to discover more about the work and to collect: {{ artist_link }}
-
-Thank you,
-{{ artist.first_name if artist.first_name is defined and artist.first_name else artist.name }}
-{% elif key == "partner_email" %}
-[SUBJECT] Early Access: Avant Arte & {{ artist.name }}
-[BODY]
-Dear collector,
-
-We're delighted to share that the {{ artist.collaboration_ordinal }} collaboration between {{ artist.name }} and Avant Arte launches {{ ("on " ~ release.launch_at|ukdate) if draw else "tomorrow" }} at {{ release.launch_at|uktime }} – {{ work_intro }}.
-
-{{ context.hook }}
-
-{{ making_theirs }}
-
-{{ features(false) }}
-As a token of appreciation for your continued support, we are offering early access to {{ "skip the draw and " if draw else "" }}purchase 24 hours before everyone else.
-
-Tap the link below to discover more about the work and to collect: {{ partner_link }}
-
-With thanks,
-{{ partner_name }}
+{{ cards() }}
+{{ quote_block() }}
+[FOOTER] {{ ("Collect " ~ cp) if draw else ("Launching " ~ release.launch_at|ukdate) }}
 {% elif key == "welcome" %}
 [SUBJECT] Welcome to Avant Arte
 [PREVIEW] Where the art world is more accessible.
@@ -147,200 +95,208 @@ Avant Arte began with a simple mission – to make collecting art more accessibl
 
 Our upcoming collaboration with {{ artist.name }} is the latest in this lineage – {{ work_intro }}. {{ hook_short }}
 
-[LOCKED BLOCK] the rest of the welcome email, house text, unchanged
-[FOOTER] We're excited to see what you collect.
-{% elif key == "edition_closed" %}
-[SUBJECT] {{ artist.name }} – Time is up
-[PREVIEW] Thank you for purchasing.
-[KICKER] Thank you for purchasing
-[HEADLINE] {{ work|cap_first }} by {{ artist.name }}
+If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?
+
+Let us know if you have any questions. We're excited to see what you collect.
+
+[CTA] Complete collector profile
+[FOOTER] Where the art world is more accessible
+{% elif key == "early_access_tl" or key == "early_access_pp" %}
+[SUBJECT] {{ artist.name }} – {{ "Early access for past collectors" if key == "early_access_pp" else "Early access 🔓" }}
+[PREVIEW] {{ "Order before everyone else." if key == "early_access_pp" else "Collect 24 hours before everyone else." }}
 [BODY]
-The launch window for {{ work }} by {{ artist.name }} is now closed. Once the final edition size{{ " for each artwork" if plural else "" }} has been confirmed, we will update the edition page{{ "s" if plural else "" }} on our website.
+{{ greeting }}
 
-The expected dispatch window for unframed orders is {{ post_purchase.ship_window_unframed|ship_window }}, with framed editions expected to ship approximately four weeks later.
-
-We'll continue to share updates as your order progresses, but if you have any questions in the meantime, please don't hesitate to reply to this email.
-
-We hope you enjoy your new edition.
-[FOOTER] Thank you for purchasing
-{% elif key == "announce_le" %}
-[SUBJECT] {{ artist.name }} – {{ ep|cap_first }}
-[PREVIEW] Enter the draw for a chance to collect. Closes {{ release.closes_at|ukdate }}.
-[KICKER] Enter the draw
-[HEADLINE] {{ work|cap_first }}
-[BODY]
-We're delighted to announce our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} – {{ work_intro }}{{ support }}.
+Our {{ ordinal }} collaboration with {{ artist.name }} launches tomorrow at {{ release.launch_at|uktime }} and will be available to collect for {{ release.window }} only – {{ work_intro }}.
 
 {{ context.hook }}
 
-{{ making }}
-
-{{ features(false) }}
-Enter the draw for a chance to collect. {{ draw_close }}
-
-[CTA] Enter the draw
-
-{{ cards() }}
-{{ quote_block() }}
-[FOOTER] Collect {{ edition|collect_phrase }}
-{% elif key == "sustain_artist" %}
-[SUBJECT] {{ work|cap_first }} by {{ artist.name }}
-[PREVIEW] The artist, the work, and {{ "the draw" if draw else "the launch on " ~ release.launch_at|ukdate }}.
-[KICKER] {{ artist.name }}
-[HEADLINE] {{ work|cap_first }}
-[BODY]
-{{ context.artist_bio }}
-
-{{ context.hook }}
-
-{% if artist.quote %}
-“{{ artist.quote }}”
-
-{% endif %}
-{% if draw %}
-Enter the draw for a chance to collect. {{ draw_close }}
+{{ features(true) }}
+{% if key == "early_access_pp" %}
+As a previous collector of the artist, we're offering you the chance to order the collaboration 24 hours before everyone else.
 {% else %}
-{{ work|cap_first }} launches on {{ release.launch_at|ukdate }} at {{ release.launch_at|uktime }} and will be available to collect for {{ release.window }} only. Click below to set a reminder.
-{% endif %}
-
-[CTA] {{ "Enter the draw" if draw else "Set a reminder" }}
-[FOOTER] {{ "Collect " ~ edition|collect_phrase if draw else "Launching " ~ release.launch_at|ukdate }}
-{% elif key == "sustain_making" %}
-[SUBJECT] Behind the scenes at Make-Ready
-[PREVIEW] How {{ work }} was made.
-[KICKER] Behind the scenes at Make-Ready
-[HEADLINE] {{ work|cap_first }}
-[BODY]
-{% if draw %}
-Enter the draw for a chance to collect {{ ep }} by {{ artist.name }}, {{ work }}.
-{% else %}
-On {{ release.launch_at|ukdate }}, for {{ release.window }} only, collect {{ ep }} by {{ artist.name }}, {{ work }}.
-{% endif %}
-
-{{ making }}
-
-{{ features(fundraiser not in context.hook) }}
-{% if draw %}
-Enter the draw for a chance to collect. {{ draw_close }}
-{% else %}
-{{ work|cap_first }} launches on {{ release.launch_at|ukdate }} at {{ release.launch_at|uktime }} and will be available to collect for {{ release.window }} only. Click below to set a reminder.
-{% endif %}
-
-[CTA] {{ "Enter the draw" if draw else "Set a reminder" }}
-[FOOTER] Behind the scenes at Make-Ready
-{% elif key == "last_chance_le" %}
-[SUBJECT] {{ artist.name }} – Last chance to enter the draw
-[PREVIEW] The draw closes tomorrow at {{ release.closes_at|uktime }}.
-[KICKER] {{ artist.name }}
-[HEADLINE] 24 hours left to collect
-[BODY]
-This is your final opportunity to enter the draw for {{ work }}, {{ edition|recap_phrase }} by {{ artist.name }}.
-
-{{ context.hook }}
-
-For a chance to collect, click the link below to enter the draw. The draw closes tomorrow at {{ release.closes_at|uktime }}.
-
-[CTA] Enter the draw
-
-{{ cards() }}
-[FOOTER] 24 hours to go
-{% elif key == "announce_tl" %}
-[SUBJECT] {{ artist.name }} – {{ ep|cap_first }}
-[PREVIEW] Launching {{ release.launch_at|ukdate }}. Register for updates.
-[KICKER] Launching {{ release.launch_at|ukdate }}
-[HEADLINE] {{ work|cap_first }} by {{ artist.name }}
-[BODY]
-We're delighted to announce our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} – {{ work_intro }}{{ support }}.
-
-{{ context.hook }}
-
-{{ making }}
-
-{{ features(false) }}
-{{ "The limited edition signed " ~ edition.unit ~ "s" if plural else "The limited edition signed " ~ edition.unit }} will be available to collect for {{ release.window }} only, {{ launch_line }}.
-
-Click below to learn more and register for updates.
-
-[CTA] Discover the collaboration
-
-{{ cards() }}
-{{ quote_block() }}
-[FOOTER] Launching {{ release.launch_at|ukdate }}
-{% elif key == "signup" %}
-[SUBJECT] {{ artist.name }} – You're signed up
-[PREVIEW] We'll remind you on launch day.
-[KICKER] You're signed up
-[HEADLINE] {{ artist.name }}
-[BODY]
-You asked us to keep you updated about our upcoming collaboration with {{ artist.name }}, and we will!
-
-{{ hook_short }}
-
-{{ "The editions" if plural else "The edition" }} will be available to collect for {{ release.window }} only, {{ launch_line }}.
-
-We'll send you a reminder on launch day, but if you have any questions before the collaboration launches, please reply to this email.
-
-[LOCKED BLOCK] the time-limited edition explainer, house text, unchanged
-[FOOTER] Thank you for your interest
-{% elif key == "early_access_tl" %}
-[SUBJECT] {{ artist.name }} – Early access 🔓
-[PREVIEW] Collect 24 hours before everyone else.
-[BODY]
-Hi {{ "{{ personalization_token('contact.firstname', 'there') }}" }},
-
-Our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} launches tomorrow at {{ release.launch_at|uktime }} and will be available to collect for {{ release.window }} only – {{ work_intro }}.
-
-{{ context.hook }}
-
-{{ features(fundraiser not in context.hook) }}
 As a thank you for registering for updates, we're offering you the chance to collect the release 24 hours before everyone else.
+{% endif %}
 
 Unlock early access using the link below.
+{% if key == "early_access_pp" %}
+
+{{ edition_numbers }}
+
+{{ questions }}
+{% endif %}
 
 [CTA] Unlock early access
+{% if key == "early_access_pp" %}
+
+{{ cards() }}
+{% endif %}
 [FOOTER] 24 hours ahead of the public launch
+{% elif key == "insiders_ea" %}
+[SUBJECT] {{ artist.name }} – Early access for Insiders 🔓
+[PREVIEW] {{ "A first look, plus early access to a limited number of pre-orders." if draw else "Collect 24 hours before everyone else." }}
+[BODY]
+{{ greeting }}
+
+I'm delighted to share our {{ ordinal }} collaboration with {{ artist.name }} – {{ work_intro }}{{ support }}.
+
+{{ context.hook }}
+
+{% if draw %}
+The edition will launch publicly on {{ release.launch_at|ukdate }} and will be allocated by a randomised draw. However, for the next 48 hours, I'm excited to offer you a first look, plus early access to a limited number of pre-orders.
+
+Discover the artwork and place your order via the private link below. Use code {{ ea_code }} to unlock early access.
+{% else %}
+The edition launches tomorrow at {{ release.launch_at|uktime }} and will be available to collect for {{ release.window }} only. For the next 24 hours, I'm excited to offer you early access ahead of the public launch.
+
+Discover the artwork and place your order via the private link below.
+{% endif %}
+
+{{ questions }}
+
+Best regards,
+{{ advisor }}
+
+Art Advisor at Avant Arte
+
+[CTA] Unlock early access
+
+{{ cards() }}
+[FOOTER] {{ "Especially for you." if draw else "24 hours ahead of the public launch" }}
+{% elif key == "early_access_le" %}
+[SUBJECT] {{ artist.name }} – Early access 🔓
+[PREVIEW] A first look, plus access to a limited number of pre-orders.
+[BODY]
+{{ greeting }}
+
+We're currently preparing the launch of our {{ ordinal }} collaboration with {{ artist.name }} – {{ work_intro }}{{ support }}.
+
+{{ context.hook }}
+
+The edition will launch publicly on {{ release.launch_at|ukdate }} and will be allocated by a randomised draw; however, for the next 48 hours we're offering a small group of collectors a first look, plus access to a limited number of pre-orders. Based on your order history and the artists you've expressed an interest in, I thought the edition would be a good fit for your collection.
+
+Explore the artwork and place your order via the private link below. Use code {{ ea_code }} to unlock early access.
+
+{{ edition_numbers }}
+
+{{ questions }}
+
+[CTA] Unlock early access
+
+{{ cards() }}
+[FOOTER] Especially for you.
 {% elif key == "live" %}
 [SUBJECT] {{ artist.name }} – Available now, for {{ release.window }} only
 [PREVIEW] {{ release.window|cap_first }}, starting now.
-[KICKER] Collect a {{ edition.unit }} by {{ artist.name }}
+[KICKER] Collect a print by {{ artist.name }}
 [HEADLINE] {{ release.window|cap_first }}, starting now
 [BODY]
-Our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} is now available to collect for {{ release.window }} only – {{ work_intro }}.
+Our {{ ordinal }} collaboration with {{ artist.name }} is now available to collect for {{ release.window }} only – {{ work_intro }}{{ support }}.
 
 {{ context.hook }}
 
 {{ making }}
 
-{{ features(fundraiser not in context.hook) }}
-The opportunity to collect an edition ends at {{ close_line }}. Click the link below to add {{ "a " ~ edition.unit if plural else work }} to your collection.
+{{ features(true) }}
+The opportunity to collect an edition ends at {{ close_line }}. Click the link below to add {{ "a print" if plural else work }} to your collection.
 
 [CTA] Buy now
 
 {{ cards() }}
-[FOOTER] Collect {{ edition|collect_phrase }}
-{% elif key == "still_time" %}
-[SUBJECT] {{ artist.name }} – There's still time to collect
-[PREVIEW] Closes {{ release.closes_at|ukdate }} at {{ release.closes_at|uktime }}.
+{{ quote_block() }}
+[FOOTER] Collect {{ cp }}
+{% elif key == "halfway" %}
+[SUBJECT] {{ artist.name }} – 24 hours to go
+[KICKER] Collect a print by {{ artist.name }}
+[HEADLINE] 24 hours down, 24 to go
+[CTA] Buy now
+[FOOTER] There's still time to add a print to your collection.
+{% elif key == "five_days" %}
+[SUBJECT] {{ artist.name }} – 5 days left
+[KICKER] Collect a print by {{ artist.name }}
+[HEADLINE] 2 days down, 5 days to go
+[CTA] Buy a print
+[FOOTER] Add a signed print to your collection
+{% elif key == "three_days" %}
+[SUBJECT] {{ artist.name }} – 3 days to go
+[KICKER] {{ work|cap_first }} by {{ artist.name }}
+[HEADLINE] Three days left to collect
 [BODY]
-There's still time to collect {{ ep }} by {{ artist.name }}.
+There are just three days left to collect {{ cp }} by {{ artist.name }}.
 
-{{ hook_short }}
+{{ context.hook }}
 
 Click the link to collect before {{ close_line }}.
 
 [CTA] Buy a print
-[FOOTER] There's still time to add a {{ edition.unit }} to your collection
-{% elif key == "last_chance_tl" %}
-[SUBJECT] {{ artist.name }} – Last chance to collect
-[PREVIEW] Time is almost up.
+
+{{ cards() }}
+[FOOTER] Add a print to your collection
+{% elif key == "last_chance" %}
+[SUBJECT] {{ artist.name }} – Last chance to {{ "enter the draw" if draw else "collect" }}
+[PREVIEW] {{ ("The draw closes at " ~ release.closes_at|uktime ~ " on " ~ release.closes_at|ukdate ~ ".") if draw else "Time is almost up." }}
 [KICKER] {{ artist.name }}
-[HEADLINE] Last chance to collect
+[HEADLINE] Last chance to {{ "enter the draw" if draw else "collect" }}
 [BODY]
-It's now or never for our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} – {{ ep }} will be available to order until {{ release.closes_at|uktime }} today, {{ release.closes_at|ukdate_dd }}.
+{% if draw %}
+This is your final opportunity to enter the draw for {{ work }}, {{ cp }} by {{ artist.name }}.
 
-After this time, the edition size will be confirmed, and the {{ "works" if plural else "work" }} will no longer be available to purchase.
+{{ context.hook }}
 
-[CTA] Buy now
+For a chance to collect, click the link below to enter the draw. The draw closes at {{ close_line }}.
+{% else %}
+It's now or never for our {{ ordinal }} collaboration with {{ artist.name }} – {{ cp }} will be available to order until {{ close_line }}.
+
+After this time, the edition size{{ " for each artwork" if plural else "" }} will be confirmed, and the {{ "works" if plural else "work" }} will no longer be available to purchase.
+{% endif %}
+
+[CTA] {{ "Enter the draw" if draw else "Buy now" }}
+
+{{ cards() }}
 [FOOTER] Time is almost up
+{% elif key == "survey_first" %}
+[SUBJECT] Congratulations on your first Avant Arte edition
+[BODY]
+{{ greeting }}
+
+Thank you for adding our collaboration with {{ artist.name }} to your collection. Great choice!
+
+I'm {{ advisor }}, an art advisor at Avant Arte. I'm here to connect collectors with artists by making suggestions, answering questions and offering early access to our collaborations.
+
+If you have two minutes to complete a short survey about your collecting journey to date, your responses will help guide my recommendations.
+
+Any questions? Reply to this email.
+
+[CTA] Complete survey
+
+[CARD] {{ artist.name }}
+{% elif key == "survey_nonpurchaser" %}
+[SUBJECT] {{ artist.name }} – Any feedback?
+[KICKER] Your feedback
+[HEADLINE] {{ artist.name }}
+[BODY]
+As someone who registered for updates but ultimately decided not to enter the draw for our collaboration with {{ artist.name }}, we'd love your feedback.
+
+This two-minute survey will guide our future collaborations and help us recommend the right artists and editions for your collection.
+
+As a thank you for taking part in the survey and helping us improve the collector experience, you'll be entered into a draw to win a €500 Avant Arte gift card.
+
+You can read the terms here.
+
+[CTA] Complete survey
+[FOOTER] What can we do better?
+{% elif key == "monthly_preview" %}
+[PARAGRAPH] this release's paragraph, for the advisor's monthly email
+From {{ artist.name }} comes {{ work_intro }}{{ support }}.
+
+{{ context.hook }}
+
+{{ making }}
+
+{% if draw %}
+The edition will be allocated by a randomised draw, which closes at {{ release.closes_at|uktime }} on {{ release.closes_at|ukdate }}.
+{% else %}
+The edition will be available to collect for {{ release.window }} only, from {{ launch_line }}.
+{% endif %}
 {% endif %}
 {% endfor %}

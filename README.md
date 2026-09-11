@@ -166,29 +166,40 @@ build.
 What is in this repository:
 
 ```
-briefs/       one YAML per release: robert-longo-le-26.yaml, gregory-crewdson-tl-26.yaml
-templates/    announcement-le, early-access-le, last-chance-le, now-live-tl, trns-printing
-render.py     brief + template → email text, with date, count and phrase filters
+briefs/       one YAML per release: robert-longo-le-26 (draw), gregory-crewdson-tl-26 (timed, 48 hours), grayson-perry-tl-26 (timed, one week)
+templates/    ig-set (the Instagram feed set), email-set (the comms plan's emails), trns-printing, and the earlier single-email templates
+render.py     brief + template → text, with date, count and phrase filters
 validate.py   the mechanical rules
 prompts/      the AI slot contract
-docs/         the taxonomy of your emails, the voice rules with evidence, the brief checklist
-out/          the two campaigns rendered, so you can compare with what was sent
-tool/         the prototype page: brief form, generated sequence, validator, Claude suggestions
+docs/         the taxonomy of your emails, the voice rules with evidence, the brief checklist, the comms plan item by item
+out/          the three campaigns rendered, so you can compare with what was sent
+tool/         release-copy.xlsx, the whole system as one workbook, and build_release_copy.py, which builds it; index.html, the earlier prototype page
 ```
 
-`templates/email-set.txt` renders every email for a release from the same brief, in our voice, the
-advisor's, the artist's and a partner's. That works because the fragments are written voice-neutral:
-the hook is about the work with no artist name and no "we" or "our"; the making line says
-"printmakers at Make-Ready" and each template adds "our" or "Avant Arte's"; features never say
-"our". `templates/ig-set.txt` is the whole Instagram feed set from one skeleton (status line, substance,
-edition line, action line): five status lines, three CTAs, one deadline form, three fragments,
-no menus. `briefs/grayson-perry-tl-26.yaml` regenerates a real campaign with it.
+**The workbook, `tool/release-copy.xlsx`**, is the same system with no code. Inputs holds the
+facts and the four fragments (blue on yellow). Lines holds every fixed sentence, one row each,
+with its placeholders. Posts and Emails assemble the outputs by formula. Fill Inputs and read
+Posts and Emails; edit a line once on Lines to change every future release. Set the mechanic to
+draw or timed, and the window to 48 hours or one week, and the rows that do not apply say so.
+
+`templates/email-set.txt` renders the emails in the comms plan from the same brief as the
+Instagram set: Announcement (TL and LE), Welcome, Early Access (TL Flow, TL Artist PP, Insiders
+for TL and LE signed by the advisor, LE early/exclusive access), Now Live, Halfway for a 48-hour
+window or 5 days to go and 3 days to go for a week, Last chance (TL and LE), the two LE surveys,
+and this release's paragraph for the Monthly Preview. The artist's own email is rare and stays
+hand-written. That works because the fragments are written voice-neutral: the hook is about the
+work with no artist name and no "we" or "our"; the making line says "printmakers at Make-Ready"
+and the template adds "our"; features never say "our". `templates/ig-set.txt` is the whole
+Instagram feed set from one skeleton (status line, substance, features line, action line): five
+status lines, three CTAs, one deadline form, four fragments, no menus. The workbook and the
+templates carry the same lines.
 
 Run it:
 
 ```
-python3 render.py briefs/robert-longo-le-26.yaml all
-python3 render.py briefs/gregory-crewdson-tl-26.yaml now-live-tl
+python3 render.py briefs/grayson-perry-tl-26.yaml all
+python3 render.py briefs/robert-longo-le-26.yaml email-set
+python3 tool/build_release_copy.py
 ```
 
 Each rendered file carries the HubSpot internal name in your convention, the subject, the

@@ -19,10 +19,7 @@ release:
   framing_code: ""
   fundraiser: the Foundling Museum
   beneficiary_handle: foundlingmuseum
-  beneficiary_name: The Foundling Museum      # as a sign-off
   advisor: Sam                                # signs the Insiders email
-  artist_link: avantarte.co/graysonperry-privateroom
-  partner_link: avantarte.co/graysonperry-foundlingmuseum
 
 artist:
   name: Grayson Perry

@@ -76,43 +76,43 @@ def day_before(v):
 def first_sentence(text):
     """The first sentence of a fragment, for the short slots."""
     import re as _re
-    m = _re.match(r"(.+?[.!?])(\s|$)", (text or "").strip())
+    m = _re.match(r"(.+?(?<! [A-Z])[.!?])(\s|$)", (text or "").strip())      # an initial ("William H.") does not end a sentence
     return m.group(1) if m else (text or "")
 
 
 def email_phases(release, artist):
-    """Every email a release gets, with send dates, from the brief or derived from the launch."""
+    """The emails in the comms plan, with send dates, from the brief or derived from the launch.
+
+    The names are the comms plan's own. The artist's own email is rare and stays hand-written.
+    """
     launch, close = dt(release["launch_at"]), dt(release["closes_at"])
     draw = release.get("mechanic") == "draw"
     day = datetime.timedelta(days=1)
     when = lambda key, default: dt(release[key]) if release.get(key) else default
-    partner = bool(release.get("fundraiser") or artist.get("partner"))
+    preview = ("monthly_preview", "Monthly Preview, this release's paragraph", when("preview_at", launch - 14 * day))
     if draw:
         ea = when("early_access_at", launch - 4 * day)
-        seq = [("early_access_le", "Early Access (LE)", ea),
-               ("insiders_ea", "Early Access for Insiders, advisor voice", ea),
-               ("artist_email", "Artist email, early access, artist voice", ea)]
-        if partner:
-            seq.append(("partner_email", "Partner email, early access, partner voice", ea))
-        return seq + [("announce_le", "Announcement (LE)", launch),
-                      ("sustain_artist", "Sustain, the artist", when("sustain_at", launch + 7 * day)),
-                      ("sustain_making", "Sustain, behind the scenes at Make-Ready", when("sustain2_at", launch + 12 * day)),
-                      ("last_chance_le", "Last Chance (LE)", when("last_chance_at", close - day))]
+        return [preview,
+                ("early_access_le", "Early/Exclusive access (LE)", ea),
+                ("insiders_ea", "Early Access (LE Insiders), signed by the advisor", ea),
+                ("announce", "Announcement (LE)", launch),
+                ("last_chance", "Last chance (LE)", when("last_chance_at", close - day)),
+                ("survey_first", "First-time collector survey (LE)", close + day),
+                ("survey_nonpurchaser", "Non-purchaser survey (LE)", close + day)]
     announce = when("announce_at", launch - 21 * day)
-    seq = [("announce_tl", "Announcement (TL)", announce),
-           ("signup", "Signup Confirmation (flow)", announce),
-           ("welcome", "Welcome (flow)", announce),
-           ("sustain_artist", "Deep dive 1, the artist (flow)", when("sustain_at", launch - 13 * day)),
-           ("sustain_making", "Deep dive 2, behind the scenes at Make-Ready (flow)", when("sustain2_at", launch - 7 * day)),
-           ("insiders_ea", "Early Access for Insiders, advisor voice", launch - day),
-           ("artist_email", "Artist email, early access, artist voice", launch - day)]
-    if partner:
-        seq.append(("partner_email", "Partner email, early access, partner voice", launch - day))
-    return seq + [("early_access_tl", "Early Access (flow)", launch - day),
-                  ("live", "Now Live", launch),
-                  ("still_time", "Still time (flow)", when("halfway_at", launch + (close - launch) / 2)),
-                  ("last_chance_tl", "Last Chance (flow)", close),
-                  ("edition_closed", "Edition Closed (flow)", close)]
+    seq = [("announce", "Announcement (TL Non-flow)", announce),
+           ("welcome", "Welcome (TL Flow)", announce),
+           preview,
+           ("insiders_ea", "Early Access (TL Insiders), signed by the advisor", launch - day),
+           ("early_access_tl", "Early Access (TL Flow)", launch - day),
+           ("early_access_pp", "Early access (TL Artist PP Non Flow)", launch - day),
+           ("live", "Now Live (TL Flow and Non-flow)", launch)]
+    if release.get("window") == "48 hours":
+        seq.append(("halfway", "Halfway (TL Flow)", when("halfway_at", launch + day)))
+    else:
+        seq += [("five_days", "5 days to go (TL Flow)", launch + 2 * day),
+                ("three_days", "3 days to go (TL Flow)", close - 3 * day)]
+    return seq + [("last_chance", "Last chance (TL Flow)", when("last_chance_at", close))]
 
 
 def voice(text, who="ours", tag=False):

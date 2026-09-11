@@ -24,10 +24,7 @@ release:
   framing_code: Longo-0926-10             # first-purchase framing offer; blank = block omitted
   fundraiser: Vote.org
   beneficiary_handle: votedotorg
-  beneficiary_name: Vote.org
   advisor: Sam
-  artist_link: avantarte.co/robertlongo-privateroom
-  partner_link: ""
 
 artist:
   name: Robert Longo

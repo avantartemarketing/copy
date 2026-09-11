@@ -45,6 +45,7 @@ US_SPELLING = {"color": "colour", "colors": "colours", "colorway": "colourway", 
                "center": "centre", "gray": "grey", "jewelry": "jewellery", "favorite": "favourite",
                "honor": "honour", "catalog": "catalogue", "program": "programme"}
 LOCKED_OK = ["Great choice!", "and we will!", "Welcome "]      # locked house lines that legitimately break a rule
+LOCKED_OK_Q = ["What is an edition?", "Any questions?", "What can we do better?", "Any feedback?"]   # house questions, not rhetorical ones
 HOUSE_PROPER = set("""UK Make-Ready North London Amsterdam Avant Arte Estate Foundation Trust Insiders
   January February March April May June July August September October November December
   Monday Tuesday Wednesday Thursday Friday Saturday Sunday I I'm I'd I've It's""".split())
@@ -125,7 +126,7 @@ def check_bounded(name, text, fact_nums, fact_words):
             errors.append(f"number {num} is not in the brief's facts")
     for s in sentences(text):
         for tok in s.split()[1:]:
-            t = tok.strip("“”\"'(),.;:").removesuffix("'s").removesuffix("’s")
+            t = tok.strip("“”‘’\"'(),.;:").removesuffix("'s").removesuffix("’s")
             if len(t) > 1 and re.match(r"^[A-Z][\w'’.-]*$", t) and t not in HOUSE_PROPER and t not in fact_words:
                 warnings.append(f"“{t}” is not in the brief's facts (invented name or place?)")
     return [f"{name}: {e}" for e in errors], [f"{name}: {w}" for w in warnings]
@@ -143,8 +144,10 @@ def check_email(text):
         if "!" in line and not any(ok in line for ok in LOCKED_OK):
             errors.append("exclamation mark")
             break
-    if "?" in body:
-        errors.append("question mark: no rhetorical questions")
+    for line in body.splitlines():
+        if "?" in line and not any(ok in line for ok in LOCKED_OK_Q):
+            errors.append("question mark: no rhetorical questions")
+            break
     if re.search(r"\b\d{1,2}\s?(am|pm)\b", low):
         errors.append("12-hour time: write 17:00 UK time")
     if re.search(r"\b\d{1,2}(st|nd|rd|th)\b", low):

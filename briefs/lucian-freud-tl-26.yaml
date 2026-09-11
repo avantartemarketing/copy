@@ -1,0 +1,66 @@
+# Release brief: the Lucian Freud Estate, Portraits 1952–2002, time-limited edition (48 hours).
+# Stress test: an estate rather than a living artist, no handle, nothing signed, a partner credit (Bridgeman Images),
+# a framing offer code. Facts lifted from what was sent in March and April 2026.
+
+outputs: [ig-set, twitter-set, email-set]
+
+release:
+  campaign_code: LucianFreud_TL_26
+  link: https://avantarte.co/lucianfreud-2026
+  mechanic: timed
+  window: 48 hours
+  coming_soon_at: "2026-03-05 12:00"
+  announce_at: "2026-03-16 13:00"
+  sustain_at: "2026-03-25 12:00"
+  sustain2_at: "2026-03-31 12:00"
+  launch_at: "2026-04-14 14:00"
+  halfway_at: "2026-04-15 14:00"
+  closes_at: "2026-04-16 14:00"
+  last_chance_at: "2026-04-16 09:00"
+  framing_code: Freud-0426-10
+  framing_percent: 10
+  fundraiser: ""
+  beneficiary_handle: ""
+  advisor: Curtis
+
+artist:
+  name: Lucian Freud
+  collab_with: the Lucian Freud Estate
+  handle: ""
+  x_handle: ""
+  hashtag: ""
+  collaboration_ordinal: latest
+  quote: "The difficulties of painting yourself are psychological, you've got to try to paint yourself as another person."
+  facts:
+    - 1922 to 2011
+    - built his reputation painting people exactly as he saw them
+    - worked from life, often over months of sittings
+    - raw studies of flesh, time and psychological tension
+
+edition:
+  unit: print
+  count: 4
+  phrase: a quartet of new limited edition prints
+  features:
+    - Individually numbered
+    - Free worldwide shipping
+    - Created in collaboration with the Lucian Freud Estate and Bridgeman Images
+    - Available individually, as curated pairs or as a complete quartet
+  facts:
+    - 310gsm Hahnemühle German Etching paper
+    - created in close collaboration with the Lucian Freud Estate at Make-Ready
+
+artworks:
+  - title: Portraits, 1952–2002
+    series: ""
+    facts:
+      - four works spanning five decades of Freud's portrait practice
+      - Girl in Bed, 1953
+      - Reflection with Two Children (Self-Portrait), 1965
+      - Double Portrait, 1988–90
+      - Self-Portrait (Reflection), 2002
+
+context:
+  artist_bio: "Lucian Freud (1922–2011) built his reputation painting people exactly as he saw them. Working from life, often over months of sittings, he turned hours of looking into raw studies of flesh, time and psychological tension."
+  hook: "Portraits, 1952–2002 brings together four seminal works spanning five decades of Freud's uncompromising portrait practice, from early intimacy to late self-scrutiny. The quartet is Girl in Bed, 1953; Reflection with Two Children (Self-Portrait), 1965; Double Portrait, 1988–90; and Self-Portrait (Reflection), 2002."
+  making: "Each print was created in close collaboration with the Lucian Freud Estate by printmakers at Make-Ready, on 310gsm Hahnemühle German Etching paper, to faithfully preserve the texture, tonal depth and psychological intensity of the original paintings."

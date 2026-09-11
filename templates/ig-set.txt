@@ -24,7 +24,7 @@
 {% set edition_line = feats|join(". ") ~ "." %}
 {% set deadline = "Closes " ~ release.closes_at|ukdate ~ " at " ~ release.closes_at|uktime ~ "." %}
 {% set pre_launch = ("Enter the draw via our link in bio. " ~ deadline) if draw else ("Available for " ~ release.window ~ " from " ~ release.launch_at|uktime ~ " on " ~ release.launch_at|ukdate ~ ". Link in bio to get updates.") %}
-{% set open = ("Enter the draw via our link in bio. " ~ deadline) if draw else ("Link in bio to buy a print. " ~ deadline) %}
+{% set open = ("Enter the draw via our link in bio. " ~ deadline) if draw else ("Link in bio to buy " ~ edition|a_unit ~ ". " ~ deadline) %}
 {% set hook = context.hook|tag_first(fundraiser, bh) %}
 {% for phase, send in phases(release, artist) %}
 {% if not loop.first %}

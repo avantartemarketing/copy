@@ -1,6 +1,6 @@
 [EMAIL 1 · Monthly Preview, this release's paragraph · 240826]
 [PARAGRAPH] this release's paragraph, for the advisor's monthly email
-From Robert Longo comes Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print, released in support of Vote.org.
+From Brooklyn-born artist Robert Longo comes Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print, released in support of Vote.org.
 
 Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year.
 
@@ -15,7 +15,7 @@ The edition will be allocated by a randomised draw, which closes at 17:00 UK tim
 [BODY]
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
-We're currently preparing the launch of our latest collaboration with Robert Longo – Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print, released in support of Vote.org.
+We're currently preparing the launch of our latest collaboration with Brooklyn-born artist Robert Longo – Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print, released in support of Vote.org.
 
 Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year.
 
@@ -41,7 +41,7 @@ A new limited edition silkscreen print by Robert Longo.
 [BODY]
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
-I'm delighted to share our latest collaboration with Robert Longo – Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print, released in support of Vote.org.
+I'm delighted to share our latest collaboration with Brooklyn-born artist Robert Longo – Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print, released in support of Vote.org.
 
 Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year.
 
@@ -70,7 +70,7 @@ A new limited edition silkscreen print by Robert Longo.
 [KICKER] Enter the draw
 [HEADLINE] Untitled (Sandy, from the series “Men in the Cities”)
 [BODY]
-We're delighted to announce our latest collaboration with Robert Longo – Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print, released in support of Vote.org.
+We're delighted to announce our latest collaboration with Brooklyn-born artist Robert Longo – Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print, released in support of Vote.org.
 
 Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year.
 
@@ -120,7 +120,7 @@ A new limited edition silkscreen print by Robert Longo.
 [BODY]
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
-Thank you for adding our collaboration with Robert Longo to your collection. Great choice!
+Thank you for adding our collaboration with Brooklyn-born artist Robert Longo to your collection. Great choice!
 
 I'm Sam, an art advisor at Avant Arte. I'm here to connect collectors with artists by making suggestions, answering questions and offering early access to our collaborations.
 
@@ -138,7 +138,7 @@ Any questions? Reply to this email.
 [KICKER] Your feedback
 [HEADLINE] Robert Longo
 [BODY]
-As someone who registered for updates but ultimately decided not to enter the draw for our collaboration with Robert Longo, we'd love your feedback.
+As someone who registered for updates but ultimately decided not to enter the draw for our collaboration with Brooklyn-born artist Robert Longo, we'd love your feedback.
 
 This two-minute survey will guide our future collaborations and help us recommend the right artists and editions for your collection.
 

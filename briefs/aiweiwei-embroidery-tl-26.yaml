@@ -1,0 +1,63 @@
+# Release brief: Ai Weiwei, Self-Portrait Embroidery, time-limited edition (one week).
+# Stress test: not a print (four framed embroideries, sold individually, in pairs or as a quartet), no verbatim quote,
+# a making line that does not involve Make-Ready. Facts lifted from what was sent in January and February 2026.
+
+outputs: [ig-set, twitter-set, email-set]
+
+release:
+  campaign_code: AiWeiwei_SelfPortrait_26
+  link: https://avantarte.co/ai-weiwei-2026
+  mechanic: timed
+  window: one week
+  coming_soon_at: "2025-12-23 12:00"
+  announce_at: "2026-01-06 13:00"
+  sustain_at: "2026-01-20 12:00"
+  launch_at: "2026-01-28 14:00"
+  halfway_at: "2026-01-31 12:00"
+  closes_at: "2026-02-04 14:00"
+  last_chance_at: "2026-02-03 12:00"
+  framing_code: ""
+  fundraiser: ""
+  beneficiary_handle: ""
+  advisor: Sam
+
+artist:
+  name: Ai Weiwei
+  collab_with: Ai Weiwei
+  handle: aiww
+  x_handle: aiww
+  hashtag: ""
+  collaboration_ordinal: latest
+  quote: ""
+  facts:
+    - one of the most influential artists and activists of his generation
+    - works across sculpture, installation, photography and film
+    - his work confronts power, freedom and the individual's place within the state
+
+edition:
+  unit: embroidery
+  count: 4
+  phrase: a quartet of new limited edition embroideries
+  features:
+    - Framed
+    - Signed by the artist via a sticker at the back
+    - Individually numbered
+    - Free worldwide shipping
+    - Available individually, in pairs or as a complete quartet
+  facts:
+    - approximately 460,000 stitches each
+    - four colour combinations: Purple & Yellow, Blue & Pink, Green & Blue, Red & Green
+
+artworks:
+  - title: Self-Portrait Embroidery
+    series: ""
+    facts:
+      - pixelates an image of the artist with a shaved head and a scar
+      - the scar was the result of police brutality following a Citizens' Investigation he led into the 2008 earthquake in Sichuan
+      - the self-portrait was first made in 2016 as toy brick works
+      - the pixelated style of the toy brick works, and the influence of Andy Warhol
+
+context:
+  artist_bio: "Ai Weiwei is one of the most influential artists and activists of his generation. Across sculpture, installation, photography and film, his work confronts power, freedom and the individual's place within the state."
+  hook: "Self-Portrait Embroidery pixelates an image of the artist with a shaved head and a scar, the result of police brutality following a Citizens' Investigation he led into the 2008 earthquake in Sichuan. The defiant self-portrait becomes four textile works of approximately 460,000 stitches each, in the pixelated style of his 2016 toy brick works."
+  making: "Each embroidery was produced in close collaboration with the artist, translating the pixelated texture and bold presence of the original toy brick works into approximately 460,000 stitches."

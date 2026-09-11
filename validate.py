@@ -78,6 +78,7 @@ def facts(brief):
     blob = yaml.safe_dump(strip(brief), allow_unicode=True)
     nums = {int(x) for x in re.findall(r"\d+", blob)}
     words = set(re.findall(r"[\w'’.-]+", blob))
+    words |= {w.strip("'’.-") for w in words}                        # Citizens' -> Citizens
     return nums, words
 
 
@@ -91,8 +92,8 @@ def sentences(text):
 def dash_and_spelling(text, low, errors):
     if "—" in text:
         errors.append("em dash (—): the house dash is a spaced en dash ( – )")
-    if re.search(r"\w[–—]\w", text):
-        errors.append("unspaced dash: use a spaced en dash ( – )")
+    if any(not (m.group(0)[0].isdigit() and m.group(0)[-1].isdigit()) for m in re.finditer(r"\w[–—]\w", text)):
+        errors.append("unspaced dash: use a spaced en dash ( – )")        # a date range like 1952–2002 is fine
     for us, uk in US_SPELLING.items():
         if re.search(rf"\b{us}\b", low):
             errors.append(f"US spelling “{us}”: use “{uk}”")
@@ -180,7 +181,12 @@ def check_email(text):
 
 def validate(text, brief):
     fact_nums, fact_words = facts(brief)
-    errors, warnings = check_email(text)
+    errors, warnings = [], []
+    for part in text.split("════"):                                 # a set file holds several emails: check each on its own
+        if part.strip():
+            e, w = check_email(part)
+            errors += e
+            warnings += w
     for name, value in bounded_fields(brief):
         if value.strip() not in text:          # only the slots this email actually uses
             continue

@@ -1,0 +1,62 @@
+# Release brief: Joel Mesler, I Love You, time-limited edition (48 hours).
+# Stress test: a debut collaboration, one print in four colourways, a framing offer code, an artist with an
+# Instagram handle and no X handle. Facts lifted from what was sent in April and May 2026.
+
+outputs: [ig-set, twitter-set, email-set]
+
+release:
+  campaign_code: JoelMesler_TL_26
+  link: https://avantarte.co/joel-mesler-x
+  mechanic: timed
+  window: 48 hours
+  coming_soon_at: "2026-04-16 12:00"
+  announce_at: "2026-04-21 13:00"
+  sustain_at: "2026-05-11 12:00"
+  launch_at: "2026-05-20 17:00"
+  halfway_at: "2026-05-21 17:00"
+  closes_at: "2026-05-22 17:00"
+  last_chance_at: "2026-05-22 12:00"
+  framing_code: Joel-0526-10
+  framing_percent: 10
+  fundraiser: ""
+  beneficiary_handle: ""
+  advisor: Sam
+
+artist:
+  name: Joel Mesler
+  collab_with: Joel Mesler
+  handle: joelmesler
+  x_handle: ""
+  hashtag: ""
+  collaboration_ordinal: debut
+  quote: "What I put out is an honest reflection of my thoughts and experiences. At this point in my life, I have nothing to hide – the good, the bad, and everything in between."
+  facts:
+    - Los Angeles-born, New York-based painter
+    - vivid colours and candid text-based works that merge personal memory with pop culture
+    - radical directness, statements and imagery straight from his own memory and emotion
+
+edition:
+  unit: print
+  count: 1
+  phrase: a new limited edition print in four colourways
+  features:
+    - Signed by the artist
+    - Individually numbered
+    - Free worldwide shipping
+    - Available in four colourways
+  facts:
+    - 9-colour split fountain silkscreen with an archival pigment overlay, metallic shimmer and high-gloss varnish
+    - four colourways: Pink, Blue, Purple, Yellow
+
+artworks:
+  - title: I Love You
+    series: ""
+    facts:
+      - a declaration of love, the colour of the text changing across the quartet
+      - draws on personal memory and popular culture in equal measure
+      - disarmingly direct
+
+context:
+  artist_bio: "Joel Mesler is a Los Angeles-born, New York-based painter known for vivid colours and candid text-based works that merge personal memory with pop culture. His practice is built on radical directness, drawing statements and imagery straight from his own memory and emotion."
+  hook: "I Love You is a declaration of love in four colourways, the colour of the text changing across the quartet. Drawing on personal memory and popular culture in equal measure, the work is disarmingly direct, and the title leaves no doubt."
+  making: "Created in close collaboration with the artist by printmakers at Make-Ready, the edition unites a 9-colour split fountain silkscreen with an archival pigment overlay, metallic shimmer and high-gloss varnish."

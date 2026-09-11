@@ -1,0 +1,206 @@
+[EMAIL 1 · Announcement (TL Non-flow) · 160326]
+[SUBJECT] Lucian Freud – A quartet of new limited edition prints
+[PREVIEW] Launching 14 April. Register for updates.
+[KICKER] Launching 14 April
+[HEADLINE] Portraits, 1952–2002 by Lucian Freud
+[BODY]
+We're delighted to announce our latest collaboration with the Lucian Freud Estate – Portraits, 1952–2002, a quartet of new limited edition prints.
+
+Portraits, 1952–2002 brings together four seminal works spanning five decades of Freud's uncompromising portrait practice, from early intimacy to late self-scrutiny. The quartet is Girl in Bed, 1953; Reflection with Two Children (Self-Portrait), 1965; Double Portrait, 1988–90; and Self-Portrait (Reflection), 2002.
+
+Each print was created in close collaboration with the Lucian Freud Estate by our printmakers at Make-Ready, on 310gsm Hahnemühle German Etching paper, to faithfully preserve the texture, tonal depth and psychological intensity of the original paintings.
+
+[FEATURES]
+· Individually numbered
+· Free worldwide shipping
+· Created in collaboration with the Lucian Freud Estate and Bridgeman Images
+· Available individually, as curated pairs or as a complete quartet
+
+The edition will be available to collect for 48 hours only, starting at 14:00 UK time on Tuesday, 14 April.
+
+Click below to learn more and register for updates.
+
+[CTA] Discover the collaboration
+
+[CARD] Portraits, 1952–2002
+A quartet of new limited edition prints by Lucian Freud.
+
+[QUOTE] The difficulties of painting yourself are psychological, you've got to try to paint yourself as another person.
+[QUOTE ATTRIBUTION] Lucian Freud
+
+[FOOTER] Launching 14 April
+
+════════════════════════════════════════════════════════════════
+[EMAIL 2 · Welcome (TL Flow) · 160326]
+[SUBJECT] Welcome to Avant Arte
+[PREVIEW] Where the art world is more accessible.
+[BODY]
+Welcome {{ personalization_token('contact.firstname', 'to Avant Arte') }}!
+
+Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems.
+
+Our upcoming collaboration with the Lucian Freud Estate is the latest in this lineage. If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?
+
+Let us know if you have any questions. We're excited to see what you collect.
+
+[CTA] Complete collector profile
+[FOOTER] Where the art world is more accessible
+
+════════════════════════════════════════════════════════════════
+[EMAIL 3 · Monthly Preview, this release's paragraph · 310326]
+[PARAGRAPH] this release's paragraph, for the advisor's monthly email
+From the Lucian Freud Estate comes Portraits, 1952–2002, a quartet of new limited edition prints.
+
+Portraits, 1952–2002 brings together four seminal works spanning five decades of Freud's uncompromising portrait practice, from early intimacy to late self-scrutiny. The quartet is Girl in Bed, 1953; Reflection with Two Children (Self-Portrait), 1965; Double Portrait, 1988–90; and Self-Portrait (Reflection), 2002.
+
+Each print was created in close collaboration with the Lucian Freud Estate by our printmakers at Make-Ready, on 310gsm Hahnemühle German Etching paper, to faithfully preserve the texture, tonal depth and psychological intensity of the original paintings.
+
+The edition will be available to collect for 48 hours only, from 14:00 UK time on Tuesday, 14 April.
+
+════════════════════════════════════════════════════════════════
+[EMAIL 4 · Early Access (TL Insiders), signed by the advisor · 130426]
+[SUBJECT] Lucian Freud – Early access for Insiders 🔓
+[PREVIEW] Collect 24 hours before everyone else.
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+I'm delighted to share our latest collaboration with the Lucian Freud Estate – Portraits, 1952–2002, a quartet of new limited edition prints.
+
+Portraits, 1952–2002 brings together four seminal works spanning five decades of Freud's uncompromising portrait practice, from early intimacy to late self-scrutiny. The quartet is Girl in Bed, 1953; Reflection with Two Children (Self-Portrait), 1965; Double Portrait, 1988–90; and Self-Portrait (Reflection), 2002.
+
+The edition launches tomorrow at 14:00 UK time and will be available to collect for 48 hours only. For the next 24 hours, I'm excited to offer you early access ahead of the public launch.
+
+Discover the artwork and place your order via the private link below.
+
+If you have any questions, please don't hesitate to get in touch by replying to this email.
+
+Best regards,
+Curtis
+
+Art Advisor at Avant Arte
+
+[CTA] Unlock early access
+
+[CARD] Portraits, 1952–2002
+A quartet of new limited edition prints by Lucian Freud.
+
+[FOOTER] 24 hours ahead of the public launch
+
+════════════════════════════════════════════════════════════════
+[EMAIL 5 · Early Access (TL Flow) · 130426]
+[SUBJECT] Lucian Freud – Early access 🔓
+[PREVIEW] Collect 24 hours before everyone else.
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+Our latest collaboration with the Lucian Freud Estate launches tomorrow at 14:00 UK time and will be available to collect for 48 hours only.
+
+Portraits, 1952–2002 brings together four seminal works spanning five decades of Freud's uncompromising portrait practice, from early intimacy to late self-scrutiny. The quartet is Girl in Bed, 1953; Reflection with Two Children (Self-Portrait), 1965; Double Portrait, 1988–90; and Self-Portrait (Reflection), 2002.
+
+[FEATURES]
+· Individually numbered
+· Free worldwide shipping
+· Created in collaboration with the Lucian Freud Estate and Bridgeman Images
+· Available individually, as curated pairs or as a complete quartet
+
+As a thank you for registering for updates, we're offering you the chance to collect the release 24 hours before everyone else.
+
+As a welcome gesture, enjoy 10% off our in-house framing on your first purchase using the code Freud-0426-10 at checkout.
+
+Unlock early access using the link below.
+
+[CTA] Unlock early access
+[FOOTER] 24 hours ahead of the public launch
+
+════════════════════════════════════════════════════════════════
+[EMAIL 6 · Early access (TL Artist PP Non Flow) · 130426]
+[SUBJECT] Lucian Freud – Early access for past collectors
+[PREVIEW] Order before everyone else.
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+Our latest collaboration with the Lucian Freud Estate launches tomorrow at 14:00 UK time and will be available to collect for 48 hours only.
+
+Portraits, 1952–2002 brings together four seminal works spanning five decades of Freud's uncompromising portrait practice, from early intimacy to late self-scrutiny. The quartet is Girl in Bed, 1953; Reflection with Two Children (Self-Portrait), 1965; Double Portrait, 1988–90; and Self-Portrait (Reflection), 2002.
+
+[FEATURES]
+· Individually numbered
+· Free worldwide shipping
+· Created in collaboration with the Lucian Freud Estate and Bridgeman Images
+· Available individually, as curated pairs or as a complete quartet
+
+As a previous collector of the artist, we're offering you the chance to order the collaboration 24 hours before everyone else.
+
+Unlock early access using the link below.
+
+Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here.
+
+If you have any questions, please don't hesitate to get in touch by replying to this email.
+
+[CTA] Unlock early access
+
+[CARD] Portraits, 1952–2002
+A quartet of new limited edition prints by Lucian Freud.
+
+[FOOTER] 24 hours ahead of the public launch
+
+════════════════════════════════════════════════════════════════
+[EMAIL 7 · Now Live (TL Flow and Non-flow) · 140426]
+[SUBJECT] Lucian Freud – Available now, for 48 hours only
+[PREVIEW] 48 hours, starting now.
+[KICKER] Collect a print by Lucian Freud
+[HEADLINE] 48 hours, starting now
+[BODY]
+Our latest collaboration with the Lucian Freud Estate is now available to collect for 48 hours only – Portraits, 1952–2002, a quartet of new limited edition prints.
+
+Portraits, 1952–2002 brings together four seminal works spanning five decades of Freud's uncompromising portrait practice, from early intimacy to late self-scrutiny. The quartet is Girl in Bed, 1953; Reflection with Two Children (Self-Portrait), 1965; Double Portrait, 1988–90; and Self-Portrait (Reflection), 2002.
+
+Each print was created in close collaboration with the Lucian Freud Estate by our printmakers at Make-Ready, on 310gsm Hahnemühle German Etching paper, to faithfully preserve the texture, tonal depth and psychological intensity of the original paintings.
+
+[FEATURES]
+· Individually numbered
+· Free worldwide shipping
+· Created in collaboration with the Lucian Freud Estate and Bridgeman Images
+· Available individually, as curated pairs or as a complete quartet
+
+The opportunity to collect an edition ends at 14:00 UK time on Thursday, 16 April. Click the link below to add a print to your collection.
+
+As a welcome gesture, enjoy 10% off our in-house framing on your first purchase using the code Freud-0426-10 at checkout.
+
+[CTA] Buy now
+
+[CARD] Portraits, 1952–2002
+A quartet of new limited edition prints by Lucian Freud.
+
+[QUOTE] The difficulties of painting yourself are psychological, you've got to try to paint yourself as another person.
+[QUOTE ATTRIBUTION] Lucian Freud
+
+[FOOTER] Collect a quartet of limited edition prints
+
+════════════════════════════════════════════════════════════════
+[EMAIL 8 · Halfway (TL Flow) · 150426]
+[SUBJECT] Lucian Freud – 24 hours to go
+[KICKER] Collect a print by Lucian Freud
+[HEADLINE] 24 hours down, 24 to go
+[CTA] Buy now
+[FOOTER] There's still time to add a print to your collection.
+
+════════════════════════════════════════════════════════════════
+[EMAIL 9 · Last chance (TL Flow) · 160426]
+[SUBJECT] Lucian Freud – Last chance to collect
+[PREVIEW] Time is almost up.
+[KICKER] Lucian Freud
+[HEADLINE] Last chance to collect
+[BODY]
+It's now or never for our latest collaboration with the Lucian Freud Estate – a quartet of limited edition prints will be available to order until 14:00 UK time on Thursday, 16 April.
+
+After this time, the edition size for each artwork will be confirmed, and the works will no longer be available to purchase.
+
+As a reminder, you can enjoy 10% off our in-house framing on your first purchase using the code Freud-0426-10 at checkout.
+
+[CTA] Buy now
+
+[CARD] Portraits, 1952–2002
+A quartet of new limited edition prints by Lucian Freud.
+
+[FOOTER] Time is almost up

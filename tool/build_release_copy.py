@@ -1,7 +1,50 @@
-"""Build tool/release-copy.xlsx: one release's inputs -> fixed lines -> every post and email, all by formula."""
+"""Build the release workbook: one release's inputs -> fixed lines -> every post, tweet and email, all by formula.
+
+Usage:
+  python3 tool/build_release_copy.py                                   # briefs/grayson-perry-tl-26.yaml -> tool/release-copy.xlsx
+  python3 tool/build_release_copy.py briefs/joel-mesler-tl-26.yaml     # -> tool/release-copy-joel-mesler-tl-26.xlsx
+  python3 tool/build_release_copy.py briefs/x.yaml path/to/out.xlsx
+
+The Inputs sheet is filled from the brief; everything else in the workbook is a formula, so the
+workbook and templates/*.txt are the same system with the same lines.
+"""
+import datetime, math, pathlib, sys
+
+import yaml
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-import datetime, math
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from render import dt, edition_phrase as phrase_of                      # noqa: E402
+
+brief_path = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "briefs" / "grayson-perry-tl-26.yaml"
+default_out = ROOT / "tool" / ("release-copy.xlsx" if brief_path.stem == "grayson-perry-tl-26" else f"release-copy-{brief_path.stem}.xlsx")
+out_path = pathlib.Path(sys.argv[2]) if len(sys.argv) > 2 else default_out
+
+
+def from_brief(path):
+    """The workbook's inputs, from a brief."""
+    b = yaml.safe_load(open(path, encoding="utf-8"))
+    rel, art, ed, aw, ctx = b["release"], b["artist"], b["edition"], b["artworks"], b["context"]
+    g = lambda d, k, default="": (d.get(k) if d.get(k) is not None else default)
+    series = g(aw[0], "series")
+    untitled = aw[0]["title"] == "Untitled" and bool(series)
+    feats = list(ed.get("features") or ["Signed by the artist", "Individually numbered", "Free worldwide shipping"]) + [""] * 5
+    return dict(
+        artist=art["name"], collab_with=g(art, "collab_with", art["name"]), handle=g(art, "handle"), x_handle=g(art, "x_handle"),
+        link=g(rel, "link"), hashtag=g(art, "hashtag"), ordinal=g(art, "collaboration_ordinal", "latest"),
+        title=series if untitled else aw[0]["title"], is_series="yes" if untitled else "no",
+        edition_phrase=phrase_of(ed), works=int(g(ed, "count", 1)), unit=g(ed, "unit", "print"),
+        mechanic=g(rel, "mechanic", "timed"), window=g(rel, "window", "48 hours"), launch_at=dt(rel["launch_at"]), closes_at=dt(rel["closes_at"]),
+        beneficiary=g(rel, "fundraiser"), beneficiary_handle=g(rel, "beneficiary_handle"), advisor=g(rel, "advisor", "Sam"),
+        early_access_code=g(rel, "early_access_code", "000-000"), framing_code=g(rel, "framing_code"), framing_percent=int(g(rel, "framing_percent", 10)),
+        feature_1=feats[0], feature_2=feats[1], feature_3=feats[2], feature_4=feats[3], feature_5=feats[4],
+        bio=g(ctx, "artist_bio"), hook=ctx["hook"], making=ctx["making"], quote=g(art, "quote"),
+    )
+
+
+V = from_brief(brief_path)
 
 wb = Workbook()
 ARIAL = Font(name="Arial", size=10); BOLD = Font(name="Arial", size=10, bold=True); TITLE = Font(name="Arial", size=13, bold=True)
@@ -17,29 +60,33 @@ ws["A1"] = "One release · inputs"; ws["A1"].font = TITLE
 ws["A2"] = "Blue cells on yellow are yours to fill. Everything else in this workbook is a formula. Set mechanic to draw to see the LE versions, and window to 48 hours or one week for the TL flow."; ws["A2"].font = NOTE
 for c, h in zip("ABC", ["Field", "Value", "What it is"]): ws[f"{c}3"] = h; ws[f"{c}3"].font = BOLD; ws[f"{c}3"].fill = GREY
 facts = [
-    ("artist", "Grayson Perry", "full name"),
-    ("handle", "alanmeasles", "Instagram handle, blank if none"),
-    ("x_handle", "", "X (Twitter) handle, blank if none"),
-    ("link", "https://avantarte.co/grayson-perry", "the release's short link, for tweets"),
-    ("hashtag", "GraysonPerry", "announcement post only; blank for none"),
-    ("ordinal", "latest", "debut, latest or second"),
-    ("title", "The Changeling", "exactly as it appears; for a series with one shared title, give the series name"),
-    ("is_series", "no", "yes when the works share one title"),
-    ("edition_phrase", "a new limited edition print", "e.g. a trio of limited edition prints; six new limited edition prints"),
-    ("works", 1, "number of works"),
-    ("mechanic", "timed", "timed (TL) or draw (LE)"),
-    ("window", "one week", "48 hours or one week; timed only"),
-    ("launch_at", datetime.datetime(2026, 4, 30, 14, 0), "date and time the window opens, or the draw opens (UK)"),
-    ("closes_at", datetime.datetime(2026, 5, 7, 14, 0), "date and time the window or draw closes (UK)"),
-    ("beneficiary", "the Foundling Museum", "as it reads mid-sentence; blank if none"),
-    ("beneficiary_handle", "foundlingmuseum", "blank if none"),
-    ("advisor", "Sam", "signs the Insiders email and the first-time collector survey: Sofiya, Curtis or Sam"),
-    ("early_access_code", "000-000", "draw releases"),
-    ("feature_1", "Signed by the artist", "the standard three; clear a cell to drop it"),
-    ("feature_2", "Individually numbered", ""),
-    ("feature_3", "Free worldwide shipping", ""),
-    ("feature_4", "", "bespoke, e.g. Hand-finished by the artist. Never 'our'."),
-    ("feature_5", "", "bespoke, e.g. Available individually or as a set"),
+    ("artist", V["artist"], "full name: the works are 'by' this name"),
+    ("collab_with", V["collab_with"], "the words after 'collaboration with': usually the name, or the estate"),
+    ("handle", V["handle"], "Instagram handle, blank if none"),
+    ("x_handle", V["x_handle"], "X (Twitter) handle, blank if none"),
+    ("link", V["link"], "the release's short link, for tweets"),
+    ("hashtag", V["hashtag"], "announcement post only; blank for none"),
+    ("ordinal", V["ordinal"], "debut, latest or second"),
+    ("title", V["title"], "exactly as it appears, shared by the set if there is one; for untitled works from a named series, the series name"),
+    ("is_series", V["is_series"], "yes only for untitled works from a named series"),
+    ("edition_phrase", V["edition_phrase"], "e.g. a new limited edition print; a quartet of new limited edition embroideries; a new limited edition print in four colourways"),
+    ("works", V["works"], "number of artworks: sets the plural wording"),
+    ("unit", V["unit"], "what one is called: print, embroidery, sculpture, edition"),
+    ("mechanic", V["mechanic"], "timed (TL) or draw (LE)"),
+    ("window", V["window"], "48 hours or one week; timed only"),
+    ("launch_at", V["launch_at"], "date and time the window opens, or the draw opens (UK)"),
+    ("closes_at", V["closes_at"], "date and time the window or draw closes (UK)"),
+    ("beneficiary", V["beneficiary"], "as it reads mid-sentence; blank if none"),
+    ("beneficiary_handle", V["beneficiary_handle"], "blank if none"),
+    ("advisor", V["advisor"], "signs the Insiders email and the first-time collector survey: Sofiya, Curtis or Sam"),
+    ("early_access_code", V["early_access_code"], "draw releases"),
+    ("framing_code", V["framing_code"], "first-purchase framing offer code, e.g. Freud-0426-10; blank for no offer"),
+    ("framing_percent", V["framing_percent"], "10 or 20"),
+    ("feature_1", V["feature_1"], "the standard three; clear a cell to drop it"),
+    ("feature_2", V["feature_2"], ""),
+    ("feature_3", V["feature_3"], ""),
+    ("feature_4", V["feature_4"], "bespoke, e.g. Hand-finished by the artist. Never 'our'."),
+    ("feature_5", V["feature_5"], "bespoke, e.g. Available individually or as a set"),
 ]
 R = {}; row = 4
 for k, v, note in facts:
@@ -49,10 +96,10 @@ for k, v, note in facts:
     R[k] = row; row += 1
 row += 1; ws[f"A{row}"] = "Fragments, written once per release. Voice-neutral: no we or our, no artist name in the hook or making line."; ws[f"A{row}"].font = BOLD; row += 1
 frags = [
-    ("bio", "Grayson Perry has long been one of the most distinctive voices in contemporary British art.\n\nWorking across ceramics, tapestry, print and sculpture, his practice examines identity, class, and gender in modern society. Drawing on autobiography as well as social observation, Grayson often pairs the decorative language of traditional craft with direct commentary on the structures and contradictions that shape everyday life.", "2 to 3 sentences on the artist, third person, no handle. Coming Soon post only."),
-    ("hook", "The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. It reimagines changeling folklore for the digital age, and is intended to be 'quite disturbing'.", "1 to 2 sentences about the work only. Reused in every post and email."),
-    ("making", "To create the edition, printmakers at Make-Ready translated a new design into a 9-colour silkscreen, capturing the vivid detail of the original drawing.", "one sentence, written as 'printmakers at Make-Ready'; the sheet adds 'our'."),
-    ("quote", "Beauty and seriousness are perhaps the most shocking tactics left to artists these days.", "verbatim, a complete sentence, or blank"),
+    ("bio", V["bio"], "2 to 3 sentences on the artist, third person, no handle. Coming Soon post only."),
+    ("hook", V["hook"], "1 to 2 sentences about the work only. Reused in every post and email."),
+    ("making", V["making"], "one sentence on how the edition was made; write 'printmakers at Make-Ready' and the sheet adds 'our'."),
+    ("quote", V["quote"], "verbatim, a complete sentence, or blank"),
 ]
 for k, v, note in frags:
     ws[f"A{row}"] = k; ws[f"B{row}"] = v; ws[f"C{row}"] = note
@@ -60,7 +107,7 @@ for k, v, note in frags:
     ws.row_dimensions[row].height = 16 * max(2, math.ceil(len(v) / 80) + v.count("\n")); R[k] = row; row += 1
 row += 1; ws[f"A{row}"] = "Derived (formulas, do not edit)"; ws[f"A{row}"].font = BOLD; row += 1
 B = lambda k: f"$B${R[k]}"
-derived = ["named", "named_x", "work", "Work", "work_email", "Work_email", "work_intro", "support", "beneficiary_tagged", "bio_tagged", "hook_names_beneficiary",
+derived = ["named", "named_x", "collab_x", "a_unit", "work", "Work", "work_email", "Work_email", "work_intro", "support", "beneficiary_tagged", "bio_tagged", "hook_names_beneficiary",
            "features", "features_list", "features_list_support", "making_ours", "making_ours_tagged",
            "launch_date", "launch_time", "launch_weekday", "launch_date_dd", "close_date", "close_time", "close_weekday", "close_date_dd",
            "collect_phrase", "edition_phrase_cap", "window_cap", "card_line", "card", "quote_line", "each_artwork", "work_word", "add_what"]
@@ -69,17 +116,16 @@ for k in derived:
 F = {
  "named": f'={B("artist")}&IF({B("handle")}="",""," (@"&{B("handle")}&")")',
  "named_x": f'={B("artist")}&IF({B("x_handle")}="",""," (@"&{B("x_handle")}&")")',
+ "collab_x": f'=IF({B("collab_with")}={B("artist")},{B("named_x")},{B("collab_with")})',
+ "a_unit": f'=IF(OR(LEFT({B("unit")},1)="a",LEFT({B("unit")},1)="e",LEFT({B("unit")},1)="i",LEFT({B("unit")},1)="o",LEFT({B("unit")},1)="u"),"an ","a ")&{B("unit")}',
  "work": f'=IF({B("is_series")}="yes","the "&{B("title")}&" series","‘"&{B("title")}&"’")',
  "Work": f'=UPPER(LEFT({B("work")},1))&MID({B("work")},2,999)',
  "work_email": f'=IF({B("is_series")}="yes","the "&{B("title")}&" series",{B("title")})',
  "Work_email": f'=UPPER(LEFT({B("work_email")},1))&MID({B("work_email")},2,999)',
- "work_intro": f'=IF({B("is_series")}="yes",{B("edition_phrase")}&" from the "&{B("title")}&" series",IF({B("works")}=1,{B("title")}&", "&{B("edition_phrase")},{B("edition_phrase")}))',
+ "work_intro": f'=IF({B("is_series")}="yes",{B("edition_phrase")}&" from the "&{B("title")}&" series",{B("title")}&", "&{B("edition_phrase")})',
  "support": f'=IF(OR({B("beneficiary")}="",{B("hook_names_beneficiary")}),"",", released in support of "&{B("beneficiary")})',
  "beneficiary_tagged": f'=IF({B("beneficiary")}="","",{B("beneficiary")}&IF({B("beneficiary_handle")}="",""," (@"&{B("beneficiary_handle")}&")"))',
  "bio_tagged": f'=IF({B("handle")}="",{B("bio")},SUBSTITUTE({B("bio")},{B("artist")},{B("named")},1))',
- "each_artwork": f'=IF({B("works")}>1," for each artwork","")',
- "work_word": f'=IF({B("works")}>1,"works","work")',
- "add_what": f'=IF({B("works")}>1,"a print",{B("work_email")})',
  "hook_names_beneficiary": f'=IF({B("beneficiary")}="",FALSE,ISNUMBER(SEARCH({B("beneficiary")},{B("hook")})))',
  "features": f'={B("feature_1")}&IF({B("feature_2")}="","",". "&{B("feature_2")})&IF({B("feature_3")}="","",". "&{B("feature_3")})&IF({B("feature_4")}="","",". "&{B("feature_4")})&IF({B("feature_5")}="","",". "&{B("feature_5")})&"."',
  "features_list": f'="· "&{B("feature_1")}&IF({B("feature_2")}="","",{NL}&"· "&{B("feature_2")})&IF({B("feature_3")}="","",{NL}&"· "&{B("feature_3")})&IF({B("feature_4")}="","",{NL}&"· "&{B("feature_4")})&IF({B("feature_5")}="","",{NL}&"· "&{B("feature_5")})',
@@ -88,12 +134,15 @@ F = {
  "making_ours_tagged": f'=SUBSTITUTE({B("making")},"printmakers at Make-Ready","our printmakers at Make-Ready (@make__ready)")',
  "launch_date": f'=TEXT({B("launch_at")},"d mmmm")', "launch_time": f'=TEXT({B("launch_at")},"hh:mm")&" UK time"', "launch_weekday": f'=TEXT({B("launch_at")},"dddd")', "launch_date_dd": f'=TEXT({B("launch_at")},"dd mmmm")',
  "close_date": f'=TEXT({B("closes_at")},"d mmmm")', "close_time": f'=TEXT({B("closes_at")},"hh:mm")&" UK time"', "close_weekday": f'=TEXT({B("closes_at")},"dddd")', "close_date_dd": f'=TEXT({B("closes_at")},"dd mmmm")',
- "collect_phrase": f'=SUBSTITUTE({B("edition_phrase")}," new "," ")',
+ "collect_phrase": f'=SUBSTITUTE({B("edition_phrase")}," new "," ",1)',
  "edition_phrase_cap": f'=UPPER(LEFT({B("edition_phrase")},1))&MID({B("edition_phrase")},2,999)',
  "window_cap": f'=UPPER(LEFT({B("window")},1))&MID({B("window")},2,999)',
  "card_line": f'={B("edition_phrase_cap")}&" by "&{B("artist")}&"."',
- "card": f'={B("title")}&{NL}&{B("card_line")}',
+ "card": f'=IF({B("is_series")}="yes","Untitled",{B("title")})&{NL}&{B("card_line")}',
  "quote_line": f'=IF({B("quote")}="","","“"&{B("quote")}&"” – "&{B("artist")})',
+ "each_artwork": f'=IF({B("works")}>1," for each artwork","")',
+ "work_word": f'=IF({B("works")}>1,"works","work")',
+ "add_what": f'=IF({B("works")}>1,{B("a_unit")},{B("work_email")})',
 }
 for k, f in F.items(): ws[f"B{R[k]}"] = f
 ws.row_dimensions[R["bio_tagged"]].height = 80; ws.row_dimensions[R["features_list"]].height = 60; ws.row_dimensions[R["features_list_support"]].height = 70
@@ -102,7 +151,7 @@ ws.column_dimensions["A"].width = 26; ws.column_dimensions["B"].width = 78; ws.c
 # ================================================================= Lines
 ls = wb.create_sheet("Lines")
 ls["A1"] = "The fixed sentences, with the placeholders they take"; ls["A1"].font = TITLE
-ls["A2"] = "This is the whole system's copy, for the posts and the emails. Edit a blue cell to change every future release. Column C fills the placeholders from Inputs."; ls["A2"].font = NOTE
+ls["A2"] = "This is the whole system's copy, for the posts, the tweets and the emails. Edit a blue cell to change every future release. Column C fills the placeholders from Inputs."; ls["A2"].font = NOTE
 for c, h in zip("ABC", ["Key", "Line, with placeholders", "Filled from Inputs"]): ls[f"{c}3"] = h; ls[f"{c}3"].font = BOLD; ls[f"{c}3"].fill = GREY
 TOKEN = "{{ personalization_token('contact.firstname', 'there') }}"
 lines = [
@@ -121,82 +170,84 @@ lines = [
  ("post · beneficiary line", "Released in support of {beneficiary_tagged}."),
  ("post · action before launch, timed", "Available for {window} from {launch_time} on {launch_date}. Link in bio to get updates."),
  ("post · action before launch, draw", "Enter the draw via our link in bio. Closes {close_date} at {close_time}."),
- ("post · action while open, timed", "Link in bio to buy a print. Closes {close_date} at {close_time}."),
+ ("post · action while open, timed", "Link in bio to buy {a_unit}. Closes {close_date} at {close_time}."),
  ("post · action while open, draw", "Enter the draw via our link in bio. Closes {close_date} at {close_time}."),
  ("post · coming soon · action", "Link in bio to get updates."),
  ("post · hashtag", "#{hashtag}"),
  ("TWEETS", None),
- ("tweet · coming soon · status", "Our {ordinal} collaboration with {named_x} is on the horizon."),
+ ("tweet · coming soon · status", "Our {ordinal} collaboration with {collab_x} is on the horizon."),
  ("tweet · coming soon · action", "Sign up for updates: {link}"),
  ("tweet · beneficiary line", "Released in support of {beneficiary}."),
  ("tweet · action before launch, timed", "Available for {window} from {launch_time} on {launch_date}. Sign up for updates: {link}"),
  ("tweet · action, draw", "Closes {close_date} at {close_time}. Enter the draw: {link}"),
- ("tweet · action while open, timed", "Closes {close_date} at {close_time}. Buy a print: {link}"),
+ ("tweet · action while open, timed", "Closes {close_date} at {close_time}. Buy {a_unit}: {link}"),
  ("EMAILS · shared", None),
  ("email · greeting", "Hi " + TOKEN + ","),
  ("email · questions line", "If you have any questions, please don't hesitate to get in touch by replying to this email."),
  ("email · draw line", "Enter the draw for a chance to collect. Closes at {close_time} on {close_date}."),
  ("email · edition numbers line", "Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here."),
+ ("email · kicker · collect", "Collect {a_unit} by {artist}"),
+ ("email · framing offer · welcome", "As a welcome gesture, enjoy {framing_percent}% off our in-house framing on your first purchase using the code {framing_code} at checkout."),
+ ("email · framing offer · reminder", "As a reminder, you can enjoy {framing_percent}% off our in-house framing on your first purchase using the code {framing_code} at checkout."),
  ("EMAILS · announcement", None),
  ("email · announce · subject", "{artist} – {edition_phrase_cap}"),
- ("email · announce · opener", "We're delighted to announce our {ordinal} collaboration with {artist} – {work_intro}{support}."),
+ ("email · announce · opener", "We're delighted to announce our {ordinal} collaboration with {collab_with} – {work_intro}{support}."),
  ("email · announce · launch line, timed", "The edition will be available to collect for {window} only, starting at {launch_time} on {launch_weekday}, {launch_date_dd}."),
  ("email · announce · register line", "Click below to learn more and register for updates."),
  ("EMAILS · welcome (TL flow)", None),
  ("email · welcome · 1", "Welcome {{ personalization_token('contact.firstname', 'to Avant Arte') }}!"),
  ("email · welcome · 2", "Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems."),
- ("email · welcome · 3", "Our upcoming collaboration with {artist} is the latest in this lineage. If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?"),
+ ("email · welcome · 3", "Our upcoming collaboration with {collab_with} is the latest in this lineage. If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?"),
  ("email · welcome · 4", "Let us know if you have any questions. We're excited to see what you collect."),
  ("EMAILS · early access", None),
- ("email · early access, timed · opener", "Our {ordinal} collaboration with {artist} launches tomorrow at {launch_time} and will be available to collect for {window} only."),
+ ("email · early access, timed · opener", "Our {ordinal} collaboration with {collab_with} launches tomorrow at {launch_time} and will be available to collect for {window} only."),
  ("email · early access, timed · registered line", "As a thank you for registering for updates, we're offering you the chance to collect the release 24 hours before everyone else."),
  ("email · early access, timed · past collectors line", "As a previous collector of the artist, we're offering you the chance to order the collaboration 24 hours before everyone else."),
  ("email · early access, timed · unlock line", "Unlock early access using the link below."),
- ("email · early access, draw · 1", "We're currently preparing the launch of our {ordinal} collaboration with {artist} – {work_intro}{support}."),
+ ("email · early access, draw · 1", "We're currently preparing the launch of our {ordinal} collaboration with {collab_with} – {work_intro}{support}."),
  ("email · early access, draw · 2", "The edition will launch publicly on {launch_date} and will be allocated by a randomised draw; however, for the next 48 hours we're offering a small group of collectors a first look, plus access to a limited number of pre-orders. Based on your order history and the artists you've expressed an interest in, I thought the edition would be a good fit for your collection."),
  ("email · early access, draw · 3", "Explore the artwork and place your order via the private link below. Use code {early_access_code} to unlock early access."),
- ("email · insiders · opener", "I'm delighted to share our {ordinal} collaboration with {artist} – {work_intro}{support}."),
+ ("email · insiders · opener", "I'm delighted to share our {ordinal} collaboration with {collab_with} – {work_intro}{support}."),
  ("email · insiders · mechanics, draw", "The edition will launch publicly on {launch_date} and will be allocated by a randomised draw. However, for the next 48 hours, I'm excited to offer you a first look, plus early access to a limited number of pre-orders."),
  ("email · insiders · mechanics, timed", "The edition launches tomorrow at {launch_time} and will be available to collect for {window} only. For the next 24 hours, I'm excited to offer you early access ahead of the public launch."),
  ("email · insiders · code line, draw", "Discover the artwork and place your order via the private link below. Use code {early_access_code} to unlock early access."),
  ("email · insiders · link line, timed", "Discover the artwork and place your order via the private link below."),
  ("email · insiders · sign-off", "Best regards,\n{advisor}\n\nArt Advisor at Avant Arte"),
  ("EMAILS · the window (TL)", None),
- ("email · live · opener", "Our {ordinal} collaboration with {artist} is now available to collect for {window} only – {work_intro}{support}."),
+ ("email · live · opener", "Our {ordinal} collaboration with {collab_with} is now available to collect for {window} only – {work_intro}{support}."),
  ("email · live · closing line", "The opportunity to collect an edition ends at {close_time} on {close_weekday}, {close_date_dd}. Click the link below to add {add_what} to your collection."),
- ("email · halfway · kicker", "Collect a print by {artist}"),
  ("email · halfway · headline", "24 hours down, 24 to go"),
- ("email · halfway · footer", "There's still time to add a print to your collection."),
+ ("email · halfway · footer", "There's still time to add {a_unit} to your collection."),
  ("email · 5 days · headline", "2 days down, 5 days to go"),
- ("email · 5 days · footer", "Add a signed print to your collection"),
  ("email · 3 days · headline", "Three days left to collect"),
  ("email · 3 days · 1", "There are just three days left to collect {collect_phrase} by {artist}."),
  ("email · 3 days · 2", "Click the link to collect before {close_time} on {close_weekday}, {close_date_dd}."),
- ("email · 3 days · footer", "Add a print to your collection"),
+ ("email · days to go · footer", "Add {a_unit} to your collection"),
  ("EMAILS · last chance", None),
- ("email · last chance, timed · 1", "It's now or never for our {ordinal} collaboration with {artist} – {collect_phrase} will be available to order until {close_time} on {close_weekday}, {close_date_dd}."),
+ ("email · last chance, timed · 1", "It's now or never for our {ordinal} collaboration with {collab_with} – {collect_phrase} will be available to order until {close_time} on {close_weekday}, {close_date_dd}."),
  ("email · last chance, timed · 2", "After this time, the edition size{each_artwork} will be confirmed, and the {work_word} will no longer be available to purchase."),
  ("email · last chance, draw · 1", "This is your final opportunity to enter the draw for {work_email}, {collect_phrase} by {artist}."),
  ("email · last chance, draw · 2", "For a chance to collect, click the link below to enter the draw. The draw closes at {close_time} on {close_weekday}, {close_date_dd}."),
  ("EMAILS · surveys (LE)", None),
  ("email · first-time survey · subject", "Congratulations on your first Avant Arte edition"),
- ("email · first-time survey · 1", "Thank you for adding our collaboration with {artist} to your collection. Great choice!"),
+ ("email · first-time survey · 1", "Thank you for adding our collaboration with {collab_with} to your collection. Great choice!"),
  ("email · first-time survey · 2", "I'm {advisor}, an art advisor at Avant Arte. I'm here to connect collectors with artists by making suggestions, answering questions and offering early access to our collaborations."),
  ("email · first-time survey · 3", "If you have two minutes to complete a short survey about your collecting journey to date, your responses will help guide my recommendations."),
  ("email · first-time survey · 4", "Any questions? Reply to this email."),
- ("email · non-purchaser survey · 1", "As someone who registered for updates but ultimately decided not to enter the draw for our collaboration with {artist}, we'd love your feedback."),
+ ("email · non-purchaser survey · 1", "As someone who registered for updates but ultimately decided not to enter the draw for our collaboration with {collab_with}, we'd love your feedback."),
  ("email · non-purchaser survey · 2", "This two-minute survey will guide our future collaborations and help us recommend the right artists and editions for your collection."),
  ("email · non-purchaser survey · 3", "As a thank you for taking part in the survey and helping us improve the collector experience, you'll be entered into a draw to win a €500 Avant Arte gift card."),
  ("email · non-purchaser survey · terms", "You can read the terms here."),
  ("email · non-purchaser survey · footer", "What can we do better?"),
  ("EMAILS · monthly preview", None),
- ("email · monthly preview · opener", "From {artist} comes {work_intro}{support}."),
+ ("email · monthly preview · opener", "From {collab_with} comes {work_intro}{support}."),
  ("email · monthly preview · when, draw", "The edition will be allocated by a randomised draw, which closes at {close_time} on {close_date}."),
  ("email · monthly preview · when, timed", "The edition will be available to collect for {window} only, from {launch_time} on {launch_weekday}, {launch_date_dd}."),
 ]
-ph = {f"{{{k}}}": k for k in ["artist", "named", "named_x", "link", "beneficiary", "work", "Work", "work_email", "Work_email", "work_intro", "support", "edition_phrase", "edition_phrase_cap", "collect_phrase", "ordinal", "window",
+ph = {f"{{{k}}}": k for k in ["artist", "collab_with", "collab_x", "named", "named_x", "link", "beneficiary", "a_unit", "work", "Work", "work_email", "Work_email", "work_intro", "support",
+                             "edition_phrase", "edition_phrase_cap", "collect_phrase", "ordinal", "window",
                              "launch_date", "launch_time", "launch_weekday", "launch_date_dd", "close_date", "close_time", "close_weekday", "close_date_dd",
-                             "beneficiary_tagged", "quote", "hashtag", "features", "advisor", "early_access_code", "each_artwork", "work_word", "add_what"]}
+                             "beneficiary_tagged", "quote", "hashtag", "features", "advisor", "early_access_code", "framing_code", "framing_percent", "each_artwork", "work_word", "add_what"]}
 L = {}; r = 4
 for k, text in lines:
     if text is None:
@@ -285,9 +336,13 @@ heads = ["#", "Email (comms plan name)", "For", "Used?", "Subject", "Preview", "
 for i, h in enumerate(heads, 1):
     c = es.cell(row=3, column=i, value=h); c.font = BOLD; c.fill = GREY
 A = IB("artist"); T = lambda s: f'"{s}"'
-def P(*parts): return f'({parts[0]}' + "".join(f'&{PP}&{p}' for p in parts[1:]) + ")"
+def P(*parts):
+    """Paragraphs joined with a blank line; an empty part (an optional line) leaves no gap."""
+    return f'({parts[0]}' + "".join(f'&IF({p}="","",{PP}&{p})' for p in parts[1:]) + ")"
 sel = lambda d_expr, t_expr: f'IF({draw},{d_expr},{t_expr})'
 win48 = f'{IB("window")}="48 hours"'
+framing_welcome = f'IF({IB("framing_code")}="","",{LC("email · framing offer · welcome")})'
+framing_reminder = f'IF({IB("framing_code")}="","",{LC("email · framing offer · reminder")})'
 USED = {
  "both": '"yes"',
  "timed": f'IF({draw},"(not used for a draw)","yes")',
@@ -296,7 +351,7 @@ USED = {
  "draw": f'IF({draw},"yes","(not used for a timed edition)")',
 }
 E = ""  # empty cell
-card = IB("card"); qline = IB("quote_line"); hook = IB("hook")
+card = IB("card"); qline = IB("quote_line"); hook = IB("hook"); kicker = LC("email · kicker · collect"); buy_one = T("Buy ") + "&" + IB("a_unit")
 emails = [
  # name, for, used, subject, preview, kicker, headline, body, cta, card, quote, footer
  ("Announcement (TL Non-flow) · Announcement (LE)", "both", "both",
@@ -311,7 +366,7 @@ emails = [
   P(LC("email · welcome · 1"), LC("email · welcome · 2"), LC("email · welcome · 3"), LC("email · welcome · 4")),
   T("Complete collector profile"), E, E, T("Where the art world is more accessible")),
  ("Early Access (TL Flow)", "timed", "timed", A+'&" – Early access 🔓"', T("Collect 24 hours before everyone else."), E, E,
-  P(LC("email · greeting"), LC("email · early access, timed · opener"), hook, IB("features_list_support"), LC("email · early access, timed · registered line"), LC("email · early access, timed · unlock line")),
+  P(LC("email · greeting"), LC("email · early access, timed · opener"), hook, IB("features_list_support"), LC("email · early access, timed · registered line"), framing_welcome, LC("email · early access, timed · unlock line")),
   T("Unlock early access"), E, E, T("24 hours ahead of the public launch")),
  ("Early access (TL Artist PP Non Flow)", "timed", "timed", A+'&" – Early access for past collectors"', T("Order before everyone else."), E, E,
   P(LC("email · greeting"), LC("email · early access, timed · opener"), hook, IB("features_list_support"), LC("email · early access, timed · past collectors line"), LC("email · early access, timed · unlock line"), LC("email · edition numbers line"), LC("email · questions line")),
@@ -323,16 +378,16 @@ emails = [
  ("Early/Exclusive access (LE)", "draw", "draw", A+'&" – Early access 🔓"', T("A first look, plus access to a limited number of pre-orders."), E, E,
   P(LC("email · greeting"), LC("email · early access, draw · 1"), hook, LC("email · early access, draw · 2"), LC("email · early access, draw · 3"), LC("email · edition numbers line"), LC("email · questions line")),
   T("Unlock early access"), card, E, T("Especially for you.")),
- ("Now Live (TL Flow) · Now Live (TL Non-flow)", "timed", "timed", A+'&" – Available now, for "&'+IB("window")+'&" only"', IB("window_cap")+'&", starting now."', T("Collect a print by ")+"&"+A, IB("window_cap")+'&", starting now"',
-  P(LC("email · live · opener"), hook, IB("making_ours"), IB("features_list_support"), LC("email · live · closing line")),
+ ("Now Live (TL Flow) · Now Live (TL Non-flow)", "timed", "timed", A+'&" – Available now, for "&'+IB("window")+'&" only"', IB("window_cap")+'&", starting now."', kicker, IB("window_cap")+'&", starting now"',
+  P(LC("email · live · opener"), hook, IB("making_ours"), IB("features_list_support"), LC("email · live · closing line"), framing_welcome),
   T("Buy now"), card, qline, T("Collect ")+"&"+IB("collect_phrase")),
- ("Halfway (TL Flow)", "timed, 48 hours", "timed 48h", A+'&" – 24 hours to go"', E, LC("email · halfway · kicker"), LC("email · halfway · headline"), E, T("Buy now"), E, E, LC("email · halfway · footer")),
- ("5 days to go (TL Flow)", "timed, one week", "timed week", A+'&" – 5 days left"', E, LC("email · halfway · kicker"), LC("email · 5 days · headline"), E, T("Buy a print"), E, E, LC("email · 5 days · footer")),
+ ("Halfway (TL Flow)", "timed, 48 hours", "timed 48h", A+'&" – 24 hours to go"', E, kicker, LC("email · halfway · headline"), E, T("Buy now"), E, E, LC("email · halfway · footer")),
+ ("5 days to go (TL Flow)", "timed, one week", "timed week", A+'&" – 5 days left"', E, kicker, LC("email · 5 days · headline"), E, buy_one, E, E, LC("email · days to go · footer")),
  ("3 days to go (TL Flow)", "timed, one week", "timed week", A+'&" – 3 days to go"', E, IB("Work_email")+'&" by "&'+A, LC("email · 3 days · headline"),
-  P(LC("email · 3 days · 1"), hook, LC("email · 3 days · 2")), T("Buy a print"), card, E, LC("email · 3 days · footer")),
+  P(LC("email · 3 days · 1"), hook, LC("email · 3 days · 2"), framing_reminder), buy_one, card, E, LC("email · days to go · footer")),
  ("Last chance (TL Flow) · Last chance (LE)", "both", "both", A+'&" – Last chance to "&'+sel(T("enter the draw"), T("collect")),
   sel(T("The draw closes at ")+"&"+IB("close_time")+'&" on "&'+IB("close_date")+'&"."', T("Time is almost up.")), A, sel(T("Last chance to enter the draw"), T("Last chance to collect")),
-  sel(P(LC("email · last chance, draw · 1"), hook, LC("email · last chance, draw · 2")), P(LC("email · last chance, timed · 1"), LC("email · last chance, timed · 2"))),
+  sel(P(LC("email · last chance, draw · 1"), hook, LC("email · last chance, draw · 2")), P(LC("email · last chance, timed · 1"), LC("email · last chance, timed · 2"), framing_reminder)),
   sel(T("Enter the draw"), T("Buy now")), card, E, T("Time is almost up")),
  ("First-time collector survey (LE)", "draw, after the draw closes", "draw", LC("email · first-time survey · subject"), E, E, E,
   P(LC("email · greeting"), LC("email · first-time survey · 1"), LC("email · first-time survey · 2"), LC("email · first-time survey · 3"), LC("email · first-time survey · 4")),
@@ -365,19 +420,21 @@ rules = [
  ("Insiders", "The Insiders account posts the same caption as the main feed. The plan says which: Announcement, Now Live and Halfway for a timed edition, Announcement for a draw. The Channels column on Posts carries this. Stories are image-led and stay outside the sheet."),
  ("Twitter", "A tweet is the post's status line with the X handle, the hook on the announcement only, the beneficiary named once, and an action line that ends with the link: sign up for updates, enter the draw, or buy a print. No features line, no hashtag, no bio. Same deadline form. Coming soon names the artist and not the work."),
  ("Skeleton, emails", "Every email is: subject, preview, kicker, headline, body paragraphs, CTA, card, quote, footer. Bodies are fixed sentences from the Lines sheet with the same fragments dropped in. Halfway and 5 days to go have no body: they are image-led."),
- ("Fragments", "Four per release, written once: bio (2 to 3 sentences, Coming Soon only), hook (1 to 2 sentences about the work, in every post and email), making (one sentence naming Make-Ready), quote (verbatim). The hook and bio must not repeat each other."),
- ("Voice", "Fragments are voice-neutral: no we or our, no artist name in the hook or the making line, and 'printmakers at Make-Ready'. The sheet adds 'our'. The Insiders email and the first-time survey are signed by the advisor named on Inputs. Features never say 'our'."),
- ("Features", "The standard three (signed by the artist, individually numbered, free worldwide shipping) plus anything bespoke. One line of short sentences in a post, a list in an email. The beneficiary follows, named once."),
+ ("Fragments", "Four per release, written once: bio (2 to 3 sentences, Coming Soon only), hook (1 to 2 sentences about the work, in every post and email), making (one sentence on how it was made), quote (verbatim). The hook and bio must not repeat each other."),
+ ("Voice", "Fragments are voice-neutral: no we or our, no artist name in the hook or the making line, and 'printmakers at Make-Ready' where it applies. The sheet adds 'our'. The Insiders email and the first-time survey are signed by the advisor named on Inputs. Features never say 'our'."),
+ ("Who and what", "'by {artist}' is always the artist. 'collaboration with {collab_with}' is the artist's name, or the estate. 'unit' is what one is called (print, embroidery, sculpture), and the sheet writes 'a print' or 'an embroidery' wherever a line names one."),
+ ("Features", "The standard three (signed by the artist, individually numbered, free worldwide shipping) plus anything bespoke: framed, a set offer, a partner credit. One line of short sentences in a post, a list in an email. The beneficiary follows, named once."),
  ("Beneficiary", "One phrase everywhere: 'released in support of'. It goes in the opener unless the hook already names the beneficiary."),
- ("Action lines", "Three CTAs: get updates before launch, enter the draw for a draw, buy a print for an open window. One deadline form: Closes {date} at {time} UK time, or 'until {time} on {weekday}, {date}' in an email."),
+ ("Framing offer", "A framing code on Inputs adds the first-purchase framing line to Early Access, Now Live, 3 days to go and Last chance. Blank means no offer."),
+ ("Action lines", "Three CTAs: get updates before launch, enter the draw for a draw, buy one for an open window. One deadline form: Closes {date} at {time} UK time, or 'until {time} on {weekday}, {date}' in an email."),
  ("Mechanic and window", "Set mechanic to timed or draw and the sheet switches every line. For a timed edition, a 48-hour window gets the halfway email; a one-week window gets 5 days to go and 3 days to go."),
  ("Dates", "Enter launch and close once as date and time; the sheet derives '30 April', '14:00 UK time', 'Thursday' and '07 May' where each email needs them."),
- ("What stays written", "A delay reason, a framing paragraph, editorial deep dives, the rest of the Monthly Preview, the artist's own email, and anything for a second release."),
- ("How to use", "Fill the blue cells on Inputs. Read Posts and Emails. To change the house wording, edit the blue cells on Lines once."),
+ ("What stays written", "A delay reason, a framing paragraph, editorial deep dives, the rest of the Monthly Preview, the artist's own email, artist-local times, and anything for a second release."),
+ ("How to use", "Fill the blue cells on Inputs. Read Posts, Tweets and Emails. To change the house wording, edit the blue cells on Lines once."),
 ]
 for i, (k, v) in enumerate(rules):
     rr = 3 + i; rs[f"A{rr}"] = k; rs[f"B{rr}"] = v; rs[f"A{rr}"].font = BOLD; rs[f"B{rr}"].font = ARIAL; rs[f"B{rr}"].alignment = WRAP; rs[f"A{rr}"].alignment = TOP
     rs.row_dimensions[rr].height = 46
 rs.column_dimensions["A"].width = 20; rs.column_dimensions["B"].width = 112
 wb.calculation.fullCalcOnLoad = True
-import pathlib; wb.save(str(pathlib.Path(__file__).resolve().parent / "release-copy.xlsx")); print("saved", len(lines), "lines,", len(posts), "posts,", len(emails), "emails")
+wb.save(str(out_path)); print("saved", out_path.relative_to(ROOT) if out_path.is_relative_to(ROOT) else out_path, "|", len(lines), "lines,", len(posts), "posts,", len(tweets), "tweets,", len(emails), "emails")

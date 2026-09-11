@@ -10,6 +10,12 @@
 #}
 {% set draw = release.mechanic == "draw" %}
 {% set ordinal = artist.collaboration_ordinal %}
+{% set collab = artist.collab_with if (artist.collab_with is defined and artist.collab_with) else artist.name %}
+{% set a_unit = edition|a_unit %}
+{% set fc = release.framing_code if (release.framing_code is defined and release.framing_code) else "" %}
+{% set fp = release.framing_percent if (release.framing_percent is defined and release.framing_percent) else 10 %}
+{% set framing_welcome = ("As a welcome gesture, enjoy " ~ fp ~ "% off our in-house framing on your first purchase using the code " ~ fc ~ " at checkout.") if fc else "" %}
+{% set framing_reminder = ("As a reminder, you can enjoy " ~ fp ~ "% off our in-house framing on your first purchase using the code " ~ fc ~ " at checkout.") if fc else "" %}
 {% set fundraiser = release.fundraiser if release.fundraiser is defined and release.fundraiser else "" %}
 {% set series = artworks[0].series if artworks[0].series is defined and artworks[0].series else "" %}
 {% set untitled = artworks[0].title == "Untitled" and series %}
@@ -27,7 +33,7 @@
 {% set hook_names_beneficiary = fundraiser and fundraiser in context.hook %}
 {% set support = (", released in support of " ~ fundraiser) if (fundraiser and not hook_names_beneficiary) else "" %}
 {% set feats = edition.features if edition.features is defined and edition.features else ["Signed by the artist", "Individually numbered"] %}
-{% set work_intro = (ep ~ " from the " ~ series ~ " series") if untitled else ((artworks[0].title ~ ", " ~ ep) if (artworks|length == 1 and not plural) else ep) %}
+{% set work_intro = (ep ~ " from the " ~ series ~ " series") if untitled else (work ~ ", " ~ ep) %}
 {% set greeting = "Hi " ~ "{{ personalization_token('contact.firstname', 'there') }}" ~ "," %}
 {% set questions = "If you have any questions, please don't hesitate to get in touch by replying to this email." %}
 {% set edition_numbers = "Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here." %}
@@ -64,7 +70,7 @@
 [KICKER] {{ "Enter the draw" if draw else "Launching " ~ release.launch_at|ukdate }}
 [HEADLINE] {{ work|cap_first if draw else work|cap_first ~ " by " ~ artist.name }}
 [BODY]
-We're delighted to announce our {{ ordinal }} collaboration with {{ artist.name }} – {{ work_intro }}{{ support }}.
+We're delighted to announce our {{ ordinal }} collaboration with {{ collab }} – {{ work_intro }}{{ support }}.
 
 {{ context.hook }}
 
@@ -92,7 +98,7 @@ Welcome {{ "{{ personalization_token('contact.firstname', 'to Avant Arte') }}" }
 
 Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems.
 
-Our upcoming collaboration with {{ artist.name }} is the latest in this lineage. If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?
+Our upcoming collaboration with {{ collab }} is the latest in this lineage. If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?
 
 Let us know if you have any questions. We're excited to see what you collect.
 
@@ -104,7 +110,7 @@ Let us know if you have any questions. We're excited to see what you collect.
 [BODY]
 {{ greeting }}
 
-Our {{ ordinal }} collaboration with {{ artist.name }} launches tomorrow at {{ release.launch_at|uktime }} and will be available to collect for {{ release.window }} only.
+Our {{ ordinal }} collaboration with {{ collab }} launches tomorrow at {{ release.launch_at|uktime }} and will be available to collect for {{ release.window }} only.
 
 {{ context.hook }}
 
@@ -113,6 +119,10 @@ Our {{ ordinal }} collaboration with {{ artist.name }} launches tomorrow at {{ r
 As a previous collector of the artist, we're offering you the chance to order the collaboration 24 hours before everyone else.
 {% else %}
 As a thank you for registering for updates, we're offering you the chance to collect the release 24 hours before everyone else.
+{% if fc %}
+
+{{ framing_welcome }}
+{% endif %}
 {% endif %}
 
 Unlock early access using the link below.
@@ -135,7 +145,7 @@ Unlock early access using the link below.
 [BODY]
 {{ greeting }}
 
-I'm delighted to share our {{ ordinal }} collaboration with {{ artist.name }} – {{ work_intro }}{{ support }}.
+I'm delighted to share our {{ ordinal }} collaboration with {{ collab }} – {{ work_intro }}{{ support }}.
 
 {{ context.hook }}
 
@@ -166,7 +176,7 @@ Art Advisor at Avant Arte
 [BODY]
 {{ greeting }}
 
-We're currently preparing the launch of our {{ ordinal }} collaboration with {{ artist.name }} – {{ work_intro }}{{ support }}.
+We're currently preparing the launch of our {{ ordinal }} collaboration with {{ collab }} – {{ work_intro }}{{ support }}.
 
 {{ context.hook }}
 
@@ -185,17 +195,21 @@ Explore the artwork and place your order via the private link below. Use code {{
 {% elif key == "live" %}
 [SUBJECT] {{ artist.name }} – Available now, for {{ release.window }} only
 [PREVIEW] {{ release.window|cap_first }}, starting now.
-[KICKER] Collect a print by {{ artist.name }}
+[KICKER] Collect {{ a_unit }} by {{ artist.name }}
 [HEADLINE] {{ release.window|cap_first }}, starting now
 [BODY]
-Our {{ ordinal }} collaboration with {{ artist.name }} is now available to collect for {{ release.window }} only – {{ work_intro }}{{ support }}.
+Our {{ ordinal }} collaboration with {{ collab }} is now available to collect for {{ release.window }} only – {{ work_intro }}{{ support }}.
 
 {{ context.hook }}
 
 {{ making }}
 
 {{ features(true) }}
-The opportunity to collect an edition ends at {{ close_line }}. Click the link below to add {{ "a print" if plural else work }} to your collection.
+The opportunity to collect an edition ends at {{ close_line }}. Click the link below to add {{ a_unit if plural else work }} to your collection.
+{% if fc %}
+
+{{ framing_welcome }}
+{% endif %}
 
 [CTA] Buy now
 
@@ -204,16 +218,16 @@ The opportunity to collect an edition ends at {{ close_line }}. Click the link b
 [FOOTER] Collect {{ cp }}
 {% elif key == "halfway" %}
 [SUBJECT] {{ artist.name }} – 24 hours to go
-[KICKER] Collect a print by {{ artist.name }}
+[KICKER] Collect {{ a_unit }} by {{ artist.name }}
 [HEADLINE] 24 hours down, 24 to go
 [CTA] Buy now
-[FOOTER] There's still time to add a print to your collection.
+[FOOTER] There's still time to add {{ a_unit }} to your collection.
 {% elif key == "five_days" %}
 [SUBJECT] {{ artist.name }} – 5 days left
-[KICKER] Collect a print by {{ artist.name }}
+[KICKER] Collect {{ a_unit }} by {{ artist.name }}
 [HEADLINE] 2 days down, 5 days to go
-[CTA] Buy a print
-[FOOTER] Add a signed print to your collection
+[CTA] Buy {{ a_unit }}
+[FOOTER] Add {{ a_unit }} to your collection
 {% elif key == "three_days" %}
 [SUBJECT] {{ artist.name }} – 3 days to go
 [KICKER] {{ work|cap_first }} by {{ artist.name }}
@@ -224,11 +238,15 @@ There are just three days left to collect {{ cp }} by {{ artist.name }}.
 {{ context.hook }}
 
 Click the link to collect before {{ close_line }}.
+{% if fc %}
 
-[CTA] Buy a print
+{{ framing_reminder }}
+{% endif %}
+
+[CTA] Buy {{ a_unit }}
 
 {{ cards() }}
-[FOOTER] Add a print to your collection
+[FOOTER] Add {{ a_unit }} to your collection
 {% elif key == "last_chance" %}
 [SUBJECT] {{ artist.name }} – Last chance to {{ "enter the draw" if draw else "collect" }}
 [PREVIEW] {{ ("The draw closes at " ~ release.closes_at|uktime ~ " on " ~ release.closes_at|ukdate ~ ".") if draw else "Time is almost up." }}
@@ -242,9 +260,13 @@ This is your final opportunity to enter the draw for {{ work }}, {{ cp }} by {{ 
 
 For a chance to collect, click the link below to enter the draw. The draw closes at {{ close_line }}.
 {% else %}
-It's now or never for our {{ ordinal }} collaboration with {{ artist.name }} – {{ cp }} will be available to order until {{ close_line }}.
+It's now or never for our {{ ordinal }} collaboration with {{ collab }} – {{ cp }} will be available to order until {{ close_line }}.
 
 After this time, the edition size{{ " for each artwork" if plural else "" }} will be confirmed, and the {{ "works" if plural else "work" }} will no longer be available to purchase.
+{% if fc %}
+
+{{ framing_reminder }}
+{% endif %}
 {% endif %}
 
 [CTA] {{ "Enter the draw" if draw else "Buy now" }}
@@ -256,7 +278,7 @@ After this time, the edition size{{ " for each artwork" if plural else "" }} wil
 [BODY]
 {{ greeting }}
 
-Thank you for adding our collaboration with {{ artist.name }} to your collection. Great choice!
+Thank you for adding our collaboration with {{ collab }} to your collection. Great choice!
 
 I'm {{ advisor }}, an art advisor at Avant Arte. I'm here to connect collectors with artists by making suggestions, answering questions and offering early access to our collaborations.
 
@@ -272,7 +294,7 @@ Any questions? Reply to this email.
 [KICKER] Your feedback
 [HEADLINE] {{ artist.name }}
 [BODY]
-As someone who registered for updates but ultimately decided not to enter the draw for our collaboration with {{ artist.name }}, we'd love your feedback.
+As someone who registered for updates but ultimately decided not to enter the draw for our collaboration with {{ collab }}, we'd love your feedback.
 
 This two-minute survey will guide our future collaborations and help us recommend the right artists and editions for your collection.
 
@@ -284,7 +306,7 @@ You can read the terms here.
 [FOOTER] What can we do better?
 {% elif key == "monthly_preview" %}
 [PARAGRAPH] this release's paragraph, for the advisor's monthly email
-From {{ artist.name }} comes {{ work_intro }}{{ support }}.
+From {{ collab }} comes {{ work_intro }}{{ support }}.
 
 {{ context.hook }}
 

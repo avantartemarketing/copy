@@ -1,0 +1,206 @@
+[EMAIL 1 · Announcement (TL Non-flow) · 210426]
+[SUBJECT] Joel Mesler – A new limited edition print in four colourways
+[PREVIEW] Launching 20 May. Register for updates.
+[KICKER] Launching 20 May
+[HEADLINE] I Love You by Joel Mesler
+[BODY]
+We're delighted to announce our debut collaboration with Joel Mesler – I Love You, a new limited edition print in four colourways.
+
+I Love You is a declaration of love in four colourways, the colour of the text changing across the quartet. Drawing on personal memory and popular culture in equal measure, the work is disarmingly direct, and the title leaves no doubt.
+
+Created in close collaboration with the artist by our printmakers at Make-Ready, the edition unites a 9-colour split fountain silkscreen with an archival pigment overlay, metallic shimmer and high-gloss varnish.
+
+[FEATURES]
+· Signed by the artist
+· Individually numbered
+· Free worldwide shipping
+· Available in four colourways
+
+The edition will be available to collect for 48 hours only, starting at 17:00 UK time on Wednesday, 20 May.
+
+Click below to learn more and register for updates.
+
+[CTA] Discover the collaboration
+
+[CARD] I Love You
+A new limited edition print in four colourways by Joel Mesler.
+
+[QUOTE] What I put out is an honest reflection of my thoughts and experiences. At this point in my life, I have nothing to hide – the good, the bad, and everything in between.
+[QUOTE ATTRIBUTION] Joel Mesler
+
+[FOOTER] Launching 20 May
+
+════════════════════════════════════════════════════════════════
+[EMAIL 2 · Welcome (TL Flow) · 210426]
+[SUBJECT] Welcome to Avant Arte
+[PREVIEW] Where the art world is more accessible.
+[BODY]
+Welcome {{ personalization_token('contact.firstname', 'to Avant Arte') }}!
+
+Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems.
+
+Our upcoming collaboration with Joel Mesler is the latest in this lineage. If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?
+
+Let us know if you have any questions. We're excited to see what you collect.
+
+[CTA] Complete collector profile
+[FOOTER] Where the art world is more accessible
+
+════════════════════════════════════════════════════════════════
+[EMAIL 3 · Monthly Preview, this release's paragraph · 060526]
+[PARAGRAPH] this release's paragraph, for the advisor's monthly email
+From Joel Mesler comes I Love You, a new limited edition print in four colourways.
+
+I Love You is a declaration of love in four colourways, the colour of the text changing across the quartet. Drawing on personal memory and popular culture in equal measure, the work is disarmingly direct, and the title leaves no doubt.
+
+Created in close collaboration with the artist by our printmakers at Make-Ready, the edition unites a 9-colour split fountain silkscreen with an archival pigment overlay, metallic shimmer and high-gloss varnish.
+
+The edition will be available to collect for 48 hours only, from 17:00 UK time on Wednesday, 20 May.
+
+════════════════════════════════════════════════════════════════
+[EMAIL 4 · Early Access (TL Insiders), signed by the advisor · 190526]
+[SUBJECT] Joel Mesler – Early access for Insiders 🔓
+[PREVIEW] Collect 24 hours before everyone else.
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+I'm delighted to share our debut collaboration with Joel Mesler – I Love You, a new limited edition print in four colourways.
+
+I Love You is a declaration of love in four colourways, the colour of the text changing across the quartet. Drawing on personal memory and popular culture in equal measure, the work is disarmingly direct, and the title leaves no doubt.
+
+The edition launches tomorrow at 17:00 UK time and will be available to collect for 48 hours only. For the next 24 hours, I'm excited to offer you early access ahead of the public launch.
+
+Discover the artwork and place your order via the private link below.
+
+If you have any questions, please don't hesitate to get in touch by replying to this email.
+
+Best regards,
+Sam
+
+Art Advisor at Avant Arte
+
+[CTA] Unlock early access
+
+[CARD] I Love You
+A new limited edition print in four colourways by Joel Mesler.
+
+[FOOTER] 24 hours ahead of the public launch
+
+════════════════════════════════════════════════════════════════
+[EMAIL 5 · Early Access (TL Flow) · 190526]
+[SUBJECT] Joel Mesler – Early access 🔓
+[PREVIEW] Collect 24 hours before everyone else.
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+Our debut collaboration with Joel Mesler launches tomorrow at 17:00 UK time and will be available to collect for 48 hours only.
+
+I Love You is a declaration of love in four colourways, the colour of the text changing across the quartet. Drawing on personal memory and popular culture in equal measure, the work is disarmingly direct, and the title leaves no doubt.
+
+[FEATURES]
+· Signed by the artist
+· Individually numbered
+· Free worldwide shipping
+· Available in four colourways
+
+As a thank you for registering for updates, we're offering you the chance to collect the release 24 hours before everyone else.
+
+As a welcome gesture, enjoy 10% off our in-house framing on your first purchase using the code Joel-0526-10 at checkout.
+
+Unlock early access using the link below.
+
+[CTA] Unlock early access
+[FOOTER] 24 hours ahead of the public launch
+
+════════════════════════════════════════════════════════════════
+[EMAIL 6 · Early access (TL Artist PP Non Flow) · 190526]
+[SUBJECT] Joel Mesler – Early access for past collectors
+[PREVIEW] Order before everyone else.
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+Our debut collaboration with Joel Mesler launches tomorrow at 17:00 UK time and will be available to collect for 48 hours only.
+
+I Love You is a declaration of love in four colourways, the colour of the text changing across the quartet. Drawing on personal memory and popular culture in equal measure, the work is disarmingly direct, and the title leaves no doubt.
+
+[FEATURES]
+· Signed by the artist
+· Individually numbered
+· Free worldwide shipping
+· Available in four colourways
+
+As a previous collector of the artist, we're offering you the chance to order the collaboration 24 hours before everyone else.
+
+Unlock early access using the link below.
+
+Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here.
+
+If you have any questions, please don't hesitate to get in touch by replying to this email.
+
+[CTA] Unlock early access
+
+[CARD] I Love You
+A new limited edition print in four colourways by Joel Mesler.
+
+[FOOTER] 24 hours ahead of the public launch
+
+════════════════════════════════════════════════════════════════
+[EMAIL 7 · Now Live (TL Flow and Non-flow) · 200526]
+[SUBJECT] Joel Mesler – Available now, for 48 hours only
+[PREVIEW] 48 hours, starting now.
+[KICKER] Collect a print by Joel Mesler
+[HEADLINE] 48 hours, starting now
+[BODY]
+Our debut collaboration with Joel Mesler is now available to collect for 48 hours only – I Love You, a new limited edition print in four colourways.
+
+I Love You is a declaration of love in four colourways, the colour of the text changing across the quartet. Drawing on personal memory and popular culture in equal measure, the work is disarmingly direct, and the title leaves no doubt.
+
+Created in close collaboration with the artist by our printmakers at Make-Ready, the edition unites a 9-colour split fountain silkscreen with an archival pigment overlay, metallic shimmer and high-gloss varnish.
+
+[FEATURES]
+· Signed by the artist
+· Individually numbered
+· Free worldwide shipping
+· Available in four colourways
+
+The opportunity to collect an edition ends at 17:00 UK time on Friday, 22 May. Click the link below to add I Love You to your collection.
+
+As a welcome gesture, enjoy 10% off our in-house framing on your first purchase using the code Joel-0526-10 at checkout.
+
+[CTA] Buy now
+
+[CARD] I Love You
+A new limited edition print in four colourways by Joel Mesler.
+
+[QUOTE] What I put out is an honest reflection of my thoughts and experiences. At this point in my life, I have nothing to hide – the good, the bad, and everything in between.
+[QUOTE ATTRIBUTION] Joel Mesler
+
+[FOOTER] Collect a limited edition print in four colourways
+
+════════════════════════════════════════════════════════════════
+[EMAIL 8 · Halfway (TL Flow) · 210526]
+[SUBJECT] Joel Mesler – 24 hours to go
+[KICKER] Collect a print by Joel Mesler
+[HEADLINE] 24 hours down, 24 to go
+[CTA] Buy now
+[FOOTER] There's still time to add a print to your collection.
+
+════════════════════════════════════════════════════════════════
+[EMAIL 9 · Last chance (TL Flow) · 220526]
+[SUBJECT] Joel Mesler – Last chance to collect
+[PREVIEW] Time is almost up.
+[KICKER] Joel Mesler
+[HEADLINE] Last chance to collect
+[BODY]
+It's now or never for our debut collaboration with Joel Mesler – a limited edition print in four colourways will be available to order until 17:00 UK time on Friday, 22 May.
+
+After this time, the edition size will be confirmed, and the work will no longer be available to purchase.
+
+As a reminder, you can enjoy 10% off our in-house framing on your first purchase using the code Joel-0526-10 at checkout.
+
+[CTA] Buy now
+
+[CARD] I Love You
+A new limited edition print in four colourways by Joel Mesler.
+
+[FOOTER] Time is almost up

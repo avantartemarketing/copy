@@ -146,19 +146,29 @@ def ship_window(w):
 
 def _noun(ed, plural):
     medium = (ed.get("medium_prefix") or "").strip()
-    return (f"{medium} {ed['unit']}".strip()) + ("s" if plural else "")
+    unit = ed.get("unit") or "print"
+    if plural:
+        unit = unit[:-1] + "ies" if unit.endswith("y") else unit + "s"      # embroidery -> embroideries
+    return f"{medium} {unit}".strip()
 
 
 def edition_phrase(ed):
-    """'a new limited edition silkscreen print' / 'a trio of new limited edition prints'"""
+    """'a new limited edition silkscreen print' / 'a trio of new limited edition prints'; or the brief's own phrase"""
+    if ed.get("phrase"):
+        return ed["phrase"].strip()
     n = ed["count"]
     return f"{NEW[n]} limited edition {_noun(ed, n > 1)}"
 
 
 def collect_phrase(ed):
-    """'a limited edition silkscreen print' / 'a trio of limited edition prints'"""
-    n = ed["count"]
-    return f"{COLLECT[n]} limited edition {_noun(ed, n > 1)}"
+    """'a limited edition silkscreen print' / 'a trio of limited edition prints': the edition phrase without 'new'"""
+    return edition_phrase(ed).replace(" new ", " ", 1)
+
+
+def a_unit(ed):
+    """'a print' / 'an embroidery': what one is called, with its article."""
+    unit = ed.get("unit") or "print"
+    return ("an " if unit[:1].lower() in "aeiou" else "a ") + unit
 
 
 def recap_phrase(ed):
@@ -230,7 +240,7 @@ def build_env():
                       trim_blocks=True, lstrip_blocks=True)
     env.filters.update(uktime=uktime, ukdate=ukdate, ukdate_dd=ukdate_dd, weekday=weekday, ddmmyy=ddmmyy, month=month,
                        day_before=day_before, rel_day=rel_day, tag_first=tag_first, cap_first=cap_first, first_sentence=first_sentence, voice=voice, ship_window=ship_window, edition_phrase=edition_phrase,
-                       collect_phrase=collect_phrase, recap_phrase=recap_phrase, titles=titles, titles_q=titles_q)
+                       collect_phrase=collect_phrase, recap_phrase=recap_phrase, a_unit=a_unit, titles=titles, titles_q=titles_q)
     env.globals.update(OPENERS=OPENERS, EA_OPENERS=EA_OPENERS, GROUP=GROUP, WORDS=WORDS,
                        production_paragraph=production_paragraph, auth_phrase=auth_phrase, phases=phases, email_phases=email_phases)
     return env

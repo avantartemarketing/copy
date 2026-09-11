@@ -8,6 +8,9 @@
 #}
 {% set xh = artist.x_handle if artist.x_handle is defined and artist.x_handle else "" %}
 {% set named = artist.name ~ ((" (@" ~ xh ~ ")") if xh else "") %}
+{% set collab = artist.collab_with if (artist.collab_with is defined and artist.collab_with) else artist.name %}
+{% set collab_x = named if collab == artist.name else collab %}
+{% set a_unit = edition|a_unit %}
 {% set link = release.link if release.link is defined and release.link else "[link]" %}
 {% set draw = release.mechanic == "draw" %}
 {% set fundraiser = release.fundraiser if release.fundraiser is defined and release.fundraiser else "" %}
@@ -16,7 +19,7 @@
 {% set work = ("the " ~ series ~ " series") if untitled else artworks|titles_q %}
 {% set deadline = "Closes " ~ release.closes_at|ukdate ~ " at " ~ release.closes_at|uktime ~ "." %}
 {% set pre_launch = (deadline ~ " Enter the draw: " ~ link) if draw else ("Available for " ~ release.window ~ " from " ~ release.launch_at|uktime ~ " on " ~ release.launch_at|ukdate ~ ". Sign up for updates: " ~ link) %}
-{% set open = (deadline ~ " Enter the draw: " ~ link) if draw else (deadline ~ " Buy a print: " ~ link) %}
+{% set open = (deadline ~ " Enter the draw: " ~ link) if draw else (deadline ~ " Buy " ~ a_unit ~ ": " ~ link) %}
 {% set ns = namespace(n=0) %}
 {% for phase, send in phases(release, artist) %}
 {% if phase in ["coming soon", "announce", "live", "still time", "last chance"] %}
@@ -26,7 +29,7 @@
 {% endif %}
 [TWEET {{ ns.n }} · {{ phase }} · {{ send|ddmmyy }} · {{ release.campaign_code }}]
 {% if phase == "coming soon" %}
-Our {{ artist.collaboration_ordinal }} collaboration with {{ named }} is on the horizon.
+Our {{ artist.collaboration_ordinal }} collaboration with {{ collab_x }} is on the horizon.
 
 Sign up for updates: {{ link }}
 {% elif phase == "announce" %}

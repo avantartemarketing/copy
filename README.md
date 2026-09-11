@@ -178,9 +178,24 @@ tool/         release-copy.xlsx, the whole system as one workbook, and build_rel
 
 **The workbook, `tool/release-copy.xlsx`**, is the same system with no code. Inputs holds the
 facts and the four fragments (blue on yellow). Lines holds every fixed sentence, one row each,
-with its placeholders. Posts and Emails assemble the outputs by formula. Fill Inputs and read
-Posts and Emails; edit a line once on Lines to change every future release. Set the mechanic to
-draw or timed, and the window to 48 hours or one week, and the rows that do not apply say so.
+with its placeholders. Posts, Tweets and Emails assemble the outputs by formula. Fill Inputs and
+read the three sheets; edit a line once on Lines to change every future release. Set the mechanic
+to draw or timed, and the window to 48 hours or one week, and the rows that do not apply say so.
+`tool/build_release_copy.py` builds it from a brief, so there is one workbook per release in
+`tool/`, and `tool/check_workbook.py` evaluates every formula and checks the workbook against the
+templates line by line for every brief (it passes for all six).
+
+**Stress-tested on three more timed releases** built from what was sent: Ai Weiwei's Self-Portrait
+Embroidery (four framed embroideries, sold singly, in pairs or as a quartet, one week), the Lucian
+Freud Estate's Portraits 1952–2002 (an estate, nothing signed, a partner credit, 48 hours) and Joel
+Mesler's I Love You (a debut, one print in four colourways, 48 hours). Four things broke and are
+fixed: the medium was hard-coded as "print" in seven lines (now an input, `unit`, written as "a
+print" or "an embroidery"); "collaboration with" took the artist's name (now `collab_with`, so an
+estate reads correctly while the works stay "by Lucian Freud"); the first-purchase framing offer
+was missing (now a code on Inputs, blank for none, which adds the line to Early Access, Now Live,
+3 days to go and Last chance); and the validator refused a date range like 1952–2002 as an unspaced
+dash. Two things are the writer's call, not the system's: five features make a heavy line on
+Instagram, and the announcement tweet carries the whole hook, so it needs X Premium.
 
 `templates/email-set.txt` renders the emails in the comms plan from the same brief as the
 Instagram set: Announcement (TL and LE), Welcome, Early Access (TL Flow, TL Artist PP, Insiders

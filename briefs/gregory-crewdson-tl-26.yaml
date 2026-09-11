@@ -1,7 +1,7 @@
 # Release brief: Gregory Crewdson, Dream House, time-limited edition (48-hour window).
 # Values are lifted from the emails sent in June to August 2026.
 
-emails: [now-live-tl, trns-printing, social-ig-announcement]
+emails: [now-live-tl, trns-printing, social-ig-announcement, social-artist-ig-last-chance]
 
 release:
   campaign_code: GregoryCrewd_TL_26
@@ -9,6 +9,8 @@ release:
   window: 48 hours                        # 24 hours | 48 hours | one week
   launch_at: "2026-06-30 17:00"
   closes_at: "2026-07-02 17:00"
+  close_local: "12:00 EDT"
+  last_chance_at: "2026-07-02 10:00"
   framing_code: Crewdson-0626-10
 
 artist:
@@ -31,6 +33,7 @@ edition:
   size: null                              # timed edition: size is set by demand
   signed_by: artist
   numbered: true
+  dimensions: ""
 
 artworks:
   - title: Untitled
@@ -51,7 +54,11 @@ context:
   hook: "Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape."   # BOUNDED, as sent
   quote_sentence: "To Gregory, Dream House represents “that moment of transcendence, where one is transported into another place, into a perfect, still world.”"   # FRAME filled by hand: "To {first name}, {work} represents “{quote}”"
   footer: From his iconic 'Dream House' series
-  social: {opener: 2, edition_line: 0, cta: 1}
+  artist_line: "It's been meaningful to see the response to this work again after all these years – these images were originally created in 2002 in an abandoned home in Vermont, as part of a larger exploration of stillness, narrative and psychological tension."
+  artist_thanks: ""
+  social:
+    announcement: {opener: 2, edition_line: 0, cta: 1}
+    last_chance: {opener: 1, middle: 4, cta: 2}
 
 post_purchase:
   printing_update_at: "2026-08-06 16:00"

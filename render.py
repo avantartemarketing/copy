@@ -69,6 +69,11 @@ def day_before(v):
     return dt(v) - datetime.timedelta(days=1)
 
 
+def rel_day(close, send):
+    """'tomorrow' when the send lands the day before the close, otherwise 'today'."""
+    return "tomorrow" if dt(send).date() < dt(close).date() else "today"
+
+
 def ship_window(w):
     a, b = dt(w["from"]), dt(w["to"])               # "23 - 30 October" / "26 October - 03 November"
     return f"{a:%d} - {b:%d %B}" if a.month == b.month else f"{a:%d %B} - {b:%d %B}"
@@ -138,7 +143,7 @@ def build_env():
     env = Environment(loader=FileSystemLoader(str(ROOT / "templates")), undefined=StrictUndefined,
                       trim_blocks=True, lstrip_blocks=True)
     env.filters.update(uktime=uktime, ukdate=ukdate, ukdate_dd=ukdate_dd, weekday=weekday, ddmmyy=ddmmyy,
-                       day_before=day_before, ship_window=ship_window, edition_phrase=edition_phrase,
+                       day_before=day_before, rel_day=rel_day, ship_window=ship_window, edition_phrase=edition_phrase,
                        collect_phrase=collect_phrase, recap_phrase=recap_phrase, titles=titles, titles_q=titles_q)
     env.globals.update(OPENERS=OPENERS, EA_OPENERS=EA_OPENERS, GROUP=GROUP, WORDS=WORDS,
                        production_paragraph=production_paragraph, auth_phrase=auth_phrase)

@@ -2,11 +2,11 @@
   ANNOUNCEMENT · IG Main · Post   (IG Ins · Post reuses the same caption)
   Skeleton, from 118 real captions since 2025:
     opener · hook · edition line · CTA with deadline · hashtag
-  Menus, chosen in the brief under context.social:
+  Menus, chosen in the brief under context.social.announcement:
     opener 1-6 · edition_line 0-6 · cta 1-5 (the CTA set switches with release.mechanic)
   Facts only, plus the same `hook` fragment the email uses.
 #}
-{% set s = context.social if context.social else {} %}
+{% set s = context.social.announcement if context.social and context.social.announcement else {} %}
 {% set o = s.opener if s.opener is defined else 1 %}
 {% set e = s.edition_line if s.edition_line is defined else 1 %}
 {% if e == 5 and release.fundraiser and release.fundraiser in context.hook %}{% set e = 1 %}{% endif %}

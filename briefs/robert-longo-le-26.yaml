@@ -8,7 +8,7 @@
 # Values below are lifted from the emails actually sent in September 2026, so the rendered
 # output can be compared with the real thing.
 
-emails: [announcement-le, early-access-le, last-chance-le, trns-printing, social-ig-announcement]
+emails: [announcement-le, early-access-le, last-chance-le, trns-printing, social-ig-announcement, social-artist-ig-last-chance]
 
 release:
   campaign_code: RobertLongo_LE_26
@@ -18,6 +18,8 @@ release:
   early_access_code: "377-985"
   launch_at: "2026-09-07 16:00"           # public announcement, UK time
   closes_at: "2026-09-29 17:00"           # draw closes, UK time
+  close_local: ""                         # optional artist-local time for artist channels, e.g. "12:00 EDT"
+  last_chance_at: "2026-09-28 16:00"      # when the last-chance posts go out; blank = the day before the close
   framing_code: Longo-0926-10             # first-purchase framing offer; blank = block omitted
   fundraiser: Vote.org
   beneficiary_handle: votedotorg
@@ -40,6 +42,7 @@ edition:
   size: null                              # edition size, when it is being published
   signed_by: artist                       # artist | estate_stamp | engraved | none
   numbered: true
+  dimensions: ""                          # e.g. "96 x 96cm", for the spec-bullet middle
   technique_facts:
     - made from the artist's original Kodak transparencies
     - high fidelity silkscreen of the original piece
@@ -67,7 +70,11 @@ context:
   hook: "Longo is renowned for works that fiercely engage with social structures and mass media, long-maintaining that making art is a political act. Sandy is released in support of Vote.org and marks only the second ever edition of Men in the Cities in silkscreen form, the first being our release of Eric last year."   # BOUNDED, as sent
   early_access_note: "It's an honour to be editioning Sandy, especially as this is only the second time that Longo has released images from Men in the Cities as silkscreen prints – the first time being our edition of Eric last year. The piece will be released in the same dimensions as Eric, for any collectors wishing to display the prints side by side."   # BOUNDED, as sent
   recap: null                             # Last Chance reuses `hook` unless this is set
-  social: {opener: 1, edition_line: 5, cta: 1}   # MENU choices for the Instagram announcement
+  artist_line: "It was really important to me that as I got older as an artist, I could still make work that meant something."   # first person, from the artist; defaults to the quote
+  artist_thanks: ""                       # optional sign-off in the artist's words
+  social:
+    announcement: {opener: 1, edition_line: 5, cta: 1}
+    last_chance: {opener: 2, middle: 1, cta: 1}
 
 post_purchase:
   printing_update_at: "2026-11-05 15:00"

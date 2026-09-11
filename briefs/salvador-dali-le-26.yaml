@@ -1,0 +1,67 @@
+# Release brief: the Salvador Dalí Estate, three prints, limited edition allocated by draw.
+# Stress test (LE): an estate, three works with their own titles, an estate stamp instead of a signature,
+# an edition size to state. Facts lifted from what was sent in August and September 2026.
+
+outputs: [ig-set, twitter-set, email-set]
+
+release:
+  campaign_code: SalvadorDali_LE_26
+  link: https://avantarte.co/salvadordaliestate-x
+  mechanic: draw
+  early_access_at: "2026-08-19 16:00"
+  early_access_code: "557-659"
+  coming_soon_at: "2026-08-14 12:00"
+  launch_at: "2026-08-21 13:00"
+  sustain_at: "2026-09-07 12:00"
+  closes_at: "2026-09-11 14:00"
+  last_chance_at: "2026-09-10 12:00"
+  fundraiser: ""
+  beneficiary_handle: ""
+  advisor: Sam
+
+artist:
+  name: Salvador Dalí
+  collab_with: the Salvador Dalí Estate
+  handle: ""
+  x_handle: ""
+  hashtag: ""
+  collaboration_ordinal: debut
+  quote: ""
+  facts:
+    - 1904 to 1989
+    - the showman of Surrealism
+    - dreams, desire and the subconscious
+    - double images and melting forms
+    - Port Lligat
+
+edition:
+  unit: print
+  count: 3
+  phrase: three new limited edition prints
+  features:
+    - Individually numbered
+    - Authenticated with a bespoke debossed Salvador Dalí Estate stamp
+    - An edition of 400
+    - Free worldwide shipping
+  facts:
+    - edition of 400
+    - created in close collaboration with the Salvador Dalí Estate at Make-Ready
+
+artworks:
+  - title: The Spectre of Sex Appeal
+    facts:
+      - the human form becomes strange and architectural, supported by crutches
+  - title: Millet's Architectonic Angelus
+    facts:
+      - reimagines a 19th-century painting of quiet piety; the original hangs in Madrid's Reina Sofía
+  - title: The Phantom Cart
+    facts:
+      - a wagon and a distant city merge into one shifting illusion
+
+context:
+  artist_bio: "Salvador Dalí (1904–1989) was the showman of Surrealism, a painter of dreams, desire and the subconscious whose double images and melting forms made him one of the most recognised artists of the twentieth century."
+  hook: "Originally painted between 1933 and 1934, Millet's Architectonic Angelus, The Spectre of Sex Appeal and The Phantom Cart are prime examples of Dalí's fascination with dreams, desire and the subconscious. Each is charged with surreal and erotic suggestion."
+  qualifier: "bringing together some of Dalí's most renowned paintings"
+  making: "Each print was created in close collaboration with the Salvador Dalí Estate by printmakers at Make-Ready, and is finished with a bespoke debossed estate stamp."
+  facts:
+    - painted between 1933 and 1934

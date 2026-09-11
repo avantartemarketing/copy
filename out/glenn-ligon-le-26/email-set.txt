@@ -1,0 +1,158 @@
+[EMAIL 1 · Monthly Preview, this release's paragraph · 030826]
+[PARAGRAPH] this release's paragraph, for the advisor's monthly email
+From Glenn Ligon comes two new limited edition silkscreen prints, Untitled (White on White) and Untitled (Black on Black).
+
+Revisiting Ligon's landmark Stranger series, the editions translate passages from James Baldwin's renowned essay, Stranger in the Village, into layered compositions where language becomes pure abstraction. Originally made with coal dust and oil stick, the compositions give Baldwin's words a tangible physical weight.
+
+Each print was produced by our printmakers at Make-Ready as a 26-layer silkscreen, capturing the depth and materiality of the original coal dust and oil stick compositions.
+
+The edition will be allocated by a randomised draw, which closes at 17:00 UK time on 9 September.
+
+════════════════════════════════════════════════════════════════
+[EMAIL 2 · Early/Exclusive access (LE) · 180826]
+[SUBJECT] Glenn Ligon – Early access 🔓
+[PREVIEW] A first look, plus access to a limited number of pre-orders.
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+We're currently preparing the launch of our debut collaboration with Glenn Ligon – two new limited edition silkscreen prints, Untitled (White on White) and Untitled (Black on Black).
+
+Revisiting Ligon's landmark Stranger series, the editions translate passages from James Baldwin's renowned essay, Stranger in the Village, into layered compositions where language becomes pure abstraction. Originally made with coal dust and oil stick, the compositions give Baldwin's words a tangible physical weight.
+
+The edition will launch publicly on 17 August and will be allocated by a randomised draw; however, for the next 48 hours we're offering a small group of collectors a first look, plus access to a limited number of pre-orders. Based on your order history and the artists you've expressed an interest in, I thought the edition would be a good fit for your collection.
+
+Explore the artwork and place your order via the private link below. Use code 813-889 to unlock early access.
+
+Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here.
+
+If you have any questions, please don't hesitate to get in touch by replying to this email.
+
+[CTA] Unlock early access
+
+[CARD] Untitled (White on White)
+A limited edition print by Glenn Ligon.
+[CARD] Untitled (Black on Black)
+A limited edition print by Glenn Ligon.
+
+[FOOTER] Especially for you.
+
+════════════════════════════════════════════════════════════════
+[EMAIL 3 · Early Access (LE Insiders), signed by the advisor · 180826]
+[SUBJECT] Glenn Ligon – Early access for Insiders 🔓
+[PREVIEW] A first look, plus early access to a limited number of pre-orders.
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+I'm delighted to share our debut collaboration with Glenn Ligon – two new limited edition silkscreen prints, Untitled (White on White) and Untitled (Black on Black).
+
+Revisiting Ligon's landmark Stranger series, the editions translate passages from James Baldwin's renowned essay, Stranger in the Village, into layered compositions where language becomes pure abstraction. Originally made with coal dust and oil stick, the compositions give Baldwin's words a tangible physical weight.
+
+The edition will launch publicly on 17 August and will be allocated by a randomised draw. However, for the next 48 hours, I'm excited to offer you a first look, plus early access to a limited number of pre-orders.
+
+Discover the artwork and place your order via the private link below. Use code 813-889 to unlock early access.
+
+If you have any questions, please don't hesitate to get in touch by replying to this email.
+
+Best regards,
+Sam
+
+Art Advisor at Avant Arte
+
+[CTA] Unlock early access
+
+[CARD] Untitled (White on White)
+A limited edition print by Glenn Ligon.
+[CARD] Untitled (Black on Black)
+A limited edition print by Glenn Ligon.
+
+[FOOTER] Especially for you.
+
+════════════════════════════════════════════════════════════════
+[EMAIL 4 · Announcement (LE) · 170826]
+[SUBJECT] Glenn Ligon – Two new limited edition silkscreen prints
+[PREVIEW] Enter the draw for a chance to collect. Closes 9 September.
+[KICKER] Enter the draw
+[HEADLINE] Untitled (White on White) and Untitled (Black on Black)
+[BODY]
+We're delighted to announce our debut collaboration with Glenn Ligon – two new limited edition silkscreen prints, Untitled (White on White) and Untitled (Black on Black).
+
+Revisiting Ligon's landmark Stranger series, the editions translate passages from James Baldwin's renowned essay, Stranger in the Village, into layered compositions where language becomes pure abstraction. Originally made with coal dust and oil stick, the compositions give Baldwin's words a tangible physical weight.
+
+Each print was produced by our printmakers at Make-Ready as a 26-layer silkscreen, capturing the depth and materiality of the original coal dust and oil stick compositions.
+
+[FEATURES]
+· Signed by the artist
+· Individually numbered
+· An edition of 75
+· Free worldwide shipping
+
+Enter the draw for a chance to collect. Closes at 17:00 UK time on 9 September.
+
+[CTA] Enter the draw
+
+[CARD] Untitled (White on White)
+A limited edition print by Glenn Ligon.
+[CARD] Untitled (Black on Black)
+A limited edition print by Glenn Ligon.
+
+[QUOTE] The legibility and illegibility of the text is what the work is about – the struggle to decipher something and find meaning.
+[QUOTE ATTRIBUTION] Glenn Ligon
+
+[FOOTER] Collect two limited edition silkscreen prints
+
+════════════════════════════════════════════════════════════════
+[EMAIL 5 · Last chance (LE) · 080926]
+[SUBJECT] Glenn Ligon – Last chance to enter the draw
+[PREVIEW] The draw closes at 17:00 UK time on 9 September.
+[KICKER] Glenn Ligon
+[HEADLINE] Last chance to enter the draw
+[BODY]
+This is your final opportunity to enter the draw for Untitled (White on White) and Untitled (Black on Black), two limited edition silkscreen prints by Glenn Ligon.
+
+Revisiting Ligon's landmark Stranger series, the editions translate passages from James Baldwin's renowned essay, Stranger in the Village, into layered compositions where language becomes pure abstraction. Originally made with coal dust and oil stick, the compositions give Baldwin's words a tangible physical weight.
+
+For a chance to collect, click the link below to enter the draw. The draw closes at 17:00 UK time on Wednesday, 09 September.
+
+[CTA] Enter the draw
+
+[CARD] Untitled (White on White)
+A limited edition print by Glenn Ligon.
+[CARD] Untitled (Black on Black)
+A limited edition print by Glenn Ligon.
+
+[FOOTER] Time is almost up
+
+════════════════════════════════════════════════════════════════
+[EMAIL 6 · First-time collector survey (LE) · 100926]
+[SUBJECT] Congratulations on your first Avant Arte edition
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+Thank you for adding our collaboration with Glenn Ligon to your collection. Great choice!
+
+I'm Sam, an art advisor at Avant Arte. I'm here to connect collectors with artists by making suggestions, answering questions and offering early access to our collaborations.
+
+If you have two minutes to complete a short survey about your collecting journey to date, your responses will help guide my recommendations.
+
+Any questions? Reply to this email.
+
+[CTA] Complete survey
+
+[CARD] Glenn Ligon
+
+════════════════════════════════════════════════════════════════
+[EMAIL 7 · Non-purchaser survey (LE) · 100926]
+[SUBJECT] Glenn Ligon – Any feedback?
+[KICKER] Your feedback
+[HEADLINE] Glenn Ligon
+[BODY]
+As someone who registered for updates but ultimately decided not to enter the draw for our collaboration with Glenn Ligon, we'd love your feedback.
+
+This two-minute survey will guide our future collaborations and help us recommend the right artists and editions for your collection.
+
+As a thank you for taking part in the survey and helping us improve the collector experience, you'll be entered into a draw to win a €500 Avant Arte gift card.
+
+You can read the terms here.
+
+[CTA] Complete survey
+[FOOTER] What can we do better?

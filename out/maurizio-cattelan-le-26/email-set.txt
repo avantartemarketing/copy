@@ -1,0 +1,150 @@
+[EMAIL 1 · Monthly Preview, this release's paragraph · 120126]
+[PARAGRAPH] this release's paragraph, for the advisor's monthly email
+From Italian artist Maurizio Cattelan comes Window, a new limited edition print, the artist's first print release with Avant Arte.
+
+Window reimagines Cattelan's legendary Comedian, the duct-taped banana, against hyper-realistic natural landscapes, grounding his provocative symbol in serene compositions of subtly absurd beauty.
+
+Each silkscreen print was produced by our printmakers at Make-Ready in four layers, sealed with a matte varnish.
+
+The edition will be allocated by a randomised draw, which closes at 17:00 UK time on 20 February.
+
+════════════════════════════════════════════════════════════════
+[EMAIL 2 · Early/Exclusive access (LE) · 220126]
+[SUBJECT] Maurizio Cattelan – Early access 🔓
+[PREVIEW] A first look, plus access to a limited number of pre-orders.
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+We're currently preparing the launch of our latest collaboration with Italian artist Maurizio Cattelan – Window, a new limited edition print, the artist's first print release with Avant Arte.
+
+Window reimagines Cattelan's legendary Comedian, the duct-taped banana, against hyper-realistic natural landscapes, grounding his provocative symbol in serene compositions of subtly absurd beauty.
+
+The edition will launch publicly on 26 January and will be allocated by a randomised draw; however, for the next 48 hours we're offering a small group of collectors a first look, plus access to a limited number of pre-orders. Based on your order history and the artists you've expressed an interest in, I thought the edition would be a good fit for your collection.
+
+Explore the artwork and place your order via the private link below. Use code 918-831 to unlock early access.
+
+Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here.
+
+If you have any questions, please don't hesitate to get in touch by replying to this email.
+
+[CTA] Unlock early access
+
+[CARD] Window
+A new limited edition print by Maurizio Cattelan.
+
+[FOOTER] Especially for you.
+
+════════════════════════════════════════════════════════════════
+[EMAIL 3 · Early Access (LE Insiders), signed by the advisor · 220126]
+[SUBJECT] Maurizio Cattelan – Early access for Insiders 🔓
+[PREVIEW] A first look, plus early access to a limited number of pre-orders.
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+I'm delighted to share our latest collaboration with Italian artist Maurizio Cattelan – Window, a new limited edition print, the artist's first print release with Avant Arte.
+
+Window reimagines Cattelan's legendary Comedian, the duct-taped banana, against hyper-realistic natural landscapes, grounding his provocative symbol in serene compositions of subtly absurd beauty.
+
+The edition will launch publicly on 26 January and will be allocated by a randomised draw. However, for the next 48 hours, I'm excited to offer you a first look, plus early access to a limited number of pre-orders.
+
+Discover the artwork and place your order via the private link below. Use code 918-831 to unlock early access.
+
+If you have any questions, please don't hesitate to get in touch by replying to this email.
+
+Best regards,
+Sam
+
+Art Advisor at Avant Arte
+
+[CTA] Unlock early access
+
+[CARD] Window
+A new limited edition print by Maurizio Cattelan.
+
+[FOOTER] Especially for you.
+
+════════════════════════════════════════════════════════════════
+[EMAIL 4 · Announcement (LE) · 260126]
+[SUBJECT] Maurizio Cattelan – A new limited edition print
+[PREVIEW] Enter the draw for a chance to collect. Closes 20 February.
+[KICKER] Enter the draw
+[HEADLINE] Window
+[BODY]
+We're delighted to announce our latest collaboration with Italian artist Maurizio Cattelan – Window, a new limited edition print, the artist's first print release with Avant Arte.
+
+Window reimagines Cattelan's legendary Comedian, the duct-taped banana, against hyper-realistic natural landscapes, grounding his provocative symbol in serene compositions of subtly absurd beauty.
+
+Each silkscreen print was produced by our printmakers at Make-Ready in four layers, sealed with a matte varnish.
+
+[FEATURES]
+· Signed by the artist
+· Individually numbered
+· Four silkscreen layers with a matte varnish seal
+· Free worldwide shipping
+
+Enter the draw for a chance to collect. Closes at 17:00 UK time on 20 February.
+
+[CTA] Enter the draw
+
+[CARD] Window
+A new limited edition print by Maurizio Cattelan.
+
+[QUOTE] A comedian is doomed to make people laugh.
+[QUOTE ATTRIBUTION] Maurizio Cattelan
+
+[FOOTER] Collect a limited edition print
+
+════════════════════════════════════════════════════════════════
+[EMAIL 5 · Last chance (LE) · 190226]
+[SUBJECT] Maurizio Cattelan – Last chance to enter the draw
+[PREVIEW] The draw closes at 17:00 UK time on 20 February.
+[KICKER] Maurizio Cattelan
+[HEADLINE] Last chance to enter the draw
+[BODY]
+This is your final opportunity to enter the draw for Window, a limited edition print by Maurizio Cattelan.
+
+Window reimagines Cattelan's legendary Comedian, the duct-taped banana, against hyper-realistic natural landscapes, grounding his provocative symbol in serene compositions of subtly absurd beauty.
+
+For a chance to collect, click the link below to enter the draw. The draw closes at 17:00 UK time on Friday, 20 February.
+
+[CTA] Enter the draw
+
+[CARD] Window
+A new limited edition print by Maurizio Cattelan.
+
+[FOOTER] Time is almost up
+
+════════════════════════════════════════════════════════════════
+[EMAIL 6 · First-time collector survey (LE) · 210226]
+[SUBJECT] Congratulations on your first Avant Arte edition
+[BODY]
+Hi {{ personalization_token('contact.firstname', 'there') }},
+
+Thank you for adding our collaboration with Italian artist Maurizio Cattelan to your collection. Great choice!
+
+I'm Sam, an art advisor at Avant Arte. I'm here to connect collectors with artists by making suggestions, answering questions and offering early access to our collaborations.
+
+If you have two minutes to complete a short survey about your collecting journey to date, your responses will help guide my recommendations.
+
+Any questions? Reply to this email.
+
+[CTA] Complete survey
+
+[CARD] Maurizio Cattelan
+
+════════════════════════════════════════════════════════════════
+[EMAIL 7 · Non-purchaser survey (LE) · 210226]
+[SUBJECT] Maurizio Cattelan – Any feedback?
+[KICKER] Your feedback
+[HEADLINE] Maurizio Cattelan
+[BODY]
+As someone who registered for updates but ultimately decided not to enter the draw for our collaboration with Italian artist Maurizio Cattelan, we'd love your feedback.
+
+This two-minute survey will guide our future collaborations and help us recommend the right artists and editions for your collection.
+
+As a thank you for taking part in the survey and helping us improve the collector experience, you'll be entered into a draw to win a €500 Avant Arte gift card.
+
+You can read the terms here.
+
+[CTA] Complete survey
+[FOOTER] What can we do better?

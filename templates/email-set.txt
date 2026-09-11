@@ -23,7 +23,7 @@
 {% set plural = artworks|length > 1 or edition.count|int > 1 %}
 {% set ep = edition|edition_phrase %}
 {% set cp = edition|collect_phrase %}
-{% set card_line = (ep|cap_first) ~ " by " ~ artist.name ~ "." %}
+{% set card_line = (("A limited edition " ~ (edition.unit if edition.unit is defined and edition.unit else "print")) if artworks|length > 1 else (ep|cap_first)) ~ " by " ~ artist.name ~ "." %}
 {% set making = context.making|voice("ours") %}
 {% set advisor = release.advisor if release.advisor is defined and release.advisor else "Sam" %}
 {% set ea_code = release.early_access_code if release.early_access_code is defined and release.early_access_code else "000-000" %}

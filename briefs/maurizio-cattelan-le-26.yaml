@@ -1,0 +1,59 @@
+# Release brief: Maurizio Cattelan, Window, limited edition allocated by draw.
+# Stress test (LE): a single print from an artist we had released sculptures with before, so "debut" is wrong
+# and the first-print fact goes in the qualifier; a described collaborator ("Italian artist"); a verbatim quote.
+# Facts lifted from what was sent in January and February 2026.
+
+outputs: [ig-set, twitter-set, email-set]
+
+release:
+  campaign_code: MaurizioC_LE_26
+  link: https://avantarte.co/maurizio-cattelan-x
+  mechanic: draw
+  early_access_at: "2026-01-22 16:00"
+  early_access_code: "918-831"
+  coming_soon_at: "2026-01-15 12:00"
+  launch_at: "2026-01-26 13:00"
+  sustain_at: "2026-02-09 12:00"
+  closes_at: "2026-02-20 17:00"
+  last_chance_at: "2026-02-19 12:00"
+  fundraiser: ""
+  beneficiary_handle: ""
+  advisor: Sam
+
+artist:
+  name: Maurizio Cattelan
+  collab_with: Italian artist Maurizio Cattelan
+  handle: mauriziocattelan
+  x_handle: ""
+  hashtag: ""
+  collaboration_ordinal: latest
+  quote: "A comedian is doomed to make people laugh."
+  facts:
+    - Italian artist
+    - satirical sculptures
+    - Comedian, the duct-taped banana, sold for millions at Art Basel Miami Beach in 2019
+    - in 2025 he painted the banana against natural landscapes in a series of watercolours
+
+edition:
+  unit: print
+  count: 1
+  phrase: a new limited edition print
+  features:
+    - Signed by the artist
+    - Individually numbered
+    - Four silkscreen layers with a matte varnish seal
+    - Free worldwide shipping
+  facts:
+    - four silkscreen layers with a matte varnish seal
+
+artworks:
+  - title: Window
+    facts:
+      - reimagines Comedian against hyper-realistic natural landscapes
+      - serene compositions of subtly absurd beauty
+
+context:
+  artist_bio: "Maurizio Cattelan is Italy's most provocative living artist, known for satirical sculptures and for Comedian, the duct-taped banana that sold for millions at Art Basel Miami Beach in 2019."
+  hook: "Window reimagines Cattelan's legendary Comedian, the duct-taped banana, against hyper-realistic natural landscapes, grounding his provocative symbol in serene compositions of subtly absurd beauty."
+  qualifier: ", the artist's first print release with Avant Arte"
+  making: "Each silkscreen print was produced by printmakers at Make-Ready in four layers, sealed with a matte varnish."

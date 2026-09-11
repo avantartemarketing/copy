@@ -1,0 +1,60 @@
+# Release brief: Glenn Ligon, Untitled (White on White) and Untitled (Black on Black), limited edition allocated by draw.
+# Stress test (LE): a pair of prints whose titles both begin "Untitled", a debut, an edition size, a verbatim quote.
+# Facts lifted from what was sent in August and September 2026.
+
+outputs: [ig-set, twitter-set, email-set]
+
+release:
+  campaign_code: GlennLigon_LE_26
+  link: https://avantarte.co/glennligon-x
+  mechanic: draw
+  early_access_at: "2026-08-18 16:00"
+  early_access_code: "813-889"
+  coming_soon_at: "2026-08-11 12:00"
+  launch_at: "2026-08-17 13:00"
+  sustain_at: "2026-08-26 12:00"
+  closes_at: "2026-09-09 17:00"
+  last_chance_at: "2026-09-08 12:00"
+  fundraiser: ""
+  beneficiary_handle: ""
+  advisor: Sam
+
+artist:
+  name: Glenn Ligon
+  collab_with: Glenn Ligon
+  handle: glennligon
+  x_handle: ""
+  hashtag: ""
+  collaboration_ordinal: debut
+  quote: "The legibility and illegibility of the text is what the work is about – the struggle to decipher something and find meaning."
+  facts:
+    - American conceptual artist
+    - for more than two decades has returned to James Baldwin's Stranger in the Village
+    - text-based paintings and prints
+
+edition:
+  unit: print
+  count: 2
+  phrase: two new limited edition silkscreen prints
+  features:
+    - Signed by the artist
+    - Individually numbered
+    - An edition of 75
+    - Free worldwide shipping
+  facts:
+    - edition of 75
+    - 26-layer silkscreen
+    - originally made with coal dust and oil stick
+
+artworks:
+  - title: Untitled (White on White)
+  - title: Untitled (Black on Black)
+
+context:
+  artist_bio: "For more than two decades, Glenn Ligon has returned to James Baldwin's Stranger in the Village, building repeated passages into layered compositions that reward a closer look. His text-based paintings and prints have made him one of the defining conceptual artists of his generation."
+  hook: "Revisiting Ligon's landmark Stranger series, the editions translate passages from James Baldwin's renowned essay, Stranger in the Village, into layered compositions where language becomes pure abstraction. Originally made with coal dust and oil stick, the compositions give Baldwin's words a tangible physical weight."
+  qualifier: ", Untitled (White on White) and Untitled (Black on Black)"
+  making: "Each print was produced by printmakers at Make-Ready as a 26-layer silkscreen, capturing the depth and materiality of the original coal dust and oil stick compositions."
+  facts:
+    - Stranger series
+    - James Baldwin's essay Stranger in the Village

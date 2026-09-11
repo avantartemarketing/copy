@@ -79,6 +79,7 @@ def facts(brief):
     nums = {int(x) for x in re.findall(r"\d+", blob)}
     words = set(re.findall(r"[\w'’.-]+", blob))
     words |= {w.strip("'’.-") for w in words}                        # Citizens' -> Citizens
+    words |= {w.removesuffix("'s").removesuffix("’s") for w in words}   # Millet's -> Millet
     return nums, words
 
 

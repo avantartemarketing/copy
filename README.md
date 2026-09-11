@@ -197,6 +197,17 @@ was missing (now a code on Inputs, blank for none, which adds the line to Early 
 dash. Two things are the writer's call, not the system's: five features make a heavy line on
 Instagram, and the announcement tweet carries the whole hook, so it needs X Premium.
 
+**And on three draw releases:** the Salvador Dalí Estate's three titled prints (an estate stamp, an
+edition of 400), Glenn Ligon's pair of "Untitled (…)" prints (a debut, an edition of 75) and
+Maurizio Cattelan's Window (a single print from an artist we had released sculptures with, so
+"debut" would be wrong and the first-print fact goes in the qualifier). The templates handled all
+three; the workbook did not, because its Inputs sheet had one title cell, so a pair or a trio lost
+every title but the first in the status lines, the headline, the last-chance opener and the cards.
+Inputs now has three title cells, the lines join them ("‘The Spectre of Sex Appeal’, ‘Millet's
+Architectonic Angelus’ and ‘The Phantom Cart’"), and each title gets its own card with a singular
+card line. Outside the plan's list, and so outside the system: the advisor's outreach to
+oversubscribed draw entrants, the repeat-buyer survey, and the LE past-collector early access.
+
 `templates/email-set.txt` renders the emails in the comms plan from the same brief as the
 Instagram set: Announcement (TL and LE), Welcome, Early Access (TL Flow, TL Artist PP, Insiders
 for TL and LE signed by the advisor, LE early/exclusive access), Now Live, Halfway for a 48-hour

@@ -61,12 +61,23 @@ def weekday(v):
     return dt(v).strftime("%A")
 
 
+def month(v):
+    return dt(v).strftime("%B")
+
+
 def ddmmyy(v):
     return dt(v).strftime("%d%m%y")                 # HubSpot internal-name prefix
 
 
 def day_before(v):
     return dt(v) - datetime.timedelta(days=1)
+
+
+def tag_first(text, name, handle):
+    """Insert (@handle) after the first mention of `name` in a fragment, if not already tagged."""
+    if not text or not name or not handle or ("@" + handle) in text:
+        return text or ""
+    return text.replace(name, f"{name} (@{handle})", 1)
 
 
 def rel_day(close, send):
@@ -142,8 +153,8 @@ def production_paragraph(ed, artist):
 def build_env():
     env = Environment(loader=FileSystemLoader(str(ROOT / "templates")), undefined=StrictUndefined,
                       trim_blocks=True, lstrip_blocks=True)
-    env.filters.update(uktime=uktime, ukdate=ukdate, ukdate_dd=ukdate_dd, weekday=weekday, ddmmyy=ddmmyy,
-                       day_before=day_before, rel_day=rel_day, ship_window=ship_window, edition_phrase=edition_phrase,
+    env.filters.update(uktime=uktime, ukdate=ukdate, ukdate_dd=ukdate_dd, weekday=weekday, ddmmyy=ddmmyy, month=month,
+                       day_before=day_before, rel_day=rel_day, tag_first=tag_first, ship_window=ship_window, edition_phrase=edition_phrase,
                        collect_phrase=collect_phrase, recap_phrase=recap_phrase, titles=titles, titles_q=titles_q)
     env.globals.update(OPENERS=OPENERS, EA_OPENERS=EA_OPENERS, GROUP=GROUP, WORDS=WORDS,
                        production_paragraph=production_paragraph, auth_phrase=auth_phrase)
@@ -161,7 +172,7 @@ def main():
         sys.exit(__doc__)
     brief_path, which = sys.argv[1], sys.argv[2]
     brief = yaml.safe_load(open(brief_path, encoding="utf-8"))
-    names = brief["emails"] if which == "all" else [which]
+    names = brief.get("outputs", brief.get("emails", [])) if which == "all" else [which]
     out_dir = ROOT / "out" / pathlib.Path(brief_path).stem
     out_dir.mkdir(parents=True, exist_ok=True)
     failed = False

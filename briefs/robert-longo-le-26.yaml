@@ -8,7 +8,7 @@
 # Values below are lifted from the emails actually sent in September 2026, so the rendered
 # output can be compared with the real thing.
 
-emails: [announcement-le, early-access-le, last-chance-le, trns-printing, social-ig-announcement, social-artist-ig-last-chance]
+outputs: [announcement-le, early-access-le, last-chance-le, trns-printing, ig-announcement, artist-ig-last-chance]
 
 release:
   campaign_code: RobertLongo_LE_26

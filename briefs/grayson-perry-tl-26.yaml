@@ -1,0 +1,95 @@
+# Release brief: Grayson Perry, The Changeling, time-limited edition (one week), in support of the Foundling Museum.
+# Facts and fragments lifted from what was actually sent and posted in April and May 2026, so the
+# generated Instagram set can be compared with the real one. Menu picks reproduce the real shapes.
+
+outputs: [ig-coming-soon, ig-announcement, ig-sustain, ig-now-live, ig-halfway, ig-last-chance, now-live-tl, trns-printing]
+
+release:
+  campaign_code: GraysonPerry_TL_26
+  mechanic: timed
+  window: one week
+  coming_soon_at: "2026-04-02 12:00"
+  announce_at: "2026-04-08 13:00"
+  launch_at: "2026-04-30 14:00"          # the announcement post said 17:00; the launch was 14:00
+  halfway_at: "2026-05-04 12:00"
+  closes_at: "2026-05-07 14:00"
+  last_chance_at: "2026-05-06 12:00"
+  close_local: ""
+  framing_code: ""
+  fundraiser: the Foundling Museum
+  beneficiary_handle: foundlingmuseum
+
+artist:
+  name: Grayson Perry
+  first_name: Grayson
+  surname: Perry
+  handle: alanmeasles
+  hashtag: GraysonPerry
+  collab_with: Grayson Perry
+  collaboration_ordinal: latest
+  partner: ""
+  quote: "Beauty and seriousness are perhaps the most shocking tactics left to artists these days."
+  quote_attribution: Grayson Perry
+  facts:
+    - British ceramicist and visual artist, one of the most distinctive voices in contemporary British art
+    - works across ceramics, tapestry, print and sculpture
+    - his practice examines identity, class and gender in modern society
+    - pairs the decorative language of traditional craft with direct social commentary
+    - draws on autobiography as well as social observation
+
+edition:
+  unit: print
+  count: 1
+  medium_prefix: ""
+  suffix: ""
+  size: ""
+  signed_by: artist
+  numbered: true
+  dimensions: ""
+  facts:
+    - 9-colour silkscreen print
+    - produced at Make-Ready in London, in close collaboration with the artist
+    - 410gsm Somerset White Rough Textured cotton paper
+    - signed by the artist and individually numbered
+  technique_clause: 9-colour silkscreen                                         # bare form; each post adds its own noun
+  technique_sentence: "This 9-colour silkscreen print was carefully produced at our London studio, Make-Ready, in close collaboration with the artist to capture the vivid detail of his world-renowned drawing style."
+
+artworks:
+  - title: The Changeling
+    short_title: The Changeling
+    year: 2026
+    series: ""
+    facts:
+      - a new design, created especially for the Foundling Museum
+      - portrays a child as a symbol of modern youth
+      - explores how technology shapes today's generations
+      - reinterprets changeling folklore for the digital age
+      - the museum's mission is to celebrate children in care
+    card_line: "Collect a limited edition print by Grayson Perry, exploring modern youth shaped by technology, produced in vivid detail through a 9-colour silkscreen print."
+
+context:
+  opener: delighted
+  early_access_opener: preparing
+  subject_hook: a new limited edition silkscreen print
+  artist_bio: "Grayson Perry has long been one of the most distinctive voices in contemporary British art.\n\nWorking across ceramics, tapestry, print and sculpture, his practice examines identity, class, and gender in modern society. Drawing on autobiography as well as social observation, Grayson often pairs the decorative language of traditional craft with direct commentary on the structures and contradictions that shape everyday life."
+  hook: "Created exclusively for the Foundling Museum, this edition portrays a child as a symbol of modern youth, exploring how technology shapes today's generations and supporting the museum's mission to celebrate children in care."
+  hook_short: "‘The Changeling’ explores the impact of technology on a generation of digital natives."
+  artist_line: ""
+  artist_thanks: ""
+  quote_sentence: ""
+  footer: Collect a limited edition silkscreen print
+  recap: ""
+  sustain:
+    - {format: making_of, source: a new design, at: "2026-04-20 12:00"}
+  social:
+    coming_soon: {teaser: 2, cta: 1, hashtag: false}
+    announcement: {opener: 7, collab: true, edition_line: 0, cta: 2, hashtag: true}
+    now_live: {opener: 1, middle: 1, cta: 1, hashtag: false}
+    halfway: {opener: 1, middle: 1, edition_line: true, cta: 1, hashtag: false}
+    last_chance_ours: {opener: 4, middle: 0, cta: 1, hashtag: false}
+
+post_purchase:
+  printing_update_at: "2026-06-04 15:00"
+  ship_window_unframed: {from: "2026-07-03", to: "2026-07-10"}
+  ship_window_framed: {from: "2026-07-31", to: "2026-08-07"}
+  delay_phrase: null

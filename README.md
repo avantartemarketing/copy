@@ -176,6 +176,10 @@ out/          the two campaigns rendered, so you can compare with what was sent
 tool/         the prototype page: brief form, generated sequence, validator, Claude suggestions
 ```
 
+The `templates/ig-*.txt` files are the Instagram feed set (Coming Soon, Announcement, Sustain,
+Now Live, Halfway, Last chance) and `artist-ig-last-chance.txt` the artist's own post;
+`briefs/grayson-perry-tl-26.yaml` regenerates a real campaign's set for comparison.
+
 Run it:
 
 ```

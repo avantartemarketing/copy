@@ -3,14 +3,18 @@
   Skeleton, from 118 real captions since 2025:
     opener · hook · edition line · CTA with deadline · hashtag
   Menus, chosen in the brief under context.social.announcement:
-    opener 1-6 · edition_line 0-6 · cta 1-5 (the CTA set switches with release.mechanic)
+    opener 1-7 (7 is the collab-post form, naming the artist in third person) · collab true/false · edition_line 0-6 · cta 1-5 (the CTA set switches with release.mechanic)
   Facts only, plus the same `hook` fragment the email uses.
 #}
 {% set s = context.social.announcement if context.social and context.social.announcement else {} %}
 {% set o = s.opener if s.opener is defined else 1 %}
 {% set e = s.edition_line if s.edition_line is defined else 1 %}
-{% if e == 5 and release.fundraiser and release.fundraiser in context.hook %}{% set e = 1 %}{% endif %}
+{% if e == 5 and fundraiser and fundraiser in context.hook %}{% set e = 1 %}{% endif %}
 {% set c = s.cta if s.cta is defined else 1 %}
+{% set collab = s.collab if s.collab is defined else false %}
+{% set suffix = ", created in collaboration with @avant.arte" if collab else "" %}
+{% set bh = release.beneficiary_handle if release.beneficiary_handle is defined else "" %}
+{% set fundraiser = release.fundraiser if release.fundraiser is defined else "" %}
 {% set at = ("@" ~ artist.handle) if artist.handle else artist.name %}
 {% set named = artist.name ~ ((" (@" ~ artist.handle ~ ")") if artist.handle else "") %}
 [CHANNEL] IG Main · Post, Announcement (reused on IG Ins · Post)
@@ -26,11 +30,13 @@ Announcing {{ edition|edition_phrase }} by {{ at }}{% if edition.suffix %}, {{ e
 We're delighted to introduce our {{ artist.collaboration_ordinal }} collaboration with {{ at }}.
 {% elif o == 5 %}
 Introducing our {{ artist.collaboration_ordinal }} collaboration with {{ named }} – {{ artworks|titles_q }} – available to collect individually or as a {{ "pair" if artworks|length == 2 else "set" }}.
+{% elif o == 7 %}
+Announcing {{ artworks|titles_q }}, {{ edition|edition_phrase }} by {{ named }}{{ suffix }}.
 {% else %}
 We're delighted to announce our {{ artist.collaboration_ordinal }} collaboration with {{ artist.partner }}, transforming {{ WORDS[artworks|length] }} of {{ artist.surname }}'s {{ artist.works_descriptor|default("works") }} into a new series of limited edition prints.
 {% endif %}
 
-{{ context.hook }}
+{{ context.hook|tag_first(fundraiser, bh) }}
 
 {% if e == 1 %}
 Signed by the artist. Individually numbered.
@@ -45,7 +51,7 @@ Each {{ (edition.medium_prefix ~ " ") if edition.medium_prefix else "" }}{{ edit
 {{ edition.technique_sentence }}
 
 {% elif e == 5 %}
-Released in support of {{ release.fundraiser }}{% if release.beneficiary_handle %} (@{{ release.beneficiary_handle }}){% endif %}.
+Released in support of {{ fundraiser }}{% if bh %} (@{{ bh }}){% endif %}.
 
 {% elif e == 6 %}
 Created in close collaboration with the {{ artist.partner }}, each {{ edition.unit }} is {{ auth_phrase(edition, artist) }}, and is individually numbered.
@@ -84,7 +90,7 @@ Link in bio to get updates.
 Sign up to be reminded when the launch starts. Link in bio.
 {% endif %}
 {% endif %}
-{% if artist.hashtag %}
+{% if artist.hashtag and (s.hashtag if s.hashtag is defined else true) %}
 
 #{{ artist.hashtag }}
 {% endif %}

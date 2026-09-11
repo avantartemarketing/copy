@@ -1,7 +1,7 @@
 # Release brief: Gregory Crewdson, Dream House, time-limited edition (48-hour window).
 # Values are lifted from the emails sent in June to August 2026.
 
-emails: [now-live-tl, trns-printing, social-ig-announcement, social-artist-ig-last-chance]
+outputs: [now-live-tl, trns-printing, ig-announcement, artist-ig-last-chance]
 
 release:
   campaign_code: GregoryCrewd_TL_26

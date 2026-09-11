@@ -17,39 +17,49 @@
 {% set local = (" / " ~ release.close_local) if release.close_local else "" %}
 {% set unit = edition.unit %}
 {% set yr = artworks[0].year if artworks[0].year is defined and artworks[0].year else "" %}
+{% set fundraiser = release.fundraiser if release.fundraiser is defined else "" %}
+{% set technique = edition.technique_sentence if edition.technique_sentence is defined else "" %}
+{% set artist_line = context.artist_line if context.artist_line is defined else "" %}
+{% set artist_thanks = context.artist_thanks if context.artist_thanks is defined else "" %}
+{% set dims = edition.dimensions if edition.dimensions is defined else "" %}
+{% set series = artworks[0].series if artworks[0].series is defined else "" %}
+{% set series_ref = series ~ ("" if series.lower().endswith(("paintings", "series", "works")) else " series") %}
+{% set untitled = artworks[0].title == "Untitled" and series %}
+{% set plural = artworks|length > 1 or edition.count|int > 1 %}
+{% set work = ("my new limited edition " ~ unit ~ ("s" if plural else "") ~ " from " ~ series) if untitled else artworks|titles_q %}
 [CHANNEL] Artist IG · Post, Last chance
 [INTERNAL NAME] {{ send|ddmmyy }} · {{ release.campaign_code }} · Last chance · Artist IG
 [CAPTION]
 {% if o == 1 %}
-There are {{ "24 hours" if when == "tomorrow" else "just a few hours" }} left to {{ "enter the draw to collect" if draw else "collect" }} {{ artworks|titles_q }}, my {{ artist.collaboration_ordinal }} {{ unit }} collaboration with @avant.arte.
+There are {{ "24 hours" if when == "tomorrow" else "just a few hours" }} left to {{ "enter the draw to collect" if draw else "collect" }} {{ work }}{{ ", made with @avant.arte" if untitled else ", my " ~ artist.collaboration_ordinal ~ " " ~ unit ~ " collaboration with @avant.arte" }}.
 {% elif o == 2 %}
-Last chance to collect {{ artworks|titles_q }} – my {{ artist.collaboration_ordinal }} {{ (edition.medium_prefix ~ " ") if edition.medium_prefix else "" }}{{ unit }} edition with @avant.arte.
+Last chance to collect {{ work }} – my {{ artist.collaboration_ordinal }} {{ "collaboration" if untitled else ((edition.medium_prefix ~ " ") if edition.medium_prefix else "") ~ unit ~ " edition" }} with @avant.arte.
 {% elif o == 3 %}
-This is your last chance to collect my new limited edition {{ unit }}{{ "s" if artworks|length > 1 else "" }}, {{ artworks|titles_q }}.
+This is your last chance to collect {{ work if untitled else "my new limited edition " ~ unit ~ ("s" if plural else "") ~ ", " ~ artworks|titles_q }}.
 {% elif o == 4 %}
-Just 24 hours remaining to {{ "enter the draw for" if draw else "collect" }} my {{ artist.collaboration_ordinal }} collaboration with @avant.arte – {{ edition|edition_phrase }}{% if yr and artworks|length == 1 %} of my {{ yr }} work {{ artworks|titles_q }}{% endif %}.
+Just 24 hours remaining to {{ "enter the draw for" if draw else "collect" }} my {{ artist.collaboration_ordinal }} collaboration with @avant.arte – {{ edition|edition_phrase }}{% if untitled %} from {{ series }}{% elif yr and artworks|length == 1 %} of my {{ yr }} work {{ artworks|titles_q }}{% endif %}.
 {% elif o == 5 %}
-The {{ "draw for" if draw else "window to collect" }} the {{ WORDS[artworks|length] if artworks|length > 1 else "" }}{{ unit }}{{ "s" if artworks|length > 1 else "" }} made by @avant.arte from my {{ artworks[0].series or "recent work" }} closes {{ when }}.
+The {{ "draw for" if draw else "window to collect" }} the {{ (WORDS[edition.count|int] ~ " ") if plural else "" }}{{ unit }}{{ "s" if plural else "" }} made by @avant.arte from my {{ series_ref if series else "recent work" }} closes {{ when }}.
 {% else %}
-This is your last chance to collect {{ artworks|titles_q }} – {{ edition|edition_phrase }} by {{ artist.name }}{{ (" (@" ~ artist.handle ~ ")") if artist.handle else "" }} in collaboration with @avant.arte.
+This is your last chance to collect {{ (edition|edition_phrase ~ " from " ~ series) if untitled else artworks|titles_q ~ " – " ~ edition|edition_phrase }} by {{ artist.name }}{{ (" (@" ~ artist.handle ~ ")") if artist.handle else "" }} in collaboration with @avant.arte.
 {% endif %}
 
-{% if m == 1 and release.fundraiser %}
-Released in support of {{ release.fundraiser }}.
+{% if m == 1 and fundraiser %}
+Released in support of {{ fundraiser }}.
 
 {% elif m == 2 %}
 - Limited edition {{ (edition.medium_prefix ~ " ") if edition.medium_prefix else "" }}{{ unit }}{{ "s" if artworks|length > 1 else "" }}
-{% if edition.dimensions %}
-- {{ edition.dimensions }}
+{% if dims %}
+- {{ dims }}
 {% endif %}
 - Signed and numbered
 - Worldwide shipping
 
-{% elif m == 3 and edition.technique_sentence %}
-{{ edition.technique_sentence }}
+{% elif m == 3 and technique %}
+{{ technique }}
 
-{% elif m == 4 and context.artist_line %}
-{{ context.artist_line }}
+{% elif m == 4 and artist_line %}
+{{ artist_line }}
 
 {% elif m == 5 and artworks|length > 1 %}
 Available to collect individually or as a {{ "pair" if artworks|length == 2 else "set" }}.
@@ -82,9 +92,9 @@ Link in bio to buy a print before {{ release.closes_at|uktime }} {{ when }}.
 Available until {{ release.closes_at|uktime }} {{ when }}. Link in bio to collect.
 {% endif %}
 {% endif %}
-{% if context.artist_thanks %}
+{% if artist_thanks %}
 
-{{ context.artist_thanks }}
+{{ artist_thanks }}
 {% endif %}
 {% if artist.hashtag %}
 

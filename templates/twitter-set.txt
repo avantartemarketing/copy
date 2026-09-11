@@ -1,0 +1,56 @@
+{#
+  THE TWITTER SET — the tweets in the comms plan: coming soon, announcement, now live, halfway, last chance.
+
+  A tweet is the post's status line with the X handle, the hook on the announcement only, the beneficiary
+  named once, and an action line that ends with the link. No features line, no hashtag, no bio.
+  Coming Soon names the artist and not the work, as the Instagram tease does. Same deadline form as the posts.
+  The same lines live in tool/release-copy.xlsx, sheet Tweets.
+#}
+{% set xh = artist.x_handle if artist.x_handle is defined and artist.x_handle else "" %}
+{% set named = artist.name ~ ((" (@" ~ xh ~ ")") if xh else "") %}
+{% set link = release.link if release.link is defined and release.link else "[link]" %}
+{% set draw = release.mechanic == "draw" %}
+{% set fundraiser = release.fundraiser if release.fundraiser is defined and release.fundraiser else "" %}
+{% set series = artworks[0].series if artworks[0].series is defined and artworks[0].series else "" %}
+{% set untitled = artworks[0].title == "Untitled" and series %}
+{% set work = ("the " ~ series ~ " series") if untitled else artworks|titles_q %}
+{% set deadline = "Closes " ~ release.closes_at|ukdate ~ " at " ~ release.closes_at|uktime ~ "." %}
+{% set pre_launch = (deadline ~ " Enter the draw: " ~ link) if draw else ("Available for " ~ release.window ~ " from " ~ release.launch_at|uktime ~ " on " ~ release.launch_at|ukdate ~ ". Sign up for updates: " ~ link) %}
+{% set open = (deadline ~ " Enter the draw: " ~ link) if draw else (deadline ~ " Buy a print: " ~ link) %}
+{% set ns = namespace(n=0) %}
+{% for phase, send in phases(release, artist) %}
+{% if phase in ["coming soon", "announce", "live", "still time", "last chance"] %}
+{% set ns.n = ns.n + 1 %}
+{% if ns.n > 1 %}
+
+{% endif %}
+[TWEET {{ ns.n }} · {{ phase }} · {{ send|ddmmyy }} · {{ release.campaign_code }}]
+{% if phase == "coming soon" %}
+Our {{ artist.collaboration_ordinal }} collaboration with {{ named }} is on the horizon.
+
+Sign up for updates: {{ link }}
+{% elif phase == "announce" %}
+Announcing {% if untitled %}{{ edition|edition_phrase }} by {{ named }}, from {{ work }}{% else %}{{ work }}, {{ edition|edition_phrase }} by {{ named }}{% endif %}.
+
+{{ context.hook }}
+{% if fundraiser and fundraiser not in context.hook %}
+
+Released in support of {{ fundraiser }}.
+{% endif %}
+
+{{ pre_launch }}
+{% elif phase == "live" %}
+{{ work|cap_first }} by {{ named }} is now available to collect, for {{ release.window }} only.
+
+{{ open }}
+{% elif phase == "still time" %}
+There's still time to collect {{ work }} by {{ named }}.
+
+{{ open }}
+{% else %}
+Last chance to {{ "enter the draw for" if draw else "collect" }} {{ work }} by {{ named }}.
+
+{{ open }}
+{% endif %}
+{% endif %}
+{% endfor %}

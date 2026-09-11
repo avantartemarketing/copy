@@ -30,7 +30,7 @@
 {% if not loop.first %}
 
 {% endif %}
-[POST {{ loop.index }} · {{ phase }} · {{ send|ddmmyy }} · {{ release.campaign_code }}]
+[POST {{ loop.index }} · {{ phase }} · {{ send|ddmmyy }} · {{ release.campaign_code }} · {{ "Main + Insiders" if phase in ["announce", "live", "still time"] else "Main" }}]
 {% if phase == "coming soon" %}
 {{ context.artist_bio|tag_first(artist.name, handle) }}
 

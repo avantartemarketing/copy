@@ -160,6 +160,13 @@ def check_email(text):
             warnings.append(f"“{w}” used {n}× across the email (cap {cap})")
     if re.search(r"(?<![\w'’])(?!a\b)[a-z] [a-z]{1,2}\b|\b[a-z]{1,2} (?!a\b)[a-z](?![\w'’])", body):
         warnings.append("possible split word (“o f”, “an d”): a known HubSpot editor artefact")
+    if "[TWEET" in text:                                             # tweet rules: the link is in the tweet
+        for chunk in text.split("[TWEET")[1:]:
+            tweet = chunk.split("]", 1)[1].strip()
+            if re.search(r"link in (our |my |the )?bio", tweet, re.I):
+                errors.append("tweet says “link in bio”: a tweet carries the link")
+            if len(tweet) > 280:
+                warnings.append(f"tweet of {len(tweet)} characters (over 280 needs X Premium; house median 183)")
     if "[CAPTION]" in text:                                          # Instagram caption rules
         cap = text.split("[CAPTION]", 1)[1].strip()
         if len(cap) > 650:

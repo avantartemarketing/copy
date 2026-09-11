@@ -19,6 +19,8 @@ for c, h in zip("ABC", ["Field", "Value", "What it is"]): ws[f"{c}3"] = h; ws[f"
 facts = [
     ("artist", "Grayson Perry", "full name"),
     ("handle", "alanmeasles", "Instagram handle, blank if none"),
+    ("x_handle", "", "X (Twitter) handle, blank if none"),
+    ("link", "https://avantarte.co/grayson-perry", "the release's short link, for tweets"),
     ("hashtag", "GraysonPerry", "announcement post only; blank for none"),
     ("ordinal", "latest", "debut, latest or second"),
     ("title", "The Changeling", "exactly as it appears; for a series with one shared title, give the series name"),
@@ -58,7 +60,7 @@ for k, v, note in frags:
     ws.row_dimensions[row].height = 16 * max(2, math.ceil(len(v) / 80) + v.count("\n")); R[k] = row; row += 1
 row += 1; ws[f"A{row}"] = "Derived (formulas, do not edit)"; ws[f"A{row}"].font = BOLD; row += 1
 B = lambda k: f"$B${R[k]}"
-derived = ["named", "work", "Work", "work_email", "Work_email", "work_intro", "support", "beneficiary_tagged", "bio_tagged", "hook_names_beneficiary",
+derived = ["named", "named_x", "work", "Work", "work_email", "Work_email", "work_intro", "support", "beneficiary_tagged", "bio_tagged", "hook_names_beneficiary",
            "features", "features_list", "features_list_support", "making_ours", "making_ours_tagged",
            "launch_date", "launch_time", "launch_weekday", "launch_date_dd", "close_date", "close_time", "close_weekday", "close_date_dd",
            "collect_phrase", "edition_phrase_cap", "window_cap", "card_line", "card", "quote_line", "each_artwork", "work_word", "add_what"]
@@ -66,6 +68,7 @@ for k in derived:
     R[k] = row; ws[f"A{row}"] = k; ws[f"A{row}"].font = ARIAL; ws[f"B{row}"].font = ARIAL; ws[f"B{row}"].alignment = WRAP; row += 1
 F = {
  "named": f'={B("artist")}&IF({B("handle")}="",""," (@"&{B("handle")}&")")',
+ "named_x": f'={B("artist")}&IF({B("x_handle")}="",""," (@"&{B("x_handle")}&")")',
  "work": f'=IF({B("is_series")}="yes","the "&{B("title")}&" series","‘"&{B("title")}&"’")',
  "Work": f'=UPPER(LEFT({B("work")},1))&MID({B("work")},2,999)',
  "work_email": f'=IF({B("is_series")}="yes","the "&{B("title")}&" series",{B("title")})',
@@ -122,6 +125,13 @@ lines = [
  ("post · action while open, draw", "Enter the draw via our link in bio. Closes {close_date} at {close_time}."),
  ("post · coming soon · action", "Link in bio to get updates."),
  ("post · hashtag", "#{hashtag}"),
+ ("TWEETS", None),
+ ("tweet · coming soon · status", "Our {ordinal} collaboration with {named_x} is on the horizon."),
+ ("tweet · coming soon · action", "Sign up for updates: {link}"),
+ ("tweet · beneficiary line", "Released in support of {beneficiary}."),
+ ("tweet · action before launch, timed", "Available for {window} from {launch_time} on {launch_date}. Sign up for updates: {link}"),
+ ("tweet · action, draw", "Closes {close_date} at {close_time}. Enter the draw: {link}"),
+ ("tweet · action while open, timed", "Closes {close_date} at {close_time}. Buy a print: {link}"),
  ("EMAILS · shared", None),
  ("email · greeting", "Hi " + TOKEN + ","),
  ("email · questions line", "If you have any questions, please don't hesitate to get in touch by replying to this email."),
@@ -184,7 +194,7 @@ lines = [
  ("email · monthly preview · when, draw", "The edition will be allocated by a randomised draw, which closes at {close_time} on {close_date}."),
  ("email · monthly preview · when, timed", "The edition will be available to collect for {window} only, from {launch_time} on {launch_weekday}, {launch_date_dd}."),
 ]
-ph = {f"{{{k}}}": k for k in ["artist", "named", "work", "Work", "work_email", "Work_email", "work_intro", "support", "edition_phrase", "edition_phrase_cap", "collect_phrase", "ordinal", "window",
+ph = {f"{{{k}}}": k for k in ["artist", "named", "named_x", "link", "beneficiary", "work", "Work", "work_email", "Work_email", "work_intro", "support", "edition_phrase", "edition_phrase_cap", "collect_phrase", "ordinal", "window",
                              "launch_date", "launch_time", "launch_weekday", "launch_date_dd", "close_date", "close_time", "close_weekday", "close_date_dd",
                              "beneficiary_tagged", "quote", "hashtag", "features", "advisor", "early_access_code", "each_artwork", "work_word", "add_what"]}
 L = {}; r = 4
@@ -209,8 +219,8 @@ words_status = LC("post · artist's words · status"); words_second = LC("post �
 # ================================================================= Posts
 ps = wb.create_sheet("Posts")
 ps["A1"] = "The posts, assembled"; ps["A1"].font = TITLE
-ps["A2"] = "Every cell below is a formula over Inputs and Lines. Skeleton: status line · substance · features line · action line · hashtag. Coming Soon opens with the bio."; ps["A2"].font = NOTE
-for i, h in enumerate(["#", "Post", "Made of", "Status line", "Substance", "Features line", "Action line", "Hashtag", "Caption", "Characters"], 1):
+ps["A2"] = "Every cell below is a formula over Inputs and Lines. Skeleton: status line · substance · features line · action line · hashtag. Coming Soon opens with the bio. The Insiders account posts the same caption; Channels says which."; ps["A2"].font = NOTE
+for i, h in enumerate(["#", "Post", "Channels", "Made of", "Status line", "Substance", "Features line", "Action line", "Hashtag", "Caption", "Characters"], 1):
     c = ps.cell(row=3, column=i, value=h); c.font = BOLD; c.fill = GREY
 feat = LC("post · features line")
 benef = f'IF({IB("beneficiary_tagged")}="",""," "&{LC("post · beneficiary line")})'
@@ -221,22 +231,51 @@ def join(cells, guard=None, guard_text=None):
     return f'=IF({guard},"{guard_text}",{expr})' if guard else "=" + expr
 quote = IB("quote")
 NO_QUOTE = "(no quote given, post skipped)"
+NA_DRAW = "(not used for a draw)"
+MAIN, BOTH = "Main", "Main + Insiders"
 posts = [
- ("coming soon", "bio · status · action", f'={LC("post · coming soon · status")}', f'={IB("bio_tagged")}', '=""', f'={LC("post · coming soon · action")}', '=""', join(["E{r}", "D{r}", "G{r}"])),
- ("announce", "status · hook · features + beneficiary · action · hashtag", f'=IF({IB("is_series")}="yes",{LC("post · announce · status, series")},{LC("post · announce · status")})', f'={IB("hook")}', f'={feat}&IF({IB("hook_names_beneficiary")},"",{benef})', f'={pre}', f'=IF({IB("hashtag")}="","",{LC("post · hashtag")})', join(["D{r}", "E{r}", "F{r}", "G{r}", "H{r}"])),
- ("sustain", "status · making · features + beneficiary · action", f'={LC("post · sustain · status")}', f'={IB("making_ours_tagged")}', f'={feat}&{benef}', f'={pre}', '=""', join(["D{r}", "E{r}", "F{r}", "G{r}"])),
- ("sustain, the artist's words", "quote · status · features + beneficiary · action", f'=IF({quote}="","{NO_QUOTE}",{words_status})', f'=IF({quote}="","",{words_second})', f'=IF({quote}="","",{feat}&{benef})', f'=IF({quote}="","",{pre})', '=""', join(["D{r}", "E{r}", "F{r}", "G{r}"], f'{quote}=""', NO_QUOTE)),
- ("live (timed only)", "status · features + beneficiary · action", f'=IF({draw},"(not used for a draw)",{LC("post · live · status")})', '=""', f'=IF({draw},"",{feat}&{benef})', f'=IF({draw},"",{opn})', '=""', join(["D{r}", "F{r}", "G{r}"], draw, "(not used for a draw)")),
- ("still time (timed only)", "status · features + beneficiary · action", f'=IF({draw},"(not used for a draw)",{LC("post · still time · status")})', '=""', f'=IF({draw},"",{feat}&{benef})', f'=IF({draw},"",{opn})', '=""', join(["D{r}", "F{r}", "G{r}"], draw, "(not used for a draw)")),
- ("last chance", "status · features + beneficiary · action", f'=IF({draw},{LC("post · last chance · status, draw")},{LC("post · last chance · status")})', '=""', f'={feat}&{benef}', f'={opn}', '=""', join(["D{r}", "F{r}", "G{r}"])),
+ # name, channels, made of, status, substance, features, action, hashtag, caption
+ ("coming soon", MAIN, "bio · status · action", f'={LC("post · coming soon · status")}', f'={IB("bio_tagged")}', '=""', f'={LC("post · coming soon · action")}', '=""', join(["F{r}", "E{r}", "H{r}"])),
+ ("announce", BOTH, "status · hook · features + beneficiary · action · hashtag", f'=IF({IB("is_series")}="yes",{LC("post · announce · status, series")},{LC("post · announce · status")})', f'={IB("hook")}', f'={feat}&IF({IB("hook_names_beneficiary")},"",{benef})', f'={pre}', f'=IF({IB("hashtag")}="","",{LC("post · hashtag")})', join(["E{r}", "F{r}", "G{r}", "H{r}", "I{r}"])),
+ ("sustain", MAIN, "status · making · features + beneficiary · action", f'={LC("post · sustain · status")}', f'={IB("making_ours_tagged")}', f'={feat}&{benef}', f'={pre}', '=""', join(["E{r}", "F{r}", "G{r}", "H{r}"])),
+ ("sustain, the artist's words", MAIN, "quote · status · features + beneficiary · action", f'=IF({quote}="","{NO_QUOTE}",{words_status})', f'=IF({quote}="","",{words_second})', f'=IF({quote}="","",{feat}&{benef})', f'=IF({quote}="","",{pre})', '=""', join(["E{r}", "F{r}", "G{r}", "H{r}"], f'{quote}=""', NO_QUOTE)),
+ ("live (timed only)", BOTH, "status · features + beneficiary · action", f'=IF({draw},"{NA_DRAW}",{LC("post · live · status")})', '=""', f'=IF({draw},"",{feat}&{benef})', f'=IF({draw},"",{opn})', '=""', join(["E{r}", "G{r}", "H{r}"], draw, NA_DRAW)),
+ ("still time (timed only)", BOTH + " (the plan's Halfway through)", "status · features + beneficiary · action", f'=IF({draw},"{NA_DRAW}",{LC("post · still time · status")})', '=""', f'=IF({draw},"",{feat}&{benef})', f'=IF({draw},"",{opn})', '=""', join(["E{r}", "G{r}", "H{r}"], draw, NA_DRAW)),
+ ("last chance", MAIN, "status · features + beneficiary · action", f'=IF({draw},{LC("post · last chance · status, draw")},{LC("post · last chance · status")})', '=""', f'={feat}&{benef}', f'={opn}', '=""', join(["E{r}", "G{r}", "H{r}"])),
 ]
-for i, (name, made, d, e, f, g, h, cap) in enumerate(posts):
+for i, (name, chans, made, d, e, f, g, h, cap) in enumerate(posts):
     rr = 4 + i
-    for col, v in enumerate([i + 1, name, made, d, e, f, g, h, cap.replace("{r}", str(rr)), f"=LEN(I{rr})"], 1):
+    for col, v in enumerate([i + 1, name, chans, made, d, e, f, g, h, cap.replace("{r}", str(rr)), f"=LEN(J{rr})"], 1):
         c = ps.cell(row=rr, column=col, value=v); c.font = ARIAL; c.alignment = WRAP; c.border = BOX
     ps.row_dimensions[rr].height = 190 if i in (0, 1) else 120
-for col, w in zip("ABCDEFGHIJ", [4, 22, 34, 44, 56, 44, 44, 14, 92, 11]): ps.column_dimensions[col].width = w
-ps.freeze_panes = "D4"
+for col, w in zip("ABCDEFGHIJK", [4, 22, 18, 34, 44, 56, 44, 44, 14, 92, 11]): ps.column_dimensions[col].width = w
+ps.freeze_panes = "E4"
+
+# ================================================================= Tweets
+ts = wb.create_sheet("Tweets")
+ts["A1"] = "The tweets, assembled"; ts["A1"].font = TITLE
+ts["A2"] = "The post's status line with the X handle, the hook on the announcement only, the beneficiary named once, and an action line that ends with the link. No features line, no hashtag, no bio."; ts["A2"].font = NOTE
+for i, h in enumerate(["#", "Tweet", "Made of", "Status line", "Substance", "Beneficiary line", "Action line", "Tweet", "Characters"], 1):
+    c = ts.cell(row=3, column=i, value=h); c.font = BOLD; c.fill = GREY
+X = lambda expr: f'SUBSTITUTE({expr},{IB("named")},{IB("named_x")})'          # the same status line, with the X handle instead of the Instagram one
+pre_t = f'IF({draw},{LC("tweet · action, draw")},{LC("tweet · action before launch, timed")})'
+opn_t = f'IF({draw},{LC("tweet · action, draw")},{LC("tweet · action while open, timed")})'
+ben_t = f'IF(OR({IB("beneficiary")}="",{IB("hook_names_beneficiary")}),"",{LC("tweet · beneficiary line")})'
+announce_status = f'IF({IB("is_series")}="yes",{LC("post · announce · status, series")},{LC("post · announce · status")})'
+tweets = [
+ ("coming soon", "status · action", f'={LC("tweet · coming soon · status")}', '=""', '=""', f'={LC("tweet · coming soon · action")}', join(["D{r}", "G{r}"])),
+ ("announce", "status · hook · beneficiary · action", f'={X(announce_status)}', f'={IB("hook")}', f'={ben_t}', f'={pre_t}', join(["D{r}", "E{r}", "F{r}", "G{r}"])),
+ ("live (timed only)", "status · action", f'=IF({draw},"{NA_DRAW}",{X(LC("post · live · status"))})', '=""', '=""', f'=IF({draw},"",{opn_t})', join(["D{r}", "G{r}"], draw, NA_DRAW)),
+ ("still time (timed only)", "status · action", f'=IF({draw},"{NA_DRAW}",{X(LC("post · still time · status"))})', '=""', '=""', f'=IF({draw},"",{opn_t})', join(["D{r}", "G{r}"], draw, NA_DRAW)),
+ ("last chance", "status · action", f'=IF({draw},{X(LC("post · last chance · status, draw"))},{X(LC("post · last chance · status"))})', '=""', '=""', f'={opn_t}', join(["D{r}", "G{r}"])),
+]
+for i, (name, made, d, e, f, g, tw) in enumerate(tweets):
+    rr = 4 + i
+    for col, v in enumerate([i + 1, name, made, d, e, f, g, tw.replace("{r}", str(rr)), f"=LEN(H{rr})"], 1):
+        c = ts.cell(row=rr, column=col, value=v); c.font = ARIAL; c.alignment = WRAP; c.border = BOX
+    ts.row_dimensions[rr].height = 150 if i == 1 else 80
+for col, w in zip("ABCDEFGHI", [4, 22, 30, 50, 56, 36, 50, 80, 11]): ts.column_dimensions[col].width = w
+ts.freeze_panes = "D4"
 
 # ================================================================= Emails
 es = wb.create_sheet("Emails")
@@ -321,8 +360,10 @@ es.freeze_panes = "E4"
 rs = wb.create_sheet("Rules")
 rs["A1"] = "The system on one page"; rs["A1"].font = TITLE
 rules = [
- ("What it covers", "Every post on our own Instagram feed, and the emails in the comms plan: Announcement (TL and LE), Welcome, Early Access (TL Flow, TL Artist PP, Insiders TL and LE, LE early/exclusive), Now Live, Halfway, 5 days to go, 3 days to go, Last chance (TL and LE), the two LE surveys, and this release's paragraph for the Monthly Preview. The artist's own email is rare and stays hand-written."),
+ ("What it covers", "Every post on our own Instagram feed and the Insiders account, the tweets, and the emails in the comms plan: Announcement (TL and LE), Welcome, Early Access (TL Flow, TL Artist PP, Insiders TL and LE, LE early/exclusive), Now Live, Halfway, 5 days to go, 3 days to go, Last chance (TL and LE), the two LE surveys, and this release's paragraph for the Monthly Preview. The artist's own email is rare and stays hand-written."),
  ("Skeleton, posts", "Every post is: status line, substance, features line, action line, and a hashtag on the announcement only. Coming Soon opens with the bio."),
+ ("Insiders", "The Insiders account posts the same caption as the main feed. The plan says which: Announcement, Now Live and Halfway for a timed edition, Announcement for a draw. The Channels column on Posts carries this. Stories are image-led and stay outside the sheet."),
+ ("Twitter", "A tweet is the post's status line with the X handle, the hook on the announcement only, the beneficiary named once, and an action line that ends with the link: sign up for updates, enter the draw, or buy a print. No features line, no hashtag, no bio. Same deadline form. Coming soon names the artist and not the work."),
  ("Skeleton, emails", "Every email is: subject, preview, kicker, headline, body paragraphs, CTA, card, quote, footer. Bodies are fixed sentences from the Lines sheet with the same fragments dropped in. Halfway and 5 days to go have no body: they are image-led."),
  ("Fragments", "Four per release, written once: bio (2 to 3 sentences, Coming Soon only), hook (1 to 2 sentences about the work, in every post and email), making (one sentence naming Make-Ready), quote (verbatim). The hook and bio must not repeat each other."),
  ("Voice", "Fragments are voice-neutral: no we or our, no artist name in the hook or the making line, and 'printmakers at Make-Ready'. The sheet adds 'our'. The Insiders email and the first-time survey are signed by the advisor named on Inputs. Features never say 'our'."),

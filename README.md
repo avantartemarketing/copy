@@ -191,8 +191,13 @@ hand-written. That works because the fragments are written voice-neutral: the ho
 work with no artist name and no "we" or "our"; the making line says "printmakers at Make-Ready"
 and the template adds "our"; features never say "our". `templates/ig-set.txt` is the whole
 Instagram feed set from one skeleton (status line, substance, features line, action line): five
-status lines, three CTAs, one deadline form, four fragments, no menus. The workbook and the
-templates carry the same lines.
+status lines, three CTAs, one deadline form, four fragments, no menus. The Insiders account posts
+the same captions (the archive shows them near-identical), so each post carries a channel tag
+instead of new lines: Announcement, Now Live and Halfway for a timed edition, Announcement for a
+draw. `templates/twitter-set.txt` is the tweets: the post's status line with the X handle, the
+hook on the announcement only, the beneficiary named once, and an action line that ends with the
+release's link. No features line, no hashtag, no bio. The workbook and the templates carry the
+same lines.
 
 Run it:
 

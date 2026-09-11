@@ -2,10 +2,11 @@
 # Facts and fragments lifted from what was actually sent and posted in April and May 2026, so the
 # generated Instagram set can be compared with the real one. Menu picks reproduce the real shapes.
 
-outputs: [ig-set, email-set, trns-printing]
+outputs: [ig-set, twitter-set, email-set, trns-printing]
 
 release:
   campaign_code: GraysonPerry_TL_26
+  link: https://avantarte.co/grayson-perry               # the release's short link, for tweets
   mechanic: timed
   window: one week
   coming_soon_at: "2026-04-02 12:00"
@@ -26,6 +27,7 @@ artist:
   first_name: Grayson
   surname: Perry
   handle: alanmeasles
+  x_handle: ""                             # X (Twitter) handle; blank if none
   hashtag: GraysonPerry
   collab_with: Grayson Perry
   collaboration_ordinal: latest

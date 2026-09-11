@@ -8,10 +8,11 @@
 # Values below are lifted from the emails actually sent in September 2026, so the rendered
 # output can be compared with the real thing.
 
-outputs: [ig-set, email-set, trns-printing, artist-ig-last-chance]
+outputs: [ig-set, twitter-set, email-set, trns-printing, artist-ig-last-chance]
 
 release:
   campaign_code: RobertLongo_LE_26
+  link: https://avantarte.co/robert-longo               # the release's short link, for tweets
   mechanic: draw                          # draw | timed | ranked_auction
   early_access_at: "2026-09-03 16:00"
   early_access_hours: 48
@@ -31,6 +32,7 @@ artist:
   first_name: Robert
   surname: Longo
   handle: robert_longo_studio               # Instagram; blank if the artist has no account
+  x_handle: ""                             # X (Twitter) handle; blank if none
   hashtag: ""                              # e.g. robertlongo; blank for none
   collab_with: Brooklyn-born artist Robert Longo   # exact words after "collaboration with"
   collaboration_ordinal: latest                    # debut | latest | second

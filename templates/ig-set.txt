@@ -1,0 +1,86 @@
+{#
+  THE INSTAGRAM SET — every post on Avant Arte's own accounts, from one skeleton:
+
+      status line            one fixed sentence per phase: coming soon, announce, sustain, live, closing
+      substance              coming soon: bio · announce: hook · sustain: making, then the quote · live and closing: none
+      edition line           "Signed by the artist and individually numbered." plus the beneficiary, named once per post
+      action line            one of three CTAs, then one deadline form
+      hashtag                announcement only
+
+  Three fragments per release (bio, hook, making). Everything else is a fact. No menus.
+  Coming Soon is the one exception to the order: it opens with the bio, because the bio names the artist.
+#}
+{% set handle = artist.handle if artist.handle is defined and artist.handle else "" %}
+{% set named = artist.name ~ ((" (@" ~ handle ~ ")") if handle else "") %}
+{% set draw = release.mechanic == "draw" %}
+{% set fundraiser = release.fundraiser if release.fundraiser is defined and release.fundraiser else "" %}
+{% set bh = release.beneficiary_handle if release.beneficiary_handle is defined and release.beneficiary_handle else "" %}
+{% set ben_line = ("Released in support of " ~ fundraiser ~ ((" (@" ~ bh ~ ")") if bh else "") ~ ".") if fundraiser else "" %}
+{% set series = artworks[0].series if artworks[0].series is defined and artworks[0].series else "" %}
+{% set untitled = artworks[0].title == "Untitled" and series %}
+{% set work = ("the " ~ series ~ " series") if untitled else artworks|titles_q %}
+{% set plural = artworks|length > 1 or edition.count|int > 1 %}
+{% set edition_line = ("Each " ~ edition.unit ~ " is signed by the artist and individually numbered.") if plural else "Signed by the artist and individually numbered." %}
+{% set deadline = "Closes " ~ release.closes_at|ukdate ~ " at " ~ release.closes_at|uktime ~ "." %}
+{% set pre_launch = ("Enter the draw via our link in bio. " ~ deadline) if draw else ("Available for " ~ release.window ~ " from " ~ release.launch_at|uktime ~ " on " ~ release.launch_at|ukdate ~ ". Link in bio to get updates.") %}
+{% set open = ("Enter the draw via our link in bio. " ~ deadline) if draw else ("Link in bio to buy a print. " ~ deadline) %}
+{% set hook = context.hook|tag_first(fundraiser, bh) %}
+{% for phase, send in phases(release, artist) %}
+{% if not loop.first %}
+
+{% endif %}
+[POST {{ loop.index }} · {{ phase }} · {{ send|ddmmyy }} · {{ release.campaign_code }}]
+{% if phase == "coming soon" %}
+{{ context.artist_bio|tag_first(artist.name, handle) }}
+
+Our {{ artist.collaboration_ordinal }} collaboration is on the horizon.
+
+Link in bio to get updates.
+{% elif phase == "announce" %}
+Announcing {% if untitled %}{{ edition|edition_phrase }} by {{ named }}, from {{ work }}{% else %}{{ work }}, {{ edition|edition_phrase }} by {{ named }}{% endif %}.
+
+{{ hook }}
+
+{{ edition_line }}{{ (" " ~ ben_line) if (fundraiser and fundraiser not in context.hook) else "" }}
+
+{{ pre_launch }}
+{% if artist.hashtag is defined and artist.hashtag %}
+
+#{{ artist.hashtag }}
+{% endif %}
+{% elif phase == "sustain" %}
+A closer look at {{ work }}, {{ edition|edition_phrase }} by {{ named }}.
+
+{{ context.making }}
+
+{{ edition_line }}{{ (" " ~ ben_line) if ben_line else "" }}
+
+{{ pre_launch }}
+{% elif phase == "sustain, the artist's words" %}
+“{{ artist.quote }}” – {{ artist.name }}
+
+{{ work|cap_first }}, {{ edition|edition_phrase }} by {{ named }}.
+
+{{ edition_line }}{{ (" " ~ ben_line) if ben_line else "" }}
+
+{{ pre_launch }}
+{% elif phase == "live" %}
+{{ work|cap_first }} by {{ named }} is now available to collect, for {{ release.window }} only.
+
+{{ edition_line }}{{ (" " ~ ben_line) if ben_line else "" }}
+
+{{ open }}
+{% elif phase == "still time" %}
+There's still time to collect {{ work }} by {{ named }}.
+
+{{ edition_line }}{{ (" " ~ ben_line) if ben_line else "" }}
+
+{{ open }}
+{% else %}
+Last chance to {{ "enter the draw for" if draw else "collect" }} {{ work }} by {{ named }}.
+
+{{ edition_line }}{{ (" " ~ ben_line) if ben_line else "" }}
+
+{{ open }}
+{% endif %}
+{% endfor %}

@@ -8,7 +8,7 @@
 # Values below are lifted from the emails actually sent in September 2026, so the rendered
 # output can be compared with the real thing.
 
-outputs: [announcement-le, early-access-le, last-chance-le, trns-printing, ig-announcement, artist-ig-last-chance]
+outputs: [announcement-le, early-access-le, last-chance-le, trns-printing, ig-set, artist-ig-last-chance]
 
 release:
   campaign_code: RobertLongo_LE_26
@@ -17,6 +17,7 @@ release:
   early_access_hours: 48
   early_access_code: "377-985"
   launch_at: "2026-09-07 16:00"           # public announcement, UK time
+  coming_soon_at: "2026-08-26 12:00"
   closes_at: "2026-09-29 17:00"           # draw closes, UK time
   close_local: ""                         # optional artist-local time for artist channels, e.g. "12:00 EDT"
   last_chance_at: "2026-09-28 16:00"      # when the last-chance posts go out; blank = the day before the close
@@ -66,14 +67,18 @@ context:
     - renowned for works that engage with social structures and mass media
     - has long maintained that making art is a political act
     - Sandy is released in support of Vote.org
+    - New York artist known for monumental charcoal drawings
+    - takes his images from film, news and mass media
+    - Men in the Cities, begun in 1979, made him a defining figure of the Pictures Generation
   subject_hook: from his acclaimed 'Men in the Cities' series   # BOUNDED, 3 to 8 words after "Robert Longo – "
   hook: "Longo is renowned for works that fiercely engage with social structures and mass media, long-maintaining that making art is a political act. Sandy is released in support of Vote.org and marks only the second ever edition of Men in the Cities in silkscreen form, the first being our release of Eric last year."   # BOUNDED, as sent
+  artist_bio: "Robert Longo is a New York artist known for monumental charcoal drawings that take their images from film, news and mass media. Men in the Cities, begun in 1979, made him a defining figure of the Pictures Generation, and he has long maintained that making art is a political act."
+  making: "To craft the edition, our printmakers at Make-Ready (@make__ready) worked from the artist's original Kodak transparencies, creating a high fidelity silkscreen of the original piece."
   early_access_note: "It's an honour to be editioning Sandy, especially as this is only the second time that Longo has released images from Men in the Cities as silkscreen prints – the first time being our edition of Eric last year. The piece will be released in the same dimensions as Eric, for any collectors wishing to display the prints side by side."   # BOUNDED, as sent
   recap: null                             # Last Chance reuses `hook` unless this is set
   artist_line: "It was really important to me that as I got older as an artist, I could still make work that meant something."   # first person, from the artist; defaults to the quote
   artist_thanks: ""                       # optional sign-off in the artist's words
   social:
-    announcement: {opener: 1, edition_line: 5, cta: 1}
     last_chance: {opener: 2, middle: 1, cta: 1}
 
 post_purchase:

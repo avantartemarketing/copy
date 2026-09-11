@@ -73,6 +73,10 @@ def day_before(v):
     return dt(v) - datetime.timedelta(days=1)
 
 
+def cap_first(text):
+    return text[:1].upper() + text[1:] if text else text
+
+
 def tag_first(text, name, handle):
     """Insert (@handle) after the first mention of `name` in a fragment, if not already tagged."""
     if not text or not name or not handle or ("@" + handle) in text:
@@ -150,14 +154,35 @@ def production_paragraph(ed, artist):
     return " ".join(parts)
 
 
+def phases(release, artist):
+    """The posts a campaign gets, with send dates: from the brief where given, otherwise derived from the launch."""
+    launch, close = dt(release["launch_at"]), dt(release["closes_at"])
+    draw = release.get("mechanic") == "draw"
+    day = datetime.timedelta(days=1)
+    when = lambda key, default: dt(release[key]) if release.get(key) else default
+    announce = when("announce_at", launch if draw else launch - 21 * day)
+    out = [("coming soon", when("coming_soon_at", announce - 14 * day)), ("announce", announce)]
+    mid = announce + (close - announce) / 2
+    out.append(("sustain", when("sustain_at", mid if draw else launch - 9 * day)))
+    if artist.get("quote"):
+        out.append(("sustain, the artist's words", when("sustain2_at", mid + 3 * day if draw else launch - 4 * day)))
+    if draw:
+        out.append(("last chance", when("last_chance_at", close - day)))
+    else:
+        out.append(("live", launch))
+        out.append(("still time", when("halfway_at", launch + (close - launch) / 2)))
+        out.append(("last chance", when("last_chance_at", close)))
+    return out
+
+
 def build_env():
     env = Environment(loader=FileSystemLoader(str(ROOT / "templates")), undefined=StrictUndefined,
                       trim_blocks=True, lstrip_blocks=True)
     env.filters.update(uktime=uktime, ukdate=ukdate, ukdate_dd=ukdate_dd, weekday=weekday, ddmmyy=ddmmyy, month=month,
-                       day_before=day_before, rel_day=rel_day, tag_first=tag_first, ship_window=ship_window, edition_phrase=edition_phrase,
+                       day_before=day_before, rel_day=rel_day, tag_first=tag_first, cap_first=cap_first, ship_window=ship_window, edition_phrase=edition_phrase,
                        collect_phrase=collect_phrase, recap_phrase=recap_phrase, titles=titles, titles_q=titles_q)
     env.globals.update(OPENERS=OPENERS, EA_OPENERS=EA_OPENERS, GROUP=GROUP, WORDS=WORDS,
-                       production_paragraph=production_paragraph, auth_phrase=auth_phrase)
+                       production_paragraph=production_paragraph, auth_phrase=auth_phrase, phases=phases)
     return env
 
 

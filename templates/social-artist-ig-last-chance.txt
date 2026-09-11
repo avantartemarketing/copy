@@ -37,7 +37,7 @@ Last chance to collect {{ work }} – my {{ artist.collaboration_ordinal }} {{ "
 {% elif o == 3 %}
 This is your last chance to collect {{ work if untitled else "my new limited edition " ~ unit ~ ("s" if plural else "") ~ ", " ~ artworks|titles_q }}.
 {% elif o == 4 %}
-Just 24 hours remaining to {{ "enter the draw for" if draw else "collect" }} my {{ artist.collaboration_ordinal }} collaboration with @avant.arte – {{ edition|edition_phrase }}{% if untitled %} from {{ series }}{% elif yr and artworks|length == 1 %} of my {{ yr }} work {{ artworks|titles_q }}{% endif %}.
+Just {{ "24 hours" if when == "tomorrow" else "a few hours" }} remaining to {{ "enter the draw for" if draw else "collect" }} my {{ artist.collaboration_ordinal }} collaboration with @avant.arte – {{ edition|edition_phrase }}{% if untitled %} from {{ series }}{% elif yr and artworks|length == 1 %} of my {{ yr }} work {{ artworks|titles_q }}{% endif %}.
 {% elif o == 5 %}
 The {{ "draw for" if draw else "window to collect" }} the {{ (WORDS[edition.count|int] ~ " ") if plural else "" }}{{ unit }}{{ "s" if plural else "" }} made by @avant.arte from my {{ series_ref if series else "recent work" }} closes {{ when }}.
 {% else %}

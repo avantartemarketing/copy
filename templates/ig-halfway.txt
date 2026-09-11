@@ -31,7 +31,7 @@ Just 24 hours left to collect {{ edition|edition_phrase }} by {{ artist.name }}.
 {% endif %}
 
 {% if m == 1 and clause %}
-{% if fundraiser %}Launched in support of the {{ ben }}, the{% else %}The{% endif %} {{ edition.unit }} is {{ clause }}, produced in close collaboration with {{ artist.first_name if artist.first_name is defined else artist.name }} at @make__ready in London.
+{% if fundraiser %}Launched in support of the {{ ben }}, the{% else %}The{% endif %} {{ edition.unit }} is a {{ clause }}, produced in close collaboration with {{ artist.first_name if artist.first_name is defined else artist.name }} at @make__ready in London.
 
 {% elif m == 2 and fundraiser %}
 Created in support of {{ ben }}, each signed and individually numbered.

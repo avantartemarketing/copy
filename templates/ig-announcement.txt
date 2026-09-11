@@ -9,12 +9,12 @@
 {% set s = context.social.announcement if context.social and context.social.announcement else {} %}
 {% set o = s.opener if s.opener is defined else 1 %}
 {% set e = s.edition_line if s.edition_line is defined else 1 %}
-{% if e == 5 and fundraiser and fundraiser in context.hook %}{% set e = 1 %}{% endif %}
 {% set c = s.cta if s.cta is defined else 1 %}
 {% set collab = s.collab if s.collab is defined else false %}
 {% set suffix = ", created in collaboration with @avant.arte" if collab else "" %}
 {% set bh = release.beneficiary_handle if release.beneficiary_handle is defined else "" %}
 {% set fundraiser = release.fundraiser if release.fundraiser is defined else "" %}
+{% if e == 5 and fundraiser and fundraiser in context.hook %}{% set e = 1 %}{% endif %}
 {% set at = ("@" ~ artist.handle) if artist.handle else artist.name %}
 {% set named = artist.name ~ ((" (@" ~ artist.handle ~ ")") if artist.handle else "") %}
 [CHANNEL] IG Main · Post, Announcement (reused on IG Ins · Post)

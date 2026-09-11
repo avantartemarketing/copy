@@ -8,7 +8,7 @@
 # Values below are lifted from the emails actually sent in September 2026, so the rendered
 # output can be compared with the real thing.
 
-emails: [announcement-le, early-access-le, last-chance-le, trns-printing]
+emails: [announcement-le, early-access-le, last-chance-le, trns-printing, social-ig-announcement]
 
 release:
   campaign_code: RobertLongo_LE_26
@@ -20,10 +20,13 @@ release:
   closes_at: "2026-09-29 17:00"           # draw closes, UK time
   framing_code: Longo-0926-10             # first-purchase framing offer; blank = block omitted
   fundraiser: Vote.org
+  beneficiary_handle: votedotorg
 
 artist:
   name: Robert Longo
   surname: Longo
+  handle: robert_longo_studio               # Instagram; blank if the artist has no account
+  hashtag: ""                              # e.g. robertlongo; blank for none
   collab_with: Brooklyn-born artist Robert Longo   # exact words after "collaboration with"
   collaboration_ordinal: latest                    # debut | latest | second
   partner: null                                    # e.g. "the Salvador Dalí Estate"
@@ -64,6 +67,7 @@ context:
   hook: "Longo is renowned for works that fiercely engage with social structures and mass media, long-maintaining that making art is a political act. Sandy is released in support of Vote.org and marks only the second ever edition of Men in the Cities in silkscreen form, the first being our release of Eric last year."   # BOUNDED, as sent
   early_access_note: "It's an honour to be editioning Sandy, especially as this is only the second time that Longo has released images from Men in the Cities as silkscreen prints – the first time being our edition of Eric last year. The piece will be released in the same dimensions as Eric, for any collectors wishing to display the prints side by side."   # BOUNDED, as sent
   recap: null                             # Last Chance reuses `hook` unless this is set
+  social: {opener: 1, edition_line: 5, cta: 1}   # MENU choices for the Instagram announcement
 
 post_purchase:
   printing_update_at: "2026-11-05 15:00"

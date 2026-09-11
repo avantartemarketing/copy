@@ -1,0 +1,90 @@
+{#
+  ANNOUNCEMENT · IG Main · Post   (IG Ins · Post reuses the same caption)
+  Skeleton, from 118 real captions since 2025:
+    opener · hook · edition line · CTA with deadline · hashtag
+  Menus, chosen in the brief under context.social:
+    opener 1-6 · edition_line 0-6 · cta 1-5 (the CTA set switches with release.mechanic)
+  Facts only, plus the same `hook` fragment the email uses.
+#}
+{% set s = context.social if context.social else {} %}
+{% set o = s.opener if s.opener is defined else 1 %}
+{% set e = s.edition_line if s.edition_line is defined else 1 %}
+{% if e == 5 and release.fundraiser and release.fundraiser in context.hook %}{% set e = 1 %}{% endif %}
+{% set c = s.cta if s.cta is defined else 1 %}
+{% set at = ("@" ~ artist.handle) if artist.handle else artist.name %}
+{% set named = artist.name ~ ((" (@" ~ artist.handle ~ ")") if artist.handle else "") %}
+[CHANNEL] IG Main · Post, Announcement (reused on IG Ins · Post)
+[INTERNAL NAME] {{ release.announce_at|default(release.launch_at)|ddmmyy }} · {{ release.campaign_code }} · Announcement · IG Main
+[CAPTION]
+{% if o == 1 %}
+We're delighted to announce our {{ artist.collaboration_ordinal }} collaboration with {{ named }}{% if artworks[0].title != 'Untitled' %} – {{ artworks|titles_q }}{% endif %}.
+{% elif o == 2 %}
+We're delighted to announce our {{ "new" if artist.collaboration_ordinal == "latest" else artist.collaboration_ordinal }} {{ edition.medium_prefix ~ " " if edition.medium_prefix else "" }}{{ edition.unit }} collaboration with {{ named }}.
+{% elif o == 3 %}
+Announcing {{ edition|edition_phrase }} by {{ at }}{% if edition.suffix %}, {{ edition.suffix }}{% elif artworks[0].title != 'Untitled' %} – {{ artworks|titles_q }}{% endif %}.
+{% elif o == 4 %}
+We're delighted to introduce our {{ artist.collaboration_ordinal }} collaboration with {{ at }}.
+{% elif o == 5 %}
+Introducing our {{ artist.collaboration_ordinal }} collaboration with {{ named }} – {{ artworks|titles_q }} – available to collect individually or as a {{ "pair" if artworks|length == 2 else "set" }}.
+{% else %}
+We're delighted to announce our {{ artist.collaboration_ordinal }} collaboration with {{ artist.partner }}, transforming {{ WORDS[artworks|length] }} of {{ artist.surname }}'s {{ artist.works_descriptor|default("works") }} into a new series of limited edition prints.
+{% endif %}
+
+{{ context.hook }}
+
+{% if e == 1 %}
+Signed by the artist. Individually numbered.
+
+{% elif e == 2 %}
+Each {{ edition.unit }} is signed by the artist and individually numbered.
+
+{% elif e == 3 %}
+Each {{ (edition.medium_prefix ~ " ") if edition.medium_prefix else "" }}{{ edition.unit }} is produced in a limited edition of {{ edition.size }}.
+
+{% elif e == 4 %}
+{{ edition.technique_sentence }}
+
+{% elif e == 5 %}
+Released in support of {{ release.fundraiser }}{% if release.beneficiary_handle %} (@{{ release.beneficiary_handle }}){% endif %}.
+
+{% elif e == 6 %}
+Created in close collaboration with the {{ artist.partner }}, each {{ edition.unit }} is {{ auth_phrase(edition, artist) }}, and is individually numbered.
+
+{% endif %}
+{% if release.mechanic == "draw" %}
+{% if c == 1 %}
+Link in bio to enter the draw. Closes at {{ release.closes_at|uktime }}, {{ release.closes_at|ukdate }}.
+{% elif c == 2 %}
+For a chance to collect, head to our link in bio and enter the draw.
+
+Closes {{ release.closes_at|uktime }}, {{ release.closes_at|ukdate }}.
+{% elif c == 3 %}
+Head to the link in our bio to enter the draw.
+{% elif c == 4 %}
+Enter the draw via our link in bio.
+{% else %}
+Enter the draw now via our link in bio.
+{% endif %}
+{% else %}
+{% if c == 1 %}
+Available to collect on {{ release.launch_at|ukdate }} at {{ release.launch_at|uktime }} for {{ release.window }} only.
+
+Link in bio to set a reminder.
+{% elif c == 2 %}
+Available on {{ release.launch_at|ukdate }} at {{ release.launch_at|uktime }} for {{ release.window }} only. Link in bio to learn more and to set a reminder for the launch.
+{% elif c == 3 %}
+Link in bio to sign up.
+
+Available to collect on {{ release.launch_at|ukdate }} for {{ release.window }} only.
+{% elif c == 4 %}
+Available to collect for {{ release.window }} only, starting {{ release.launch_at|ukdate }} at {{ release.launch_at|uktime }}.
+
+Link in bio to get updates.
+{% else %}
+Sign up to be reminded when the launch starts. Link in bio.
+{% endif %}
+{% endif %}
+{% if artist.hashtag %}
+
+#{{ artist.hashtag }}
+{% endif %}

@@ -157,6 +157,14 @@ def check_email(text):
             warnings.append(f"“{w}” used {n}× across the email (cap {cap})")
     if re.search(r"(?<![\w'’])(?!a\b)[a-z] [a-z]{1,2}\b|\b[a-z]{1,2} (?!a\b)[a-z](?![\w'’])", body):
         warnings.append("possible split word (“o f”, “an d”): a known HubSpot editor artefact")
+    if "[CAPTION]" in text:                                          # Instagram caption rules
+        cap = text.split("[CAPTION]", 1)[1].strip()
+        if len(cap) > 650:
+            warnings.append(f"caption of {len(cap)} characters (house median 413, p90 693)")
+        if "link in bio" not in cap.lower() and "link in our bio" not in cap.lower():
+            errors.append("Instagram caption has no “link in bio” line")
+        if re.search(r"https?://", cap):
+            errors.append("Instagram caption contains a URL; links go in the bio")
     return errors, warnings
 
 

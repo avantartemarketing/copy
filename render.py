@@ -102,6 +102,12 @@ def titles(artworks):
     return t[0] if len(t) == 1 else ", ".join(t[:-1]) + " and " + t[-1]
 
 
+def titles_q(artworks):
+    """Titles in single curly quotes, as Instagram captions write them."""
+    t = [f"\u2018{a['title']}\u2019" for a in artworks]
+    return t[0] if len(t) == 1 else ", ".join(t[:-1]) + " and " + t[-1]
+
+
 def auth_phrase(ed, artist):
     kind = ed.get("signed_by", "artist")
     if kind == "artist":
@@ -133,9 +139,9 @@ def build_env():
                       trim_blocks=True, lstrip_blocks=True)
     env.filters.update(uktime=uktime, ukdate=ukdate, ukdate_dd=ukdate_dd, weekday=weekday, ddmmyy=ddmmyy,
                        day_before=day_before, ship_window=ship_window, edition_phrase=edition_phrase,
-                       collect_phrase=collect_phrase, recap_phrase=recap_phrase, titles=titles)
+                       collect_phrase=collect_phrase, recap_phrase=recap_phrase, titles=titles, titles_q=titles_q)
     env.globals.update(OPENERS=OPENERS, EA_OPENERS=EA_OPENERS, GROUP=GROUP, WORDS=WORDS,
-                       production_paragraph=production_paragraph)
+                       production_paragraph=production_paragraph, auth_phrase=auth_phrase)
     return env
 
 

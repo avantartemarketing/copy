@@ -1,7 +1,7 @@
 # Release brief: Gregory Crewdson, Dream House, time-limited edition (48-hour window).
 # Values are lifted from the emails sent in June to August 2026.
 
-emails: [now-live-tl, trns-printing]
+emails: [now-live-tl, trns-printing, social-ig-announcement]
 
 release:
   campaign_code: GregoryCrewd_TL_26
@@ -15,6 +15,8 @@ artist:
   name: Gregory Crewdson
   first_name: Gregory
   surname: Crewdson
+  handle: crewdsonstudio
+  hashtag: ""
   collab_with: New York-based artist Gregory Crewdson
   collaboration_ordinal: latest
   partner: null
@@ -49,6 +51,7 @@ context:
   hook: "Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape."   # BOUNDED, as sent
   quote_sentence: "To Gregory, Dream House represents “that moment of transcendence, where one is transported into another place, into a perfect, still world.”"   # FRAME filled by hand: "To {first name}, {work} represents “{quote}”"
   footer: From his iconic 'Dream House' series
+  social: {opener: 2, edition_line: 0, cta: 1}
 
 post_purchase:
   printing_update_at: "2026-08-06 16:00"

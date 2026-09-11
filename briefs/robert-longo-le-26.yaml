@@ -43,7 +43,12 @@ edition:
   size: null                              # edition size, when it is being published
   signed_by: artist                       # artist | estate_stamp | engraved | none
   numbered: true
-  dimensions: ""                          # e.g. "96 x 96cm", for the spec-bullet middle
+  dimensions: ""
+  features:
+    - Signed by the artist
+    - Individually numbered
+    - Free worldwide shipping
+    - Same dimensions as our edition of Eric                          # e.g. "96 x 96cm", for the spec-bullet middle
   technique_facts:
     - made from the artist's original Kodak transparencies
     - high fidelity silkscreen of the original piece

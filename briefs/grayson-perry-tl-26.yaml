@@ -47,6 +47,10 @@ edition:
   signed_by: artist
   numbered: true
   dimensions: ""
+  features:                                # the standard three, plus anything bespoke to this release
+    - Signed by the artist
+    - Individually numbered
+    - Free worldwide shipping
   facts:
     - 9-colour silkscreen print
     - produced at Make-Ready in London, in close collaboration with the artist
@@ -66,6 +70,7 @@ artworks:
       - explores how technology shapes today's generations
       - reinterprets changeling folklore for the digital age
       - the museum's mission is to celebrate children in care
+      - Grayson describes the work as intentionally 'quite disturbing'
     card_line: "Collect a limited edition print by Grayson Perry, exploring modern youth shaped by technology, produced in vivid detail through a 9-colour silkscreen print."
 
 context:
@@ -73,7 +78,7 @@ context:
   early_access_opener: preparing
   subject_hook: a new limited edition silkscreen print
   artist_bio: "Grayson Perry has long been one of the most distinctive voices in contemporary British art.\n\nWorking across ceramics, tapestry, print and sculpture, his practice examines identity, class, and gender in modern society. Drawing on autobiography as well as social observation, Grayson often pairs the decorative language of traditional craft with direct commentary on the structures and contradictions that shape everyday life."
-  hook: "Created exclusively for the Foundling Museum, this edition portrays a child as a symbol of modern youth, exploring how technology shapes today's generations and supporting the museum's mission to celebrate children in care."
+  hook: "The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. Grayson describes the work as intentionally 'quite disturbing', a changeling reimagined for the digital age."   # about the work only; the templates place the beneficiary, medium and features
   hook_short: "‘The Changeling’ explores the impact of technology on a generation of digital natives."
   making: "To create the edition, our printmakers at Make-Ready (@make__ready) translated a new design into a 9-colour silkscreen, capturing the vivid detail of Grayson's drawing style."
   artist_line: ""

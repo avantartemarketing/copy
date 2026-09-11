@@ -3,7 +3,7 @@
 
       status line            one fixed sentence per phase: coming soon, announce, sustain, live, closing
       substance              coming soon: bio · announce: hook · sustain: making, then the quote · live and closing: none
-      edition line           "Signed by the artist and individually numbered." plus the beneficiary, named once per post
+      features line          the release's features as short sentences, plus the beneficiary, named once per post
       action line            one of three CTAs, then one deadline form
       hashtag                announcement only
 
@@ -20,7 +20,8 @@
 {% set untitled = artworks[0].title == "Untitled" and series %}
 {% set work = ("the " ~ series ~ " series") if untitled else artworks|titles_q %}
 {% set plural = artworks|length > 1 or edition.count|int > 1 %}
-{% set edition_line = ("Each " ~ edition.unit ~ " is signed by the artist and individually numbered.") if plural else "Signed by the artist and individually numbered." %}
+{% set feats = edition.features if edition.features is defined and edition.features else ["Signed by the artist", "Individually numbered"] %}
+{% set edition_line = feats|join(". ") ~ "." %}
 {% set deadline = "Closes " ~ release.closes_at|ukdate ~ " at " ~ release.closes_at|uktime ~ "." %}
 {% set pre_launch = ("Enter the draw via our link in bio. " ~ deadline) if draw else ("Available for " ~ release.window ~ " from " ~ release.launch_at|uktime ~ " on " ~ release.launch_at|ukdate ~ ". Link in bio to get updates.") %}
 {% set open = ("Enter the draw via our link in bio. " ~ deadline) if draw else ("Link in bio to buy a print. " ~ deadline) %}

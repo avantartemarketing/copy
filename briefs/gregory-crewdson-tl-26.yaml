@@ -38,6 +38,11 @@ edition:
   signed_by: artist
   numbered: true
   dimensions: ""
+  features:
+    - Signed by the artist
+    - Individually numbered
+    - Free worldwide shipping
+    - Bespoke silver aluminium frame available
 
 artworks:
   - title: Untitled

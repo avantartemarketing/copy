@@ -11,12 +11,24 @@
 {% set work = ("the " ~ series ~ " series") if untitled else artworks|titles %}
 {% set plural = artworks|length > 1 or edition.count|int > 1 %}
 {% set ep = edition|edition_phrase %}
-{% set card_line = (ep|cap_first) ~ " by " ~ artist.name ~ ", signed by the artist and individually numbered." %}
+{% set card_line = (ep|cap_first) ~ " by " ~ artist.name ~ "." %}
+{% set making = context.making|replace(" (@make__ready)", "")|replace("@make__ready", "Make-Ready") %}
 {% set hook_short = context.hook|first_sentence %}
 {% set launch_line = "starting at " ~ release.launch_at|uktime ~ " on " ~ release.launch_at|weekday ~ ", " ~ release.launch_at|ukdate_dd %}
 {% set close_line = release.closes_at|uktime ~ " on " ~ release.closes_at|weekday ~ ", " ~ release.closes_at|ukdate_dd %}
 {% set draw_close = "Closes at " ~ release.closes_at|uktime ~ " on " ~ release.closes_at|ukdate ~ "." %}
 {% set support = (" created especially for " ~ fundraiser) if (fundraiser and fundraiser not in context.hook) else "" %}
+{% set feats = edition.features if edition.features is defined and edition.features else ["Signed by the artist", "Individually numbered"] %}
+{% set work_intro = (ep ~ " from the " ~ series ~ " series") if untitled else ((artworks[0].title ~ ", " ~ ep) if (artworks|length == 1 and not plural) else ep) %}
+{% macro features(with_support) %}
+[FEATURES]
+{% for f in feats %}
+· {{ f }}
+{% endfor %}
+{% if with_support and fundraiser %}
+· Released in support of {{ fundraiser }}
+{% endif %}
+{% endmacro %}
 {% macro cards() %}
 {% for a in artworks %}
 [CARD] {{ a.title }}
@@ -63,12 +75,13 @@ If you have any questions, please don't hesitate to get in touch by replying to 
 [KICKER] Enter the draw
 [HEADLINE] {{ work|cap_first }}
 [BODY]
-We're delighted to announce our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} – {{ ep }}{{ support }}.
+We're delighted to announce our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} – {{ work_intro }}{{ support }}.
 
 {{ context.hook }}
 
-{{ context.making }}
+{{ making }}
 
+{{ features(false) }}
 Enter the draw for a chance to collect. {{ draw_close }}
 
 [CTA] Enter the draw
@@ -110,10 +123,9 @@ Enter the draw for a chance to collect {{ ep }} by {{ artist.name }}, {{ work }}
 On {{ release.launch_at|ukdate }}, for {{ release.window }} only, collect {{ ep }} by {{ artist.name }}, {{ work }}.
 {% endif %}
 
-{{ context.making }}
+{{ making }}
 
-{{ "Each " ~ edition.unit if plural else "The " ~ edition.unit }} is signed by the artist and individually numbered.
-
+{{ features(fundraiser not in context.hook) }}
 {% if draw %}
 Enter the draw for a chance to collect. {{ draw_close }}
 {% else %}
@@ -144,12 +156,13 @@ For a chance to collect, click the link below to enter the draw. The draw closes
 [KICKER] Launching {{ release.launch_at|ukdate }}
 [HEADLINE] {{ work|cap_first }} by {{ artist.name }}
 [BODY]
-We're delighted to announce our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} – {{ ep }}{{ support }}.
+We're delighted to announce our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} – {{ work_intro }}{{ support }}.
 
 {{ context.hook }}
 
-{{ context.making }}
+{{ making }}
 
+{{ features(false) }}
 {{ "The limited edition signed " ~ edition.unit ~ "s" if plural else "The limited edition signed " ~ edition.unit }} will be available to collect for {{ release.window }} only, {{ launch_line }}.
 
 Click below to learn more and register for updates.
@@ -181,10 +194,11 @@ We'll send you a reminder on launch day, but if you have any questions before th
 [BODY]
 Hi {{ "{{ personalization_token('contact.firstname', 'there') }}" }},
 
-Our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} launches tomorrow at {{ release.launch_at|uktime }} and will be available to collect for {{ release.window }} only. Each edition is individually numbered, signed by the artist, and includes free worldwide shipping.
+Our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} launches tomorrow at {{ release.launch_at|uktime }} and will be available to collect for {{ release.window }} only – {{ work_intro }}.
 
 {{ context.hook }}
 
+{{ features(fundraiser not in context.hook) }}
 As a thank you for registering for updates, we're offering you the chance to collect the release 24 hours before everyone else.
 
 Unlock early access using the link below.
@@ -197,12 +211,13 @@ Unlock early access using the link below.
 [KICKER] Collect a {{ edition.unit }} by {{ artist.name }}
 [HEADLINE] {{ release.window|cap_first }}, starting now
 [BODY]
-Our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} is now available to collect for {{ release.window }} only – {{ ep }}, signed and numbered, with free worldwide shipping.
+Our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} is now available to collect for {{ release.window }} only – {{ work_intro }}.
 
 {{ context.hook }}
 
-{{ context.making }}
+{{ making }}
 
+{{ features(fundraiser not in context.hook) }}
 The opportunity to collect an edition ends at {{ close_line }}. Click the link below to add {{ "a " ~ edition.unit if plural else work }} to your collection.
 
 [CTA] Buy now

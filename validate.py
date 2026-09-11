@@ -161,7 +161,7 @@ def check_email(text):
         cap = text.split("[CAPTION]", 1)[1].strip()
         if len(cap) > 650:
             warnings.append(f"caption of {len(cap)} characters (house median 413, p90 693)")
-        if "link in bio" not in cap.lower() and "link in our bio" not in cap.lower():
+        if not re.search(r"link in (our |my |the )?bio", cap, re.I):
             errors.append("Instagram caption has no “link in bio” line")
         if re.search(r"https?://", cap):
             errors.append("Instagram caption contains a URL; links go in the bio")

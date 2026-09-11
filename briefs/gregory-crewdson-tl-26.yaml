@@ -54,7 +54,7 @@ context:
   hook: "Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape."   # BOUNDED, as sent
   quote_sentence: "To Gregory, Dream House represents “that moment of transcendence, where one is transported into another place, into a perfect, still world.”"   # FRAME filled by hand: "To {first name}, {work} represents “{quote}”"
   footer: From his iconic 'Dream House' series
-  artist_line: "It's been meaningful to see the response to this work again after all these years – these images were originally created in 2002 in an abandoned home in Vermont, as part of a larger exploration of stillness, narrative and psychological tension."
+  artist_line: "It's been meaningful to see the response to this work again after all these years. These images were originally created in 2002 in an abandoned home in Vermont, as part of a larger exploration of stillness, narrative and psychological tension."
   artist_thanks: ""
   social:
     announcement: {opener: 2, edition_line: 0, cta: 1}

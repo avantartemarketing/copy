@@ -93,6 +93,14 @@ aside{border-left:1px solid var(--line);background:var(--surface)}
 .fld:hover{background:var(--field-hi)}
 .fld:focus{background:var(--field-hi);box-shadow:0 0 0 2px var(--accent-line)}
 .fld:empty::before{content:attr(data-ph);color:var(--ink-faint);font-style:italic}
+.cards{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 0}
+.card{flex:0 1 172px;min-width:0;max-width:200px;border:1px solid var(--line-soft);border-radius:7px;overflow:hidden;padding-bottom:9px}
+.card i{display:block;aspect-ratio:4/3;background:var(--sunk)}
+.card b{display:block;padding:8px 10px 0;font-size:14.5px;font-weight:500;color:var(--ink);line-height:1.3}
+.card span{display:block;padding:1px 10px 0;font-size:12.5px;line-height:1.4;color:var(--ink-faint)}
+.pull{margin:22px 0 0;padding-left:14px;border-left:2px solid var(--line);font-size:16.5px;font-style:italic;line-height:1.5}
+.pull cite{display:block;margin-top:6px;font:600 10.5px/1 var(--sans);letter-spacing:.07em;text-transform:uppercase;font-style:normal;color:var(--ink-faint)}
+.sig{margin:20px 0 0!important;font:600 10.5px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint)}
 .cta{display:inline-block;font-family:var(--sans);font-size:12.5px;font-weight:500;padding:8px 15px;border:1px solid var(--line);border-radius:6px;color:var(--ink-soft)}
 .foot{display:flex;gap:8px;align-items:center;padding:13px 22px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--ink-faint)}
 .from{display:flex;align-items:center;gap:9px;margin:0;padding:0 22px 14px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint)}
@@ -263,7 +271,8 @@ function D(){
   d.editionCap = cap(f.edition_phrase);
   d.windowCap = cap(f.window);
   d.cardLine = (titles.length>1 ? `A limited edition ${f.unit}` : d.editionCap) + ` by ${f.artist}.`;
-  d.cards = (d.series?["Untitled"]:titles).map(t=>`${t}\n${d.cardLine}`).join("\n\n");
+  d.cardTitles = d.series ? ["Untitled"] : titles;
+  d.cards = d.cardTitles.map(t=>`${t}\n${d.cardLine}`).join("\n\n");
   d.quoteLine = f.quote ? `“${f.quote}” – ${f.artist}` : "";
   d.addWhat = d.plural ? d.aUnit : d.workEmail;
   d.framingWelcome = f.framing_code ? `As a welcome gesture, enjoy ${f.framing_percent}% off our in-house framing on your first purchase using the code ${f.framing_code} at checkout.` : "";
@@ -507,7 +516,7 @@ function renderWrite(){
       <p>Three fragments are written for each release, and this is the natural place to write them: in the email they open, with the rest of it already around them.</p>
       <div class="key">
         <span><i></i> <span>The three fragments. Only these are yours, and they seed every other post, tweet and email.</span></span>
-        <span><i class="fx"></i> <span>Built from the release details. Fixed here, so a name or a date cannot drift between one email and the next.</span></span>
+        <span><i class="fx"></i> <span>Built from the release details, including the cards and the quote. Fixed here, so a name or a date cannot drift between one email and the next.</span></span>
       </div>
     </div>
     <div class="sheet">
@@ -528,6 +537,9 @@ function renderWrite(){
           <p>${esc(closing)}</p>
           ${d.draw?"":`<p>Click below to learn more and register for updates.</p>`}
           <span class="cta">${d.draw?"Enter the draw":"Discover the collaboration"}</span>
+          <div class="cards">${d.cardTitles.map(t=>`<div class="card"><i></i><b>${esc(t)}</b><span>${esc(d.cardLine)}</span></div>`).join("")}</div>
+          ${f.quote?`<blockquote class="pull">${esc("\u201c"+f.quote+"\u201d")}<cite>${esc(f.artist)}</cite></blockquote>`:""}
+          <p class="sig">${esc(d.draw?`Collect ${d.collectPhrase}`:`Launching ${d.launchDate}`)}</p>
         </div>
       </div>
       <div class="foot" id="foot">Then: ${o.posts.length} posts, ${o.tweets.length} tweets and ${live} more emails come from these three fragments.</div>

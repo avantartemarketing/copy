@@ -87,8 +87,9 @@ aside{border-left:1px solid var(--line);background:var(--surface)}
 .doc ul{padding:0;list-style:none}
 .doc li{position:relative;padding-left:16px}
 .doc li::before{content:"·";position:absolute;left:3px}
-.fld{display:block;color:var(--ink);background:var(--field);border-radius:5px;padding:3px 8px;margin:0 -8px;outline:none;transition:background .12s,box-shadow .12s}
-.fld.in{display:inline;padding:1px 5px;margin:0}
+.fld{display:block;cursor:text;color:var(--ink);background:var(--field);border-radius:5px;padding:3px 8px;margin:0 -8px;outline:none;transition:background .12s,box-shadow .12s}
+.fld.in{display:inline;padding:1px 4px 1px 5px;margin:0 -4px 0 0}
+.fld.in:empty{display:inline-block;min-width:2ch;vertical-align:baseline}
 .fld:hover{background:var(--field-hi)}
 .fld:focus{background:var(--field-hi);box-shadow:0 0 0 2px var(--accent-line)}
 .fld:empty::before{content:attr(data-ph);color:var(--ink-faint);font-style:italic}
@@ -541,12 +542,29 @@ function renderWrite(){
       document.execCommand("insertText", false, txt);
     });
     el.addEventListener("keydown", e => { if (e.key === "Enter") e.preventDefault(); });
+    // an empty inline field has no text node, and some engines will not put the
+    // caret in one on a click. Place it ourselves. A field with words in it is
+    // left alone, so clicking mid-word still lands where you clicked.
+    el.addEventListener("pointerdown", e => {
+      if (el.textContent.trim()) return;
+      e.preventDefault();
+      caret(el);
+    });
   });
   $("#main").querySelectorAll("[data-goto]").forEach(b => b.onclick = () => { S.view = b.dataset.goto; render(); });
   requestAnimationFrame(drawGutter);
 }
+// put the caret at the start of a field, and keep it there
+function caret(el){
+  el.focus();
+  const r = document.createRange(); r.selectNodeContents(el); r.collapse(true);
+  const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+}
 function onField(el){
   S.blocks[el.dataset.k] = el.innerText.replace(/\s+/g," ").trim();
+  // deleting the last word can leave a stray <br>, which loses :empty and the
+  // placeholder with it. Clear it out and put the caret back.
+  if (!el.textContent.trim() && el.innerHTML !== "") { el.innerHTML = ""; caret(el); }
   S.ai[el.dataset.k] = undefined;
   syncFrame();
   const o = outputs(), live = o.emails.filter(e=>!e.t.startsWith("—")).length;

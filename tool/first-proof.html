@@ -64,32 +64,43 @@ aside{border-left:1px solid var(--line);background:var(--surface)}
 
 /* ---------- the sheet ---------- */
 .sheet{background:var(--surface);border:1px solid var(--line);border-radius:10px;max-width:760px}
-.meta{display:grid;grid-template-columns:88px minmax(0,1fr);gap:3px 16px;padding:18px 22px;border-bottom:1px solid var(--line-soft);font-size:13px}
+.meta{display:grid;grid-template-columns:88px minmax(0,1fr);gap:3px 16px;padding:18px 22px 10px;font-size:13px}
 .meta dt{color:var(--ink-faint);font-size:11px;letter-spacing:.05em;text-transform:uppercase;font-weight:600;padding-top:2px}
 .meta dd{margin:0;color:var(--ink-soft)}
 
-.body{display:grid;grid-template-columns:74px minmax(0,1fr);align-items:start}
-.gutter{position:relative;padding:26px 0 0}
-.tag{position:absolute;right:12px;display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint);white-space:nowrap;transition:color .15s}
-.tag:hover{color:var(--ink-soft)}
-.tag[data-on="true"]{color:var(--accent)}
-.tag s{width:5px;height:5px;border-radius:50%;background:var(--line);text-decoration:none}
+.body{display:grid;grid-template-columns:104px minmax(0,1fr);align-items:start}
+.gutter{position:relative}
+.tag{position:absolute;right:14px;display:flex;align-items:flex-start;gap:7px;text-align:right;white-space:nowrap;transition:color .15s}
+.tag b{display:block;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint)}
+.tag u{display:block;font-size:10px;font-weight:400;letter-spacing:.01em;text-decoration:none;color:var(--ink-faint);opacity:.72;margin-top:2px}
+.tag s{flex:none;width:5px;height:5px;border-radius:50%;background:var(--line);text-decoration:none;margin-top:4px}
+.tag:hover b{color:var(--ink-soft)}
+.tag[data-on="true"] b{color:var(--accent)}
 .tag[data-on="true"] s{background:var(--accent)}
 .tag[data-flag="warn"] s{background:var(--warn)}
 
-#pen{padding:26px 26px 8px;font-family:var(--serif);font-size:17.5px;line-height:1.62;color:var(--ink);border-left:1px solid var(--line-soft);min-height:210px}
-#pen:focus{outline:none}
+.zone{padding:6px 24px 18px 0}
+#pen{padding:19px 21px 5px;background:var(--sunk);border:1px solid var(--line);border-radius:9px;font-family:var(--serif);font-size:17.5px;line-height:1.62;color:var(--ink);min-height:200px}
+#pen:focus{border-color:var(--accent-line);outline:none}
 #pen p{margin:0 0 1.05em}
 #pen p:empty::before{content:attr(data-ph);color:var(--ink-faint);font-style:italic}
 #pen .q{border-bottom:1px dotted var(--accent-line);padding-bottom:1px}
 
-.fixed{border-left:1px solid var(--line-soft);padding:4px 26px 24px;font-family:var(--serif);font-size:17.5px;line-height:1.62;color:var(--ink-soft)}
+.fixed{padding:0 24px 20px 22px;font-family:var(--serif);font-size:17.5px;line-height:1.62;color:var(--ink-soft)}
 .fixed ul{margin:0 0 1.05em;padding:0;list-style:none}
 .fixed li{position:relative;padding-left:16px}
 .fixed li::before{content:"·";position:absolute;left:3px}
 .fixed p{margin:0 0 1.05em}
 .cta{display:inline-block;font-family:var(--sans);font-size:12.5px;font-weight:500;padding:8px 15px;border:1px solid var(--line);border-radius:6px;color:var(--ink-soft)}
 .foot{display:flex;gap:8px;align-items:center;padding:13px 22px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--ink-faint)}
+.from{display:flex;align-items:center;gap:9px;margin:0;padding:0 22px 14px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint)}
+.from::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+.from button{font:inherit;letter-spacing:.07em;color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+.from.mid{padding-top:4px}
+.key{display:flex;flex-direction:column;gap:8px;margin:18px 0 0;font-size:12.5px;color:var(--ink-soft);max-width:58ch}
+.key span{display:flex;align-items:flex-start;gap:9px}
+.key i{flex:none;width:24px;height:15px;border-radius:4px;border:1px solid var(--line);background:var(--sunk);margin-top:2px}
+.key i.fx{background:transparent;border-style:dashed}
 
 /* ---------- aside ---------- */
 .panel h2{font-family:var(--serif);font-size:19px;font-weight:400;margin:8px 0 8px;letter-spacing:-.01em}
@@ -158,7 +169,8 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 @media (max-width:560px){
   .body{grid-template-columns:1fr}
   .gutter{display:none}
-  #pen,.fixed{border-left:none;padding-inline:18px}
+  .zone{padding:6px 16px 14px}
+  .fixed{padding-inline:18px}
   .meta{grid-template-columns:1fr;gap:0 0}
   .meta dt{padding-top:9px}
 }
@@ -471,7 +483,11 @@ function renderWrite(){
     <div class="head">
       <span class="lbl">Step one</span>
       <h1>The announcement email</h1>
-      <p>Write it as one email. Three paragraphs, three blocks — and those three seed every other post, tweet and email in the campaign. Everything in grey is already filled in from the release details.</p>
+      <p>Write it as one email. The three paragraphs inside the panel are the only copy anyone writes for this release, and they seed every other post, tweet and email in the campaign.</p>
+      <div class="key">
+        <span><i></i> <span>You write these. The opener arrives written – adjust it, or pick another wording on the right.</span></span>
+        <span><i class="fx"></i> <span>Filled in from the release details, and not edited here.</span></span>
+      </div>
     </div>
     <div class="sheet">
       <dl class="meta">
@@ -480,10 +496,12 @@ function renderWrite(){
         <dt>Kicker</dt><dd>${esc(kicker)}</dd>
         <dt>Headline</dt><dd>${esc(head)}</dd>
       </dl>
+      <p class="from">From the details <button data-goto="facts">edit</button></p>
       <div class="body">
         <div class="gutter" id="gutter"></div>
-        <div id="pen" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="The announcement email, three paragraphs"></div>
+        <div class="zone"><div id="pen" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="The announcement email, three paragraphs"></div></div>
       </div>
+      <p class="from mid">From the details <button data-goto="facts">edit</button></p>
       <div class="body">
         <div class="gutter"></div>
         <div class="fixed">
@@ -496,8 +514,9 @@ function renderWrite(){
     </div>`;
 
   const pen = $("#pen");
+  const PH = {opener:"The opener. Pick a wording on the right.", hook:"What is this work? Two or three sentences, as editorial as you like.", making:"How was it made? One sentence."};
   pen.innerHTML = ["opener","hook","making"].map(k =>
-    `<p data-k="${k}" data-ph="${k==="hook"?"What is this work? Two or three sentences.":"How was it made? One sentence."}">${esc(S.blocks[k])}</p>`).join("");
+    `<p data-k="${k}" data-ph="${esc(PH[k])}">${esc(S.blocks[k])}</p>`).join("");
   pen.addEventListener("input", onPen);
   pen.addEventListener("paste", e => {
     e.preventDefault();
@@ -506,6 +525,7 @@ function renderWrite(){
   pen.addEventListener("focusin", syncFocus);
   pen.addEventListener("keyup", syncFocus);
   pen.addEventListener("click", syncFocus);
+  $("#main").querySelectorAll("[data-goto]").forEach(b => b.onclick = () => { S.view = b.dataset.goto; render(); });
   requestAnimationFrame(drawGutter);
 }
 function paras(){ return Array.from($("#pen").querySelectorAll("p")); }
@@ -528,13 +548,14 @@ function syncFocus(){
 }
 function drawGutter(){
   const g = $("#gutter"); if (!g) return;
-  const pen = $("#pen"), top = pen.getBoundingClientRect().top;
+  const top = g.getBoundingClientRect().top;
   g.innerHTML = paras().map(el => {
     const k = el.dataset.k;
     if (!SPEC[k]) return "";
-    const y = el.getBoundingClientRect().top - top + 4;
+    const y = el.getBoundingClientRect().top - top + 3;
     const warn = checks(k).some(c => c.k === "warn");
-    return `<button class="tag" data-jump="${k}" data-on="${k===S.focus}" data-flag="${warn?"warn":""}" style="top:${y}px"><s></s>${SPEC[k].name}</button>`;
+    return `<button class="tag" data-jump="${k}" data-on="${k===S.focus}" data-flag="${warn?"warn":""}" style="top:${y}px">`
+      + `<span><b>${SPEC[k].name}</b><u>${state(k)}</u></span><s></s></button>`;
   }).join("");
   g.querySelectorAll("[data-jump]").forEach(b => b.onclick = () => {
     S.focus = b.dataset.jump;
@@ -584,6 +605,12 @@ function renderAside(){
     drawGutter(); renderAside();
   });
   const btn = $("#proof"); if (btn) btn.onclick = () => proofread(k);
+}
+function state(k){
+  if (k !== "opener") return S.blocks[k].trim() ? "yours" : "yours, not written";
+  const q = qualifier();
+  if (q === null) return "your own wording";
+  return q.trim() ? "written for you, edited" : "written for you";
 }
 const trim = s => s.length > 210 ? s.slice(0,205).replace(/\s\S*$/,"") + "…" : s;
 function renderAI(r){

@@ -1,0 +1,759 @@
+<title>First Proof</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,500;1,6..72,400&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#FBFAF7; --surface:#FFFFFF; --sunk:#F4F2ED;
+  --line:#E5E2DA; --line-soft:#EFEDE6;
+  --ink:#1C1B16; --ink-soft:#6E6B60; --ink-faint:#A6A298;
+  --accent:#1F3A5F; --accent-soft:#E7ECF3; --accent-line:#C3D0E2;
+  --warn:#8F4327; --warn-soft:#F8EDE8;
+  --good:#3C5E3B; --good-soft:#EDF2EC;
+  --sans:"Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --serif:"Newsreader",Georgia,"Times New Roman",serif;
+  --rail:196px; --aside:340px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#161512; --surface:#1D1C18; --sunk:#232219;
+  --line:#343229; --line-soft:#2A2822;
+  --ink:#EDEAE1; --ink-soft:#A19D91; --ink-faint:#6F6C62;
+  --accent:#9BB8DC; --accent-soft:#222B37; --accent-line:#3A4757;
+  --warn:#D99878; --warn-soft:#2E241E;
+  --good:#9DBE9B; --good-soft:#212821;
+}}
+:root[data-theme="dark"]{
+  --paper:#161512; --surface:#1D1C18; --sunk:#232219;
+  --line:#343229; --line-soft:#2A2822;
+  --ink:#EDEAE1; --ink-soft:#A19D91; --ink-faint:#6F6C62;
+  --accent:#9BB8DC; --accent-soft:#222B37; --accent-line:#3A4757;
+  --warn:#D99878; --warn-soft:#2E241E;
+  --good:#9DBE9B; --good-soft:#212821;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+.lbl{font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint)}
+
+/* ---------- frame ---------- */
+.top{display:flex;align-items:center;gap:14px;height:52px;padding-inline:20px;border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:0;z-index:20}
+.mark{font-family:var(--serif);font-size:17px;letter-spacing:-.01em;white-space:nowrap}
+.mark em{font-style:italic;color:var(--accent)}
+.crumb{color:var(--ink-soft);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.crumb b{color:var(--ink);font-weight:500}
+.ghost{padding:5px 10px;border:1px solid var(--line);border-radius:6px;font-size:12.5px;color:var(--ink-soft)}
+.ghost:hover{border-color:var(--ink-faint);color:var(--ink)}
+
+.shell{display:grid;grid-template-columns:var(--rail) minmax(0,1fr) var(--aside);min-height:calc(100dvh - 52px)}
+nav{border-right:1px solid var(--line)}
+.stick{position:sticky;top:52px;padding:22px 12px;display:flex;flex-direction:column;gap:2px}
+nav .lbl{padding:0 10px 8px}
+nav button{display:flex;align-items:baseline;gap:9px;width:100%;text-align:left;padding:7px 10px;border-radius:6px;color:var(--ink-soft);font-size:13.5px}
+nav button:hover{background:var(--sunk);color:var(--ink)}
+nav button[aria-current="true"]{background:var(--accent-soft);color:var(--accent);font-weight:500}
+nav button i{font-style:normal;font-size:10.5px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+nav button[aria-current="true"] i{color:var(--accent)}
+
+main{padding:34px 40px 90px;min-width:0}
+aside{border-left:1px solid var(--line);background:var(--surface)}
+#aside{position:sticky;top:52px;max-height:calc(100dvh - 52px);overflow-y:auto;padding:26px 22px 60px}
+
+.head{max-width:62ch;margin-bottom:26px}
+.head h1{font-family:var(--serif);font-size:25px;font-weight:400;letter-spacing:-.012em;margin:6px 0 7px;text-wrap:balance}
+.head p{margin:0;color:var(--ink-soft);max-width:58ch}
+
+/* ---------- the sheet ---------- */
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:10px;max-width:760px}
+.meta{display:grid;grid-template-columns:88px minmax(0,1fr);gap:3px 16px;padding:18px 22px;border-bottom:1px solid var(--line-soft);font-size:13px}
+.meta dt{color:var(--ink-faint);font-size:11px;letter-spacing:.05em;text-transform:uppercase;font-weight:600;padding-top:2px}
+.meta dd{margin:0;color:var(--ink-soft)}
+
+.body{display:grid;grid-template-columns:74px minmax(0,1fr);align-items:start}
+.gutter{position:relative;padding:26px 0 0}
+.tag{position:absolute;right:12px;display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint);white-space:nowrap;transition:color .15s}
+.tag:hover{color:var(--ink-soft)}
+.tag[data-on="true"]{color:var(--accent)}
+.tag s{width:5px;height:5px;border-radius:50%;background:var(--line);text-decoration:none}
+.tag[data-on="true"] s{background:var(--accent)}
+.tag[data-flag="warn"] s{background:var(--warn)}
+
+#pen{padding:26px 26px 8px;font-family:var(--serif);font-size:17.5px;line-height:1.62;color:var(--ink);border-left:1px solid var(--line-soft);min-height:210px}
+#pen:focus{outline:none}
+#pen p{margin:0 0 1.05em}
+#pen p:empty::before{content:attr(data-ph);color:var(--ink-faint);font-style:italic}
+#pen .q{border-bottom:1px dotted var(--accent-line);padding-bottom:1px}
+
+.fixed{border-left:1px solid var(--line-soft);padding:4px 26px 24px;font-family:var(--serif);font-size:17.5px;line-height:1.62;color:var(--ink-soft)}
+.fixed ul{margin:0 0 1.05em;padding:0;list-style:none}
+.fixed li{position:relative;padding-left:16px}
+.fixed li::before{content:"·";position:absolute;left:3px}
+.fixed p{margin:0 0 1.05em}
+.cta{display:inline-block;font-family:var(--sans);font-size:12.5px;font-weight:500;padding:8px 15px;border:1px solid var(--line);border-radius:6px;color:var(--ink-soft)}
+.foot{display:flex;gap:8px;align-items:center;padding:13px 22px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--ink-faint)}
+
+/* ---------- aside ---------- */
+.panel h2{font-family:var(--serif);font-size:19px;font-weight:400;margin:8px 0 8px;letter-spacing:-.01em}
+.panel .rule{color:var(--ink-soft);font-size:13px;margin:0 0 16px}
+.panel section{border-top:1px solid var(--line-soft);padding:15px 0 3px;margin-top:4px}
+.panel section:first-of-type{border-top:none}
+.panel h3{margin:0 0 10px;font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint)}
+
+.opt{display:block;width:100%;text-align:left;padding:9px 11px;border:1px solid var(--line);border-radius:7px;margin-bottom:6px;font-family:var(--serif);font-size:13.5px;line-height:1.45;color:var(--ink-soft)}
+.opt:hover{border-color:var(--accent-line);background:var(--accent-soft)}
+.opt[aria-pressed="true"]{border-color:var(--accent-line);background:var(--accent-soft);color:var(--ink)}
+.opt u{display:block;font-family:var(--sans);font-size:10px;letter-spacing:.07em;text-transform:uppercase;text-decoration:none;color:var(--ink-faint);margin-bottom:4px}
+
+.use{border:1px solid var(--line);border-radius:7px;padding:10px 11px;margin-bottom:7px;background:var(--paper)}
+.use h4{margin:0 0 6px;font-size:11px;font-weight:600;color:var(--ink-soft);letter-spacing:.02em}
+.use .q{font-family:var(--serif);font-size:13px;line-height:1.5;color:var(--ink-faint);white-space:pre-line}
+.use .q mark{background:none;color:var(--ink);box-shadow:inset 0 -6px 0 var(--accent-soft)}
+
+.chk{display:flex;gap:8px;align-items:flex-start;padding:7px 0;font-size:12.5px;color:var(--ink-soft);border-top:1px solid var(--line-soft)}
+.chk:first-of-type{border-top:none}
+.chk s{flex:none;width:6px;height:6px;border-radius:50%;margin-top:6px;background:var(--good);text-decoration:none}
+.chk[data-k="warn"] s{background:var(--warn)}
+.chk[data-k="warn"]{color:var(--ink)}
+.chk b{font-weight:600;color:var(--ink)}
+
+.act{width:100%;padding:9px 12px;border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--accent);border-radius:7px;font-size:13px;font-weight:500;margin-top:8px}
+.act:hover{filter:brightness(.97)}
+.act[disabled]{opacity:.5;cursor:default}
+.note{font-size:11.5px;color:var(--ink-faint);margin:8px 0 0;line-height:1.45}
+
+/* ---------- facts ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px 18px;max-width:760px}
+.grid.wide{grid-template-columns:1fr}
+fieldset{border:none;margin:0 0 30px;padding:0;max-width:760px}
+legend{padding:0;margin-bottom:3px;font-family:var(--serif);font-size:18px;font-weight:400}
+fieldset>p{margin:0 0 16px;color:var(--ink-soft);font-size:13px;max-width:56ch}
+label{display:block}
+label span{display:block;font-size:11px;font-weight:500;color:var(--ink-soft);margin-bottom:5px}
+input,select,textarea{width:100%;font:inherit;font-size:13.5px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:8px 10px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent-line);box-shadow:0 0 0 3px var(--accent-soft)}
+label small{display:block;font-size:11px;color:var(--ink-faint);margin-top:4px}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink-faint) 50%),linear-gradient(135deg,var(--ink-faint) 50%,transparent 50%);background-position:calc(100% - 15px) 15px,calc(100% - 10px) 15px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+
+/* ---------- outputs ---------- */
+.out{max-width:760px;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-bottom:12px;overflow:hidden}
+.out>summary{display:flex;align-items:baseline;gap:10px;padding:13px 18px;cursor:pointer;list-style:none}
+.out>summary::-webkit-details-marker{display:none}
+.out>summary b{font-weight:500;font-size:13.5px}
+.out>summary i{font-style:normal;color:var(--ink-faint);font-size:11.5px;margin-left:auto;font-variant-numeric:tabular-nums}
+.out[open]>summary{border-bottom:1px solid var(--line-soft)}
+.out pre{margin:0;padding:16px 18px 20px;font-family:var(--serif);font-size:15px;line-height:1.6;white-space:pre-wrap;word-wrap:break-word;color:var(--ink-soft)}
+.na{color:var(--ink-faint);font-style:italic}
+.groupline{display:flex;align-items:center;gap:12px;margin:26px 0 12px;max-width:760px}
+.groupline::after{content:"";flex:1;height:1px;background:var(--line)}
+
+@media (max-width:1080px){
+  .shell{grid-template-columns:1fr}
+  nav{border-right:none;border-bottom:1px solid var(--line)}
+  .stick{position:static;flex-direction:row;overflow-x:auto;padding:8px 12px}
+  nav .lbl{display:none}
+  nav button{width:auto;white-space:nowrap}
+  aside{border-left:none;border-top:1px solid var(--line)}
+  #aside{position:static;max-height:none}
+  main{padding:24px 16px 60px}
+}
+@media (max-width:560px){
+  .body{grid-template-columns:1fr}
+  .gutter{display:none}
+  #pen,.fixed{border-left:none;padding-inline:18px}
+  .meta{grid-template-columns:1fr;gap:0 0}
+  .meta dt{padding-top:9px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="top">
+  <span class="mark">First <em>Proof</em></span>
+  <span class="crumb" id="crumb"></span>
+  <button class="ghost" id="theme" title="Switch theme">Theme</button>
+</header>
+
+<div class="shell">
+  <nav><div class="stick">
+    <span class="lbl">Release</span>
+    <button data-view="write" aria-current="true">Write <i>3 blocks</i></button>
+    <button data-view="facts">Details <i id="nfacts"></i></button>
+    <button data-view="out">Everything else <i id="nout"></i></button>
+  </div></nav>
+  <main id="main"></main>
+  <aside><div id="aside"></div></aside>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════ state
+const S = {
+  view: "write",
+  focus: "hook",
+  lead: 0,
+  facts: {
+    artist:"Grayson Perry", collab_with:"Grayson Perry", ordinal:"latest",
+    handle:"alanmeasles", x_handle:"", hashtag:"GraysonPerry",
+    link:"https://avantarte.co/grayson-perry",
+    title_1:"The Changeling", title_2:"", title_3:"", is_series:"no",
+    edition_phrase:"a new limited edition print", works:1, unit:"print",
+    mechanic:"timed", window:"one week",
+    launch_at:"2026-04-30T14:00", closes_at:"2026-05-07T14:00",
+    beneficiary:"the Foundling Museum", beneficiary_handle:"foundlingmuseum",
+    advisor:"Sam", early_access_code:"000-000", framing_code:"", framing_percent:10,
+    f1:"Signed by the artist", f2:"Individually numbered", f3:"Free worldwide shipping", f4:"", f5:"",
+    quote:"Beauty and seriousness are perhaps the most shocking tactics left to artists these days.",
+    bio:"Grayson Perry has long been one of the most distinctive voices in contemporary British art. Working across ceramics, tapestry, print and sculpture, his practice examines identity, class and gender in modern society."
+  },
+  blocks: {
+    opener:"", // filled at boot from the chosen lead
+    hook:"The Changeling portrays a child as a symbol of modern youth, exploring how technology shapes today's generations. It reimagines changeling folklore for the digital age, and is intended to be 'quite disturbing'.",
+    making:"To create the edition, printmakers at Make-Ready translated a new design into a 9-colour silkscreen, capturing the vivid detail of the original drawing."
+  },
+  ai: {}   // per-block Claude result
+};
+
+// ═══════════════════════════════════════════════════ derived
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const cap = s => s ? s[0].toUpperCase()+s.slice(1) : s;
+const join = a => a.length<2 ? (a[0]||"") : a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+
+function D(){
+  const f = S.facts, d = {};
+  const L = new Date(f.launch_at), C = new Date(f.closes_at);
+  const fmt = (x,pad) => `${pad?String(x.getDate()).padStart(2,"0"):x.getDate()} ${MONTHS[x.getMonth()]}`;
+  const tm  = x => `${String(x.getHours()).padStart(2,"0")}:${String(x.getMinutes()).padStart(2,"0")} UK time`;
+  d.draw = f.mechanic === "draw";
+  d.named = f.artist + (f.handle ? ` (@${f.handle})` : "");
+  d.namedX = f.artist + (f.x_handle ? ` (@${f.x_handle})` : "");
+  d.collabX = f.collab_with === f.artist ? d.namedX : f.collab_with;
+  d.aUnit = ("aeiou".includes((f.unit||"print")[0].toLowerCase()) ? "an " : "a ") + (f.unit||"print");
+  const titles = [f.title_1,f.title_2,f.title_3].filter(Boolean);
+  d.series = f.is_series === "yes";
+  d.work = d.series ? `the ${f.title_1} series` : join(titles.map(t=>`‘${t}’`));
+  d.Work = cap(d.work);
+  d.workEmail = d.series ? `the ${f.title_1} series` : join(titles);
+  d.WorkEmail = cap(d.workEmail);
+  d.plural = (+f.works) > 1;
+  d.hookNamesBen = !!(f.beneficiary && S.blocks.hook.toLowerCase().includes(f.beneficiary.toLowerCase()));
+  d.support = (f.beneficiary && !d.hookNamesBen) ? `, released in support of ${f.beneficiary}` : "";
+  d.benTagged = f.beneficiary ? f.beneficiary + (f.beneficiary_handle ? ` (@${f.beneficiary_handle})` : "") : "";
+  d.feats = [f.f1,f.f2,f.f3,f.f4,f.f5].filter(Boolean);
+  d.featLine = d.feats.join(". ") + ".";
+  d.featList = d.feats.map(x=>"· "+x).join("\n");
+  d.featListSupport = d.featList + ((f.beneficiary && !d.hookNamesBen) ? `\n· Released in support of ${f.beneficiary}` : "");
+  d.makingOurs = S.blocks.making.replace("printmakers at Make-Ready","our printmakers at Make-Ready");
+  d.makingTagged = S.blocks.making.replace("printmakers at Make-Ready","our printmakers at Make-Ready (@make__ready)");
+  d.launchDate = fmt(L); d.launchDateDd = fmt(L,1); d.launchTime = tm(L); d.launchDay = DAYS[L.getDay()];
+  d.closeDate = fmt(C); d.closeDateDd = fmt(C,1); d.closeTime = tm(C); d.closeDay = DAYS[C.getDay()];
+  d.collectPhrase = f.edition_phrase.replace(" new "," ");
+  d.editionCap = cap(f.edition_phrase);
+  d.windowCap = cap(f.window);
+  d.cardLine = (titles.length>1 ? `A limited edition ${f.unit}` : d.editionCap) + ` by ${f.artist}.`;
+  d.cards = (d.series?["Untitled"]:titles).map(t=>`${t}\n${d.cardLine}`).join("\n\n");
+  d.quoteLine = f.quote ? `“${f.quote}” – ${f.artist}` : "";
+  d.addWhat = d.plural ? d.aUnit : d.workEmail;
+  d.framingWelcome = f.framing_code ? `As a welcome gesture, enjoy ${f.framing_percent}% off our in-house framing on your first purchase using the code ${f.framing_code} at checkout.` : "";
+  d.framingRemind  = f.framing_code ? `As a reminder, you can enjoy ${f.framing_percent}% off our in-house framing on your first purchase using the code ${f.framing_code} at checkout.` : "";
+  // the opener frame: what the system supplies, either side of the writer's words
+  d.workIntro = ((+f.works)===1 && titles.length ? `${f.title_1}, ` : "") + f.edition_phrase;
+  return d;
+}
+
+// ═══════════════════════════════════════════════════ the opener's wordings
+const LEADS = [
+  {name:"Delighted to announce", note:"49 of your last 58 announcements",
+   head:d=>`We're delighted to announce our ${S.facts.ordinal} collaboration with ${S.facts.collab_with} – `},
+  {name:"Proud to present", note:"used for estates and landmark releases",
+   head:d=>`We're proud to present our ${S.facts.ordinal} collaboration with ${S.facts.collab_with} – `},
+  {name:"Honoured to announce", note:"Carrie Mae Weems, 2025",
+   head:d=>`We're honoured to announce our ${S.facts.ordinal} collaboration with ${S.facts.collab_with} – `},
+  {name:"Excited to unveil", note:"Parra, 2025",
+   head:d=>`We're excited to unveil our ${S.facts.ordinal} collaboration with ${S.facts.collab_with} – `},
+  {name:"Over the moon", note:"The Andy Warhol Foundation, 2026",
+   head:d=>`We are over the moon to announce our ${S.facts.ordinal} collaboration with ${S.facts.collab_with} – `},
+  {name:"The work first", note:"one announcement in ten opens on the artwork",
+   head:d=>`We're delighted to present `, tail:d=>` by ${S.facts.artist}`}
+];
+function openerFrame(){
+  const d = D(), L = LEADS[S.lead];
+  return { head: L.head(d), mid: d.workIntro, tail: (L.tail?L.tail(d):"") + d.support + "." };
+}
+function defaultOpener(){ const f=openerFrame(); return f.head+f.mid+f.tail; }
+// what the writer added inside the frame, if the frame is still intact
+function qualifier(){
+  const f = openerFrame(), t = S.blocks.opener.trim();
+  if (t.startsWith(f.head+f.mid) && t.endsWith(f.tail))
+    return t.slice((f.head+f.mid).length, t.length-f.tail.length);
+  return null;                                     // the writer has gone their own way
+}
+function workIntro(){ const q=qualifier(); return D().workIntro + (q===null?"":q); }
+
+// ═══════════════════════════════════════════════════ assembly
+function outputs(){
+  const f=S.facts, d=D(), H=S.blocks.hook.trim(), M=S.blocks.making.trim(), wi=workIntro();
+  const opener = S.blocks.opener.trim();
+  const P = (...xs)=>xs.filter(x=>x&&x.trim()).join("\n\n");
+  const deadline = `Closes ${d.closeDate} at ${d.closeTime}.`;
+  const preAct = d.draw ? `Enter the draw via our link in bio. ${deadline}`
+                        : `Available for ${f.window} from ${d.launchTime} on ${d.launchDate}. Link in bio to get updates.`;
+  const openAct = d.draw ? `Enter the draw via our link in bio. ${deadline}`
+                         : `Link in bio to buy ${d.aUnit}. ${deadline}`;
+  const ben = d.benTagged ? ` Released in support of ${d.benTagged}.` : "";
+  const feat = d.featLine, NA = "— not used for a draw —";
+  const announceStatus = d.series
+    ? `Announcing ${f.edition_phrase} by ${d.named}, from ${d.work}.`
+    : `Announcing ${d.work}, ${f.edition_phrase} by ${d.named}.`;
+
+  const posts = [
+    {n:"Coming soon", ch:"Main", t:P(d.bioTagged||f.bio, `Our ${f.ordinal} collaboration is on the horizon.`, "Link in bio to get updates.")},
+    {n:"Announcement", ch:"Main + Insiders", t:P(announceStatus, H, feat+(d.hookNamesBen?"":ben), preAct, f.hashtag?"#"+f.hashtag:"")},
+    {n:"Sustain, the making", ch:"Main", t:P(`A closer look at ${d.work}, ${f.edition_phrase} by ${d.named}.`, d.makingTagged, feat+ben, preAct)},
+    {n:"Sustain, the artist's words", ch:"Main", t: f.quote ? P(d.quoteLine, `${d.Work}, ${f.edition_phrase} by ${d.named}.`, feat+ben, preAct) : "— no quote given, post skipped —"},
+    {n:"Now live", ch:"Main + Insiders", t: d.draw?NA:P(`${d.Work} by ${d.named} is now available to collect, for ${f.window} only.`, feat+ben, openAct)},
+    {n:"Still time", ch:"Main + Insiders", t: d.draw?NA:P(`There's still time to collect ${d.work} by ${d.named}.`, feat+ben, openAct)},
+    {n:"Last chance", ch:"Main", t:P(`Last chance to ${d.draw?"enter the draw for":"collect"} ${d.work} by ${d.named}.`, feat+ben, openAct)}
+  ];
+
+  const X = s => s.replace(d.named, d.namedX);
+  const preT = d.draw ? `${deadline} Enter the draw: ${f.link}` : `Available for ${f.window} from ${d.launchTime} on ${d.launchDate}. Sign up for updates: ${f.link}`;
+  const openT = d.draw ? `${deadline} Enter the draw: ${f.link}` : `${deadline} Buy ${d.aUnit}: ${f.link}`;
+  const benT = (f.beneficiary && !d.hookNamesBen) ? `Released in support of ${f.beneficiary}.` : "";
+  const tweets = [
+    {n:"Coming soon", t:P(`Our ${f.ordinal} collaboration with ${d.collabX} is on the horizon.`, `Sign up for updates: ${f.link}`)},
+    {n:"Announcement", t:P(X(announceStatus), H, benT, preT)},
+    {n:"Now live", t: d.draw?NA:P(X(`${d.Work} by ${d.named} is now available to collect, for ${f.window} only.`), openT)},
+    {n:"Still time", t: d.draw?NA:P(X(`There's still time to collect ${d.work} by ${d.named}.`), openT)},
+    {n:"Last chance", t:P(X(`Last chance to ${d.draw?"enter the draw for":"collect"} ${d.work} by ${d.named}.`), openT)}
+  ];
+
+  const greet = "Hi {{ personalization_token('contact.firstname', 'there') }},";
+  const questions = "If you have any questions, please don't hesitate to get in touch by replying to this email.";
+  const editionNos = "Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here.";
+  const drawLine = `Enter the draw for a chance to collect. Closes at ${d.closeTime} on ${d.closeDate}.`;
+  const w48 = f.window === "48 hours";
+  const E = (n, use, t) => ({n, use, t});
+  const emails = [
+    E("Announcement (TL Non-flow) · Announcement (LE)", "both",
+      P(opener, H, d.makingOurs, d.featList,
+        d.draw ? drawLine : P(`The edition will be available to collect for ${f.window} only, starting at ${d.launchTime} on ${d.launchDay}, ${d.launchDateDd}.`, "Click below to learn more and register for updates."))),
+    E("Welcome (TL Flow)", "timed", d.draw?NA:P(
+      "Welcome {{ personalization_token('contact.firstname', 'to Avant Arte') }}!",
+      "Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems.",
+      `Our upcoming collaboration with ${f.collab_with} is the latest in this lineage. If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?`,
+      "Let us know if you have any questions. We're excited to see what you collect.")),
+    E("Early Access (TL Flow)", "timed", d.draw?NA:P(greet,
+      `Our ${f.ordinal} collaboration with ${f.collab_with} launches tomorrow at ${d.launchTime} and will be available to collect for ${f.window} only.`,
+      H, d.featListSupport,
+      "As a thank you for registering for updates, we're offering you the chance to collect the release 24 hours before everyone else.",
+      d.framingWelcome, "Unlock early access using the link below.")),
+    E("Early access (TL Artist PP)", "timed", d.draw?NA:P(greet,
+      `Our ${f.ordinal} collaboration with ${f.collab_with} launches tomorrow at ${d.launchTime} and will be available to collect for ${f.window} only.`,
+      H, d.featListSupport,
+      "As a previous collector of the artist, we're offering you the chance to order the collaboration 24 hours before everyone else.",
+      "Unlock early access using the link below.", editionNos, questions)),
+    E("Early Access (Insiders), signed by the advisor", "both", P(greet,
+      `I'm delighted to share our ${f.ordinal} collaboration with ${f.collab_with} – ${wi}${d.support}.`,
+      H,
+      d.draw ? `The edition will launch publicly on ${d.launchDate} and will be allocated by a randomised draw. However, for the next 48 hours, I'm excited to offer you a first look, plus early access to a limited number of pre-orders.`
+             : `The edition launches tomorrow at ${d.launchTime} and will be available to collect for ${f.window} only. For the next 24 hours, I'm excited to offer you early access ahead of the public launch.`,
+      d.draw ? `Discover the artwork and place your order via the private link below. Use code ${f.early_access_code} to unlock early access.`
+             : "Discover the artwork and place your order via the private link below.",
+      questions, `Best regards,\n${f.advisor}\n\nArt Advisor at Avant Arte`)),
+    E("Early/Exclusive access (LE)", "draw", !d.draw?"— not used for a timed edition —":P(greet,
+      `We're currently preparing the launch of our ${f.ordinal} collaboration with ${f.collab_with} – ${wi}${d.support}.`,
+      H,
+      `The edition will launch publicly on ${d.launchDate} and will be allocated by a randomised draw; however, for the next 48 hours we're offering a small group of collectors a first look, plus access to a limited number of pre-orders. Based on your order history and the artists you've expressed an interest in, I thought the edition would be a good fit for your collection.`,
+      `Explore the artwork and place your order via the private link below. Use code ${f.early_access_code} to unlock early access.`,
+      editionNos, questions)),
+    E("Now Live (TL Flow and Non-flow)", "timed", d.draw?NA:P(
+      `Our ${f.ordinal} collaboration with ${f.collab_with} is now available to collect for ${f.window} only – ${wi}${d.support}.`,
+      H, d.makingOurs, d.featListSupport,
+      `The opportunity to collect an edition ends at ${d.closeTime} on ${d.closeDay}, ${d.closeDateDd}. Click the link below to add ${d.addWhat} to your collection.`,
+      d.framingWelcome)),
+    E("Halfway (TL Flow)", "timed, 48 hours", (d.draw||!w48)?"— 48-hour windows only —":"Kicker: Collect "+d.aUnit+" by "+f.artist+"\nHeadline: 24 hours down, 24 to go\n\nNo body: this one is image-led.\n\nCTA: Buy now"),
+    E("5 days to go (TL Flow)", "timed, one week", (d.draw||w48)?"— one-week windows only —":"Kicker: Collect "+d.aUnit+" by "+f.artist+"\nHeadline: 2 days down, 5 days to go\n\nNo body: this one is image-led.\n\nCTA: Buy "+d.aUnit),
+    E("3 days to go (TL Flow)", "timed, one week", (d.draw||w48)?"— one-week windows only —":P(
+      `There are just three days left to collect ${d.collectPhrase} by ${f.artist}.`, H,
+      `Click the link to collect before ${d.closeTime} on ${d.closeDay}, ${d.closeDateDd}.`, d.framingRemind)),
+    E("Last chance (TL Flow) · Last chance (LE)", "both", d.draw
+      ? P(`This is your final opportunity to enter the draw for ${d.workEmail}, ${d.collectPhrase} by ${f.artist}.`, H,
+          `For a chance to collect, click the link below to enter the draw. The draw closes at ${d.closeTime} on ${d.closeDay}, ${d.closeDateDd}.`)
+      : P(`It's now or never for our ${f.ordinal} collaboration with ${f.collab_with} – ${d.collectPhrase} will be available to order until ${d.closeTime} on ${d.closeDay}, ${d.closeDateDd}.`,
+          `After this time, the edition size${d.plural?" for each artwork":""} will be confirmed, and the ${d.plural?"works":"work"} will no longer be available to purchase.`, d.framingRemind)),
+    E("Monthly Preview · this release's paragraph", "both", P(
+      `From ${f.collab_with} comes ${wi}${d.support}.`, H, d.makingOurs,
+      d.draw ? `The edition will be allocated by a randomised draw, which closes at ${d.closeTime} on ${d.closeDate}.`
+             : `The edition will be available to collect for ${f.window} only, from ${d.launchTime} on ${d.launchDay}, ${d.launchDateDd}.`))
+  ];
+  return {posts, tweets, emails};
+}
+
+// where does a block land, and what sits either side of it there?
+function placements(key){
+  const text = S.blocks[key].trim();
+  if (!text) return [];
+  const o = outputs(), hits = [];
+  const scan = (list, kind) => list.forEach(x => {
+    const t = x.t || "";
+    const paras = t.split("\n\n");
+    const vars = key==="making"
+      ? [text, text.replace("printmakers at Make-Ready","our printmakers at Make-Ready"),
+               text.replace("printmakers at Make-Ready","our printmakers at Make-Ready (@make__ready)")]
+      : [text];
+    const i = paras.findIndex(p => vars.some(v => p.includes(v)));
+    if (i >= 0) hits.push({kind, name:x.n, before:paras[i-1]||"", line:paras[i], after:paras[i+1]||""});
+  });
+  if (key === "opener") {
+    // the opener's own wording appears once; its tail is reused by the frames below
+    const q = qualifier();
+    o.emails.forEach(x => { if (x.t.includes(workIntro()) ) hits.push({kind:"Email", name:x.n, before:"", line:x.t.split("\n\n")[0], after:x.t.split("\n\n")[1]||""}); });
+    return hits;
+  }
+  scan(o.posts,"Instagram"); scan(o.tweets,"Twitter"); scan(o.emails,"Email");
+  return hits;
+}
+
+// ═══════════════════════════════════════════════════ the rules each block is held to
+const BANNED = ["don't miss out","miss out","hurry","act now","shop now","last call","elevate","delve","dive into","tapestry of","testament to","journey through","unleash","embark","captivating","mesmerising","breathtaking","stunning","must-have","prestigious","seamless","effortless","cutting-edge","nestled","boasts","showcases","look no further","not only","at the heart of","perfect for","we're thrilled","thrilled to","excited to announce","one-of-a-kind","product","item","drop","raffle","customer"];
+const US = {color:"colour",colors:"colours",realize:"realise",center:"centre",gray:"grey",favorite:"favourite",honor:"honour",catalog:"catalogue",program:"programme"};
+const SPEC = {
+  opener:{ name:"Opener", rule:"The house frame, with room for a few words of your own about the work. The tail is reused by four other emails, so keep it a phrase, not a second sentence.", max:45 },
+  hook:{ name:"Hook", rule:"Two to three sentences about the work. As editorial as you like — this is where the release sounds like itself. The one test: it must read as well in the middle of an email as at the top of a post.", max:70 },
+  making:{ name:"Making", rule:"One sentence on how the edition was made. Write “printmakers at Make-Ready” and the system adds “our” where it belongs.", max:45 }
+};
+function checks(key){
+  const t = S.blocks[key].trim(), out = [], low = t.toLowerCase();
+  if (!t) return [{k:"warn", t:"Nothing written yet."}];
+  const words = t.split(/\s+/).length;
+  BANNED.forEach(b => { if (new RegExp("(?<![\\w-])"+b.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(?![\\w-])").test(low)) out.push({k:"warn", t:`Banned phrase: “${b}”`}); });
+  Object.entries(US).forEach(([us,uk]) => { if (new RegExp("\\b"+us+"\\b").test(low)) out.push({k:"warn", t:`US spelling “${us}” — use “${uk}”`}); });
+  if (t.includes("—")) out.push({k:"warn", t:"Em dash. The house dash is a spaced en dash."});
+  if (/\w[–—]\w/.test(t) && !/\d[–—]\d/.test(t)) out.push({k:"warn", t:"Unspaced dash."});
+  if (t.includes("!")) out.push({k:"warn", t:"Exclamation mark."});
+  if (t.includes("?")) out.push({k:"warn", t:"Rhetorical question. It assumes the reader is at the start, and most of the time this block is mid-email."});
+  if (/limited-edition/.test(low)) out.push({k:"warn", t:"“limited-edition” — the house form has no hyphen."});
+  t.split(/(?<=[.!?])\s+/).forEach(s => { const n=s.split(/\s+/).length; if (n>35) out.push({k:"warn", t:`A sentence of ${n} words. The cap is 35.`}); });
+  if (words > SPEC[key].max) out.push({k:"warn", t:`${words} words. Aim for under ${SPEC[key].max}.`});
+  if (key==="making" && t && !/Make-Ready/.test(t)) out.push({k:"warn", t:"No mention of Make-Ready. If this edition was made elsewhere, that is fine — the system just won't add “our”."});
+  if (key==="opener" && qualifier()===null) out.push({k:"warn", t:"This no longer matches the house frame, so the other emails will fall back to the standard opener. Fine if deliberate."});
+  if (!out.length) out.push({k:"good", t:`Clean. ${words} words, ${placements(key).length} places.`});
+  return out;
+}
+
+// ═══════════════════════════════════════════════════ render
+const $ = s => document.querySelector(s);
+const esc = s => (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+function render(){
+  const f = S.facts;
+  $("#crumb").innerHTML = `<b>${esc(f.artist)}</b> &middot; ${esc(f.title_1||"Untitled")} &middot; ${f.mechanic==="draw"?"draw":f.window}`;
+  const o = outputs();
+  $("#nout").textContent = o.posts.length + o.tweets.length + o.emails.length;
+  $("#nfacts").textContent = FORM.reduce((n,s)=>n+s.f.length,0);
+  document.querySelectorAll("nav button").forEach(b => b.setAttribute("aria-current", String(b.dataset.view===S.view)));
+  if (S.view === "write") { renderWrite(); renderAside(); }
+  else if (S.view === "facts") { renderFacts(); $("#aside").innerHTML = asideFacts(); }
+  else { renderOut(); $("#aside").innerHTML = asideOut(); }
+}
+
+// ---------- write ----------
+let penBuilt = false;
+function renderWrite(){
+  const f = S.facts, d = D(), o = outputs();
+  const kicker = d.draw ? "Enter the draw" : "Launching " + d.launchDate;
+  const head = d.draw ? d.WorkEmail : `${d.WorkEmail} by ${f.artist}`;
+  const subject = `${f.artist} – ${d.editionCap}`;
+  const preview = d.draw ? `Enter the draw for a chance to collect. Closes ${d.closeDate}.` : `Launching ${d.launchDate}. Register for updates.`;
+  const closing = d.draw
+    ? `Enter the draw for a chance to collect. Closes at ${d.closeTime} on ${d.closeDate}.`
+    : `The edition will be available to collect for ${f.window} only, starting at ${d.launchTime} on ${d.launchDay}, ${d.launchDateDd}.<br>Click below to learn more and register for updates.`;
+
+  $("#main").innerHTML = `
+    <div class="head">
+      <span class="lbl">Step one</span>
+      <h1>The announcement email</h1>
+      <p>Write it as one email. Three paragraphs, three blocks — and those three seed every other post, tweet and email in the campaign. Everything in grey is already filled in from the release details.</p>
+    </div>
+    <div class="sheet">
+      <dl class="meta">
+        <dt>Subject</dt><dd>${esc(subject)}</dd>
+        <dt>Preview</dt><dd>${esc(preview)}</dd>
+        <dt>Kicker</dt><dd>${esc(kicker)}</dd>
+        <dt>Headline</dt><dd>${esc(head)}</dd>
+      </dl>
+      <div class="body">
+        <div class="gutter" id="gutter"></div>
+        <div id="pen" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="The announcement email, three paragraphs"></div>
+      </div>
+      <div class="body">
+        <div class="gutter"></div>
+        <div class="fixed">
+          <ul>${d.feats.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+          <p>${closing}</p>
+          <span class="cta">${d.draw?"Enter the draw":"Discover the collaboration"}</span>
+        </div>
+      </div>
+      <div class="foot">Then: ${o.posts.length} posts, ${o.tweets.length} tweets and ${o.emails.filter(e=>!e.t.startsWith("—")).length} more emails come from these three blocks.</div>
+    </div>`;
+
+  const pen = $("#pen");
+  pen.innerHTML = ["opener","hook","making"].map(k =>
+    `<p data-k="${k}" data-ph="${k==="hook"?"What is this work? Two or three sentences.":"How was it made? One sentence."}">${esc(S.blocks[k])}</p>`).join("");
+  pen.addEventListener("input", onPen);
+  pen.addEventListener("paste", e => {
+    e.preventDefault();
+    document.execCommand("insertText", false, (e.clipboardData||window.clipboardData).getData("text").replace(/\s*\n\s*\n\s*/g,"\n").trim());
+  });
+  pen.addEventListener("focusin", syncFocus);
+  pen.addEventListener("keyup", syncFocus);
+  pen.addEventListener("click", syncFocus);
+  requestAnimationFrame(drawGutter);
+}
+function paras(){ return Array.from($("#pen").querySelectorAll("p")); }
+function onPen(){
+  const p = paras();
+  ["opener","hook","making"].forEach((k,i) => { S.blocks[k] = p[i] ? p[i].innerText.replace(/\s+/g," ").trim() : ""; });
+  p.forEach((el,i) => el.dataset.k = ["opener","hook","making"][i] || "extra");
+  S.ai = {};
+  drawGutter(); renderAside();
+  const o = outputs();
+  const foot = document.querySelector(".foot");
+  if (foot) foot.textContent = `Then: ${o.posts.length} posts, ${o.tweets.length} tweets and ${o.emails.filter(e=>!e.t.startsWith("—")).length} more emails come from these three blocks.`;
+}
+function syncFocus(){
+  const sel = window.getSelection();
+  if (!sel.anchorNode) return;
+  let n = sel.anchorNode; while (n && n.nodeName !== "P") n = n.parentNode;
+  const k = n && n.dataset ? n.dataset.k : null;
+  if (k && SPEC[k] && k !== S.focus) { S.focus = k; drawGutter(); renderAside(); }
+}
+function drawGutter(){
+  const g = $("#gutter"); if (!g) return;
+  const pen = $("#pen"), top = pen.getBoundingClientRect().top;
+  g.innerHTML = paras().map(el => {
+    const k = el.dataset.k;
+    if (!SPEC[k]) return "";
+    const y = el.getBoundingClientRect().top - top + 4;
+    const warn = checks(k).some(c => c.k === "warn");
+    return `<button class="tag" data-jump="${k}" data-on="${k===S.focus}" data-flag="${warn?"warn":""}" style="top:${y}px"><s></s>${SPEC[k].name}</button>`;
+  }).join("");
+  g.querySelectorAll("[data-jump]").forEach(b => b.onclick = () => {
+    S.focus = b.dataset.jump;
+    const el = paras().find(p => p.dataset.k === S.focus);
+    if (el) { const r=document.createRange(); r.selectNodeContents(el); r.collapse(false);
+              const s=window.getSelection(); s.removeAllRanges(); s.addRange(r); el.parentNode.focus(); }
+    drawGutter(); renderAside();
+  });
+}
+
+// ---------- aside: the focused block ----------
+function renderAside(){
+  const k = S.focus, spec = SPEC[k], hits = placements(k), cs = checks(k), ai = S.ai[k];
+  const isOpener = k === "opener";
+  $("#aside").innerHTML = `<div class="panel">
+    <span class="lbl">Block</span>
+    <h2>${spec.name}</h2>
+    <p class="rule">${spec.rule}</p>
+
+    ${isOpener ? `<section><h3>Wording</h3>
+      ${LEADS.map((L,i)=>`<button class="opt" data-lead="${i}" aria-pressed="${i===S.lead}"><u>${esc(L.note)}</u>${esc(L.head(D())+D().workIntro+((L.tail?L.tail(D()):"")+D().support)+".")}</button>`).join("")}
+      <p class="note">Pick one and the paragraph is rewritten. Anything you add inside it is kept, and carried into the four emails below.</p>
+    </section>` : ""}
+
+    <section><h3>Checks</h3>
+      ${cs.map(c=>`<div class="chk" data-k="${c.k}"><s></s><span>${esc(c.t)}</span></div>`).join("")}
+      <button class="act" id="proof">${ai&&ai.busy?"Reading…":"Proofread in all "+hits.length+" places"}</button>
+      ${ai&&ai.err?`<p class="note">${esc(ai.err)}</p>`:""}
+      ${ai&&ai.res?renderAI(ai.res):""}
+      <p class="note">The checks above are mechanical and run as you type. The button asks Claude to read the block in every place it lands and say where it does not sit well.</p>
+    </section>
+
+    <section><h3>Where it lands · ${hits.length}</h3>
+      ${hits.length?hits.map(h=>`<div class="use">
+        <h4>${esc(h.kind)} · ${esc(h.name)}</h4>
+        <div class="q">${h.before?esc(trim(h.before))+"<br><br>":""}<mark>${esc(trim(h.line))}</mark>${h.after?"<br><br>"+esc(trim(h.after)):""}</div>
+      </div>`).join(""):`<p class="note">Nothing yet — write the block and its uses appear here.</p>`}
+    </section>
+  </div>`;
+
+  $("#aside").querySelectorAll("[data-lead]").forEach(b => b.onclick = () => {
+    const q = qualifier(); S.lead = +b.dataset.lead;
+    const fr = openerFrame();
+    S.blocks.opener = fr.head + fr.mid + (q===null?"":q) + fr.tail;
+    const el = paras().find(p => p.dataset.k === "opener");
+    if (el) el.textContent = S.blocks.opener;
+    drawGutter(); renderAside();
+  });
+  const btn = $("#proof"); if (btn) btn.onclick = () => proofread(k);
+}
+const trim = s => s.length > 210 ? s.slice(0,205).replace(/\s\S*$/,"") + "…" : s;
+function renderAI(r){
+  if (!r) return "";
+  if (r.verdict === "good") return `<div class="chk" data-k="good"><s></s><span><b>Claude:</b> ${esc(r.summary||"Reads well everywhere.")}</span></div>`;
+  return `<div class="chk" data-k="warn"><s></s><span><b>Claude:</b> ${esc(r.summary||"")}</span></div>` +
+    (r.issues||[]).map(i=>`<div class="chk" data-k="warn"><s></s><span><b>${esc(i.where||"")}</b> ${esc(i.note||"")}${i.fix?`<br><em>Try:</em> ${esc(i.fix)}`:""}</span></div>`).join("");
+}
+
+async function proofread(k){
+  S.ai[k] = {busy:true}; renderAside();
+  try{
+    const sample = await claude.use("sample");
+    if (!sample) throw new Error("Claude is not available in this view.");
+    const hits = placements(k);
+    const ctx = hits.map((h,i)=>`${i+1}. ${h.kind} — ${h.name}\n${h.before?h.before+"\n\n":""}>>> ${h.line}\n${h.after?"\n"+h.after:""}`).join("\n\n");
+    const res = await sample.json(
+`You are proofreading one block of copy for Avant Arte, a publisher of limited edition artworks. The same block is reused across a campaign, so it has to work in every place it lands.
+
+THE BLOCK — the "${SPEC[k].name}":
+${S.blocks[k]}
+
+WHAT THIS BLOCK IS FOR: ${SPEC[k].rule}
+
+EVERY PLACE IT LANDS, with the copy either side of it (the block is marked >>>):
+${ctx}
+
+HOUSE RULES: British spelling. The house dash is a spaced en dash, never an em dash. No exclamation marks and no rhetorical questions. Sentences under 35 words. Times written as "14:00 UK time", dates as "30 April". Never say "we" or "our" inside this block — the surrounding frame supplies those. Every fact must be true of this release: do not invent dates, numbers, places or names.
+
+Judge two things. First, does the block read well on its own? Second, and more important, does it still read well in EACH place above — check especially whether it assumes it is the first thing being read, because in most of these places it is a middle paragraph. Also flag repetition with the copy either side of it.
+
+Be sparing. Only report real problems a careful editor would raise. Ignore matters of taste.
+
+Reply with JSON only, no other text:
+{"verdict":"good"|"fix","summary":"one short sentence","issues":[{"where":"the place, or 'everywhere'","note":"one sentence","fix":"a suggested rewrite, or null"}]}`,
+      {modelTier:"default"});
+    S.ai[k] = {res};
+  }catch(e){
+    S.ai[k] = {err: e && e.code === "not_granted" ? "Claude was not allowed to run here." : "Could not reach Claude just now. The mechanical checks above still apply."};
+  }
+  renderAside();
+}
+
+// ---------- facts ----------
+const FORM = [
+  {g:"The collaboration", d:"Who it is with, and how they are named. The works are always “by” the artist; the collaboration may be with an estate or a trust.", f:[
+    ["artist","Artist","text","The works are by this name"],
+    ["collab_with","Collaboration is with","text","Usually the same; for an estate, “the Lucian Freud Estate”"],
+    ["ordinal","Which collaboration","select","debut|latest|second"],
+    ["handle","Instagram handle","text","Without the @"],
+    ["x_handle","X handle","text","Leave blank if none"],
+    ["hashtag","Hashtag","text","Announcement post only"],
+    ["link","Release link","text","Used in tweets"],
+    ["advisor","Advisor","select","Sam|Curtis|Sofiya"]
+  ]},
+  {g:"The edition", d:"The edition phrase is the one that travels: it appears in the opener, the status lines, the cards and the footers, so it is written once here.", f:[
+    ["title_1","Title","text",""],
+    ["title_2","Second title","text","For a pair or trio"],
+    ["title_3","Third title","text",""],
+    ["is_series","Untitled works from a named series","select","no|yes"],
+    ["edition_phrase","Edition phrase","text","e.g. a quartet of new limited edition embroideries"],
+    ["works","Number of works","number",""],
+    ["unit","One of them is called a","text","print, embroidery, sculpture"],
+    ["f1","Feature 1","text",""],["f2","Feature 2","text",""],["f3","Feature 3","text",""],
+    ["f4","Feature 4","text","Bespoke to this release"],["f5","Feature 5","text",""]
+  ]},
+  {g:"The release", d:"Enter each date and time once. Every deadline sentence across the campaign is derived from these two.", f:[
+    ["mechanic","Mechanic","select","timed|draw"],
+    ["window","Window","select","48 hours|one week"],
+    ["launch_at","Opens","datetime-local","UK time"],
+    ["closes_at","Closes","datetime-local","UK time"],
+    ["beneficiary","Released in support of","text","Blank if none"],
+    ["beneficiary_handle","Their Instagram handle","text",""],
+    ["early_access_code","Early access code","text","Draw releases"],
+    ["framing_code","Framing offer code","text","Blank for no offer"],
+    ["framing_percent","Framing offer %","number",""]
+  ]},
+  {g:"Written elsewhere", d:"The quote is copied exactly as the artist said it. The bio opens the Coming Soon post, and nothing else.", f:[
+    ["quote","Artist quote","textarea","Verbatim, or blank"],
+    ["bio","Artist bio","textarea","Two or three sentences, third person"]
+  ]}
+];
+function renderFacts(){
+  $("#main").innerHTML = `
+    <div class="head">
+      <span class="lbl">Step two</span>
+      <h1>Release details</h1>
+      <p>The facts. Everything the copy states about dates, names, counts and codes comes from here, so it is stated once and cannot drift between a post and an email.</p>
+    </div>
+    ${FORM.map(sec=>`<fieldset><legend>${esc(sec.g)}</legend><p>${esc(sec.d)}</p>
+      <div class="grid${sec.f[0][2]==="textarea"?" wide":""}">
+      ${sec.f.map(([k,lab,type,hint])=>{
+        const v = S.facts[k] ?? "";
+        const ctl = type==="select"
+          ? `<select id="f_${k}" data-f="${k}">${hint.split("|").map(o=>`<option ${o===String(v)?"selected":""}>${o}</option>`).join("")}</select>`
+          : type==="textarea"
+            ? `<textarea id="f_${k}" data-f="${k}" rows="3">${esc(String(v))}</textarea>`
+            : `<input id="f_${k}" data-f="${k}" type="${type}" value="${esc(String(v))}">`;
+        const sub = (type==="select"||!hint) ? "" : `<small>${esc(hint)}</small>`;
+        return `<label><span>${esc(lab)}</span>${ctl}${sub}</label>`;
+      }).join("")}</div></fieldset>`).join("")}`;
+  $("#main").querySelectorAll("[data-f]").forEach(el => el.addEventListener("input", e => {
+    const k = e.target.dataset.f;
+    S.facts[k] = e.target.type === "number" ? (+e.target.value||0) : e.target.value;
+    if (k === "artist" || k === "collab_with" || k === "ordinal" || k === "edition_phrase" || k === "title_1" || k === "beneficiary") {
+      const q = qualifier(); const fr = openerFrame();
+      S.blocks.opener = fr.head + fr.mid + (q===null?"":q) + fr.tail;
+    }
+    const f = S.facts;
+    $("#crumb").innerHTML = `<b>${esc(f.artist)}</b> &middot; ${esc(f.title_1||"Untitled")} &middot; ${f.mechanic==="draw"?"draw":f.window}`;
+    $("#aside").innerHTML = asideFacts();
+  }));
+}
+function asideFacts(){
+  const d = D(), f = S.facts;
+  const rows = [
+    ["Opener reads", `${LEADS[S.lead].head(d)}${workIntro()}${d.support}.`],
+    ["Status line", d.series?`Announcing ${f.edition_phrase} by ${d.named}, from ${d.work}.`:`Announcing ${d.work}, ${f.edition_phrase} by ${d.named}.`],
+    ["Deadline", d.draw?`Closes ${d.closeDate} at ${d.closeTime}.`:`Available for ${f.window} from ${d.launchTime} on ${d.launchDate}.`],
+    ["Card", d.cards.split("\n\n")[0]],
+    ["Footer", d.draw?`Collect ${d.collectPhrase}`:`Launching ${d.launchDate}`]
+  ];
+  return `<div class="panel"><span class="lbl">From these facts</span><h2>What changes</h2>
+    <p class="rule">A sample of the lines these fields build. Edit a field and watch them move.</p>
+    <section><h3>Live</h3>
+    ${rows.map(([k,v])=>`<div class="use"><h4>${esc(k)}</h4><div class="q">${esc(v)}</div></div>`).join("")}
+    </section></div>`;
+}
+
+// ---------- outputs ----------
+function renderOut(){
+  const o = outputs();
+  const block = (title, note, list, meta) => `<div class="groupline"><span class="lbl">${esc(title)}</span></div>
+    <p class="note" style="max-width:60ch;margin:0 0 14px">${esc(note)}</p>
+    ${list.map(x=>`<details class="out"><summary><b>${esc(x.n)}</b>${x.ch?`<span class="note">${esc(x.ch)}</span>`:""}${x.use?`<span class="note">${esc(x.use)}</span>`:""}<i>${x.t.startsWith("—")?"not used":(meta?x.t.length+" chars":"")}</i></summary><pre>${x.t.startsWith("—")?`<span class="na">${esc(x.t)}</span>`:esc(x.t)}</pre></details>`).join("")}`;
+  $("#main").innerHTML = `
+    <div class="head">
+      <span class="lbl">Step three</span>
+      <h1>Everything else</h1>
+      <p>Built from the three blocks and the release details. Nothing here needs writing — read it, and if a line is wrong, fix the block or the fact it came from.</p>
+    </div>
+    ${block("Instagram", "The Insiders account posts the same caption as the main feed; the plan says which.", o.posts, true)}
+    ${block("Twitter", "The status line with the X handle, the hook on the announcement only, and an action line that ends with the link.", o.tweets, true)}
+    ${block("Email", "Body copy only. Subject, preview, kicker and headline are on the writing screen.", o.emails, false)}`;
+}
+function asideOut(){
+  const o = outputs(), live = o.emails.filter(e=>!e.t.startsWith("—")).length;
+  const H = S.blocks.hook.trim(), M = S.blocks.making.trim();
+  return `<div class="panel"><span class="lbl">This campaign</span><h2>What you wrote</h2>
+  <p class="rule">Three blocks, and this is their reach.</p>
+  <section><h3>Reach</h3>
+    <div class="chk" data-k="good"><s></s><span><b>Hook</b> · ${placements("hook").length} places</span></div>
+    <div class="chk" data-k="good"><s></s><span><b>Making</b> · ${placements("making").length} places</span></div>
+    <div class="chk" data-k="good"><s></s><span><b>Opener</b> · ${placements("opener").length} emails</span></div>
+    <div class="chk" data-k="good"><s></s><span>${o.posts.length} posts, ${o.tweets.length} tweets, ${live} emails</span></div>
+    <div class="chk" data-k="good"><s></s><span>${(H+M).split(/\s+/).filter(Boolean).length} words written by hand</span></div>
+  </section>
+  <section><h3>Still by hand</h3>
+  <p class="note">Deep dives and sustain posts, the Monthly Preview around this paragraph, past-works carousels, games and competitions, exhibition news, and the artist's own email. None of those are release comms in the sense this tool means.</p>
+  </section></div>`;
+}
+
+// ═══════════════════════════════════════════════════ boot
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => { S.view = b.dataset.view; render(); });
+$("#theme").onclick = () => {
+  const cur = document.documentElement.getAttribute("data-theme")
+    || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+};
+addEventListener("resize", () => { if (S.view === "write") drawGutter(); });
+S.blocks.opener = defaultOpener();
+render();
+</script>

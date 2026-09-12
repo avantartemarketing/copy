@@ -149,8 +149,20 @@ learns the register from.
 
 ## 5. The tool
 
-**Prototype:** https://claude.ai/code/artifact/4155f4ed-cc63-4cff-b439-68b540568319
-(private until shared from the page's share menu; source in `tool/index.html`).
+**Prototype:** *First Proof* — https://claude.ai/code/artifact/d10df239-0479-479e-baa3-787074c504ae
+(private until shared from the page's share menu; source in `tool/first-proof.html`).
+
+Three screens. **Write** is the announcement email as one document: the writer types three
+paragraphs, and the gutter names them opener, hook and making. Everything else in the email is
+already filled in from the facts and shown in grey. The opener arrives written, with six wordings
+drawn from the archive to choose between. The right-hand panel follows whichever block has the
+cursor: what the block is for, the mechanical checks running as you type, and every place that
+block lands with the copy either side of it. A button asks Claude to read the block in all of
+those places at once and say where it does not sit well, which is the check a writer cannot do by
+eye. **Details** is the facts, with a live panel showing the lines they build. **Everything else**
+is the whole campaign, 7 posts, 5 tweets and 12 emails, assembled and ready to copy.
+
+The older single-page prototype is still in `tool/index.html`; *First Proof* supersedes it.
 
 It is the brief form on the left and the generated sequence on the right. Load the Robert
 Longo (draw) or Gregory Crewdson (timed) brief, or start blank. Every sentence in the output

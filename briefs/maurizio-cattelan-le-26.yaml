@@ -54,6 +54,6 @@ artworks:
 
 context:
   artist_bio: "Maurizio Cattelan is Italy's most provocative living artist, known for satirical sculptures and for Comedian, the duct-taped banana that sold for millions at Art Basel Miami Beach in 2019."
-  hook: "Window reimagines Cattelan's legendary Comedian, the duct-taped banana, against hyper-realistic natural landscapes, grounding his provocative symbol in serene compositions of subtly absurd beauty."
+  hook: "Window reimagines Cattelan's legendary Comedian, the duct-taped banana, against hyper-realistic natural landscapes, grounding his provocative symbol in serene compositions of subtly absurd beauty."   # about the work; as editorial as you like, but it must read as well mid-email as at the top of a post
   qualifier: ", the artist's first print release with Avant Arte"
   making: "Each silkscreen print was produced by printmakers at Make-Ready in four layers, sealed with a matte varnish."

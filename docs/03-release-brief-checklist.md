@@ -8,7 +8,7 @@ every email is locked text or a frame.
 
 | # | Piece | Size | Used in | Written from |
 |---|---|---|---|---|
-| 1 | **Hook**: who the artist is and why this work | 1 to 2 sentences, 60 words max | Announcement, Last Chance (recap), Now Live, sign-up confirmation | artist facts + artwork facts |
+| 1 | **Hook**: what this work is, written as editorially as you like | 2 to 3 sentences, 60 words max; it must read as well mid-email as at the top of a post | Announcement, Last Chance (recap), Now Live, sign-up confirmation | artist facts + artwork facts |
 | 2 | **Card line**, one per artwork | 1 sentence, 15 to 30 words | Announcement, Early Access, Last Chance, Now Live, Sustain | artwork facts |
 | 3 | **Subject hook** for the Announcement | 3 to 8 words after "Artist – " | Announcement only; every other subject is a frame | artwork facts |
 | 4 | **Early Access note**: why this one, to one collector | 1 to 3 sentences, 60 words max | Early Access (LE), Insiders versions | artwork facts + artist facts |

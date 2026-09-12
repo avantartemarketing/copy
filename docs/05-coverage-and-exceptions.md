@@ -102,5 +102,34 @@ not. The second of those opens with a question, which the validator now blocks o
 So the framework is a description of where the voice landed in 2025 and 2026, not a description of
 Avant Arte's voice in general. Applied in 2024 it would have flattened a more varied feed. Applied
 now it codifies a convergence that had already happened, which is why it fits the recent archive so
-well. It should be revisited whenever the voice moves again, and the fragments are the place where
-personality is meant to live.
+well.
+
+## 6. The editorial voice belongs in the hook
+
+The 2023 and 2024 register can come back without adding anything to the framework, because the hook
+is already the right place for it. Tested by rendering these through all 16 slots the hook reaches:
+
+> Folklore says a changeling is a child swapped at birth for something not quite human. Grayson
+> Perry's version is the generation raised by screens, and he means it to disturb.
+
+> Lucian Freud painted people exactly as he saw them, over months of sittings, and flattered
+> nobody. Four portraits across five decades trace what that cost, from early intimacy to late
+> self-scrutiny.
+
+> Three words, four colourways, no ambiguity. Joel Mesler paints the things people find hardest to
+> say plainly, and the title leaves no doubt.
+
+All three hold in every slot, and all three pass the validator unchanged. What fails is not
+editorial writing but writing that assumes it is opening. "Inside the icon, there's still a
+transvestite potter from Essex" is a fine first line for a post and a non sequitur in the middle
+of a three-days-to-go email, which is where the hook lands most of the time.
+
+**So the rule is self-contained, not plain.** The hook may be as vivid as the writer likes, and may
+name the artist, so long as it describes the work and does not depend on being read first. That
+rules out a rhetorical question and an aside that never reaches the work. It rules nothing else out.
+
+Two constraints written for an earlier version of the system have been dropped. "No artist name"
+existed because the hook was reused in the artist's and the partner's own emails; both were removed
+when the email set was cut to the comms plan's list, so the hook is now only ever in Avant Arte's
+voice or the advisor's. "One to two sentences" is now two to three, which is what the editorial
+register needs.

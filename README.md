@@ -214,7 +214,7 @@ for TL and LE signed by the advisor, LE early/exclusive access), Now Live, Halfw
 window or 5 days to go and 3 days to go for a week, Last chance (TL and LE), the two LE surveys,
 and this release's paragraph for the Monthly Preview. The artist's own email is rare and stays
 hand-written. That works because the fragments are written voice-neutral: the hook is about the
-work with no artist name and no "we" or "our"; the making line says "printmakers at Make-Ready"
+work with no "we" or "our"; the making line says "printmakers at Make-Ready"
 and the template adds "our"; features never say "our". `templates/ig-set.txt` is the whole
 Instagram feed set from one skeleton (status line, substance, features line, action line): five
 status lines, three CTAs, one deadline form, four fragments, no menus. The Insiders account posts

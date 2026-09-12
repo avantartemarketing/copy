@@ -171,7 +171,7 @@ templates/    ig-set (the Instagram feed set), email-set (the comms plan's email
 render.py     brief + template → text, with date, count and phrase filters
 validate.py   the mechanical rules
 prompts/      the AI slot contract
-docs/         the taxonomy of your emails, the voice rules with evidence, the brief checklist, the comms plan item by item
+docs/         the taxonomy of your emails, the voice rules with evidence, the brief checklist, the comms plan item by item, what the framework covers and what it never will
 out/          the three campaigns rendered, so you can compare with what was sent
 tool/         release-copy.xlsx, the whole system as one workbook, and build_release_copy.py, which builds it; index.html, the earlier prototype page
 ```

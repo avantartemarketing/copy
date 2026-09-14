@@ -442,8 +442,17 @@ function placements(key){
 const BANNED = ["don't miss out","miss out","hurry","act now","shop now","last call","elevate","delve","dive into","tapestry of","testament to","journey through","unleash","embark","captivating","mesmerising","breathtaking","stunning","must-have","prestigious","seamless","effortless","cutting-edge","nestled","boasts","showcases","look no further","not only","at the heart of","perfect for","we're thrilled","thrilled to","excited to announce","one-of-a-kind","product","item","drop","raffle","customer"];
 const US = {color:"colour",colors:"colours",realize:"realise",center:"centre",gray:"grey",favorite:"favourite",honor:"honour",catalog:"catalogue",program:"programme"};
 const SPEC = {
-  qualifier:{ name:"Opener", sub:"a few words",
-    rule:"The frame is built from the release details. Pick how it opens, and add a few words about the work if the line reads bald without them. A phrase, not a sentence — it is reused by four other emails.", max:10 },
+  qualifier:{ name:"Opener", sub:"a few words", max:10,
+    rule:"The frame is built from the release details. Pick how it opens, and add a few words about the work if the line reads bald without them. A phrase, not a sentence — it is reused by four other emails.",
+    full:"The frame is built from the release details — pick how it opens. This release already gives $, so the line is not bald and blank is usually the right answer: more words would be a second thing hanging off the same dash. Add a few only for a fact that belongs here and nowhere else.",
+    bald:"The frame is built from the release details — pick how it opens. With more than one work the title drops out of this line, so it ends on the edition phrase and nothing else. This is where a few words about the work earn their place: a phrase, not a sentence, and it travels into four other emails."},
+  // what the frame already says, and so whether the writer's words are wanted
+  openerCarries(){
+    const d = D(), f = S.facts, has = [];
+    if (d.cardTitles.length === 1 && f.title_1) has.push("the work by name");
+    if (f.beneficiary && !d.hookNamesBen) has.push("what it supports");
+    return has;
+  },
   hook:{ name:"Hook", sub:"yours",
     rule:"Two to three sentences about the work. As editorial as you like — this is where the release sounds like itself. The one test: it must read as well in the middle of an email as at the top of a post.", max:70 },
   making:{ name:"Making", sub:"yours",
@@ -454,14 +463,25 @@ const SPEC = {
 // the cards share one rule; the gutter labels the row, the aside names the card
 function spec(k){
   const d = D();
+  if (k === "qualifier") {
+    const has = SPEC.openerCarries();
+    return Object.assign({}, SPEC.qualifier, {
+      sub: has.length ? "usually blank" : "a few words",
+      rule: has.length ? SPEC.qualifier.full.replace("$", join(has)) : SPEC.qualifier.bald});
+  }
   if (k === "card") return Object.assign({}, SPEC.card, {name: d.cardTitles.length>1 ? "Cards" : "Card", sub: d.cardTitles.length>1 ? "a line each" : "yours"});
   if (k.startsWith("card_")) return Object.assign({}, SPEC.card, {name: "Card · " + (d.cardTitles[+k.slice(5)-1] || "")});
   return SPEC[k];
 }
 function checks(key){
   const t = S.blocks[key].trim(), out = [], low = t.toLowerCase(), f = S.facts;
-  if (!t) return [{k: key==="qualifier" ? "good" : "warn",
-                   t: key==="qualifier" ? "Nothing added. The opener stands on its own." : "Nothing written yet."}];
+  if (!t) {
+    if (key !== "qualifier") return [{k:"warn", t:"Nothing written yet."}];
+    const has = SPEC.openerCarries();
+    return [has.length
+      ? {k:"good", t:`Nothing added, which is right: the opener already gives ${join(has)}.`}
+      : {k:"warn", t:"Nothing added, and with more than one work the opener names none of them: it ends on the edition phrase alone."}];
+  }
   const words = t.split(/\s+/).length;
   BANNED.forEach(b => { if (new RegExp("(?<![\\w-])"+b.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(?![\\w-])").test(low)) out.push({k:"warn", t:`Banned phrase: “${b}”`}); });
   Object.entries(US).forEach(([us,uk]) => { if (new RegExp("\\b"+us+"\\b").test(low)) out.push({k:"warn", t:`US spelling “${us}” — use “${uk}”`}); });
@@ -475,6 +495,11 @@ function checks(key){
     if (/[.!?]$/.test(t)) out.push({k:"warn", t:"No full stop. The frame closes the sentence."});
     if (f.artist && low.includes(f.artist.toLowerCase())) out.push({k:"warn", t:"The artist is already named in the frame."});
     if (f.beneficiary && low.includes(f.beneficiary.toLowerCase())) out.push({k:"warn", t:"The frame adds “released in support of” on its own."});
+    const n = openerText().split(/\s+/).length;
+    if (f.beneficiary && !D().hookNamesBen)
+      out.push({k:"warn", t:`Two clauses after the dash now: your words, then “released in support of ${f.beneficiary}”. That is ${n} words; house openers sit between 22 and 27.`});
+    else if (n > 28)
+      out.push({k:"warn", t:`The opener runs to ${n} words with these in it. House openers sit between 22 and 27.`});
   } else {
     if (t.includes("?")) out.push({k:"warn", t:"Rhetorical question. It assumes the reader is at the start, and most of the time this is a middle paragraph."});
     t.split(/(?<=[.!?])\s+/).forEach(s => { const n=s.split(/\s+/).length; if (n>35) out.push({k:"warn", t:`A sentence of ${n} words. The cap is 35.`}); });

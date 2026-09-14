@@ -180,9 +180,10 @@ def check_email(text):
     return errors, warnings
 
 
-def check_qualifier(q, artist_name):
+def check_qualifier(q, brief):
     """The few words after the edition phrase in the email opener: a phrase, not a sentence."""
-    errors = []
+    artist_name = (brief.get("artist") or {}).get("name")
+    errors, warnings = [], []
     words = q.strip(" ,").split()
     if len(words) > 10:
         errors.append(f"qualifier: {len(words)} words (max 10)")
@@ -194,7 +195,15 @@ def check_qualifier(q, artist_name):
         errors.append("qualifier: a phrase, no full stop")
     if "support of" in q.lower():
         errors.append("qualifier: the beneficiary is added by the frame")
-    return errors
+    # the opener is one sentence: the writer's words and "released in support of X"
+    # both hang off the same noun, and one work means the title is already there too
+    fundraiser = (brief.get("release") or {}).get("fundraiser") or ""
+    hook = ((brief.get("context") or {}).get("hook") or "")
+    if fundraiser.strip() and fundraiser not in hook:
+        warnings.append("qualifier: the opener already says what the release supports, so these words are a second clause after the dash")
+    elif len(brief.get("artworks") or []) == 1 and int((brief.get("edition") or {}).get("count") or 1) == 1:
+        warnings.append("qualifier: the opener already names the work, so it is not bald without these words")
+    return errors, warnings
 
 
 def validate(text, brief):
@@ -202,7 +211,9 @@ def validate(text, brief):
     errors, warnings = [], []
     q = (brief.get("context") or {}).get("qualifier")
     if q and q.strip() in text:
-        errors += check_qualifier(q, (brief.get("artist") or {}).get("name"))
+        e, w = check_qualifier(q, brief)
+        errors += e
+        warnings += w
     for part in text.split("════"):                                 # a set file holds several emails: check each on its own
         if part.strip():
             e, w = check_email(part)

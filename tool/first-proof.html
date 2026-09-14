@@ -46,6 +46,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .crumb b{color:var(--ink);font-weight:500}
 .ghost{padding:5px 10px;border:1px solid var(--line);border-radius:6px;font-size:12.5px;color:var(--ink-soft)}
 .ghost:hover{border-color:var(--ink-faint);color:var(--ink)}
+.ghost.arm{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
 
 .shell{display:grid;grid-template-columns:var(--rail) minmax(0,1fr) var(--aside);min-height:calc(100dvh - 52px)}
 nav{border-right:1px solid var(--line)}
@@ -112,6 +113,17 @@ aside{border-left:1px solid var(--line);background:var(--surface)}
 .key span{display:flex;align-items:flex-start;gap:9px}
 .key i{flex:none;width:24px;height:15px;border-radius:4px;background:var(--field);margin-top:2px}
 .key i.fx{background:transparent;border:1px dashed var(--line)}
+.todo{margin:0;padding:0;list-style:none}
+.todo li{display:flex;gap:11px;align-items:baseline;padding:11px 0;border-top:1px solid var(--line-soft)}
+.todo li:first-child{border-top:none}
+.todo s{flex:none;width:7px;height:7px;border-radius:50%;background:var(--warn);text-decoration:none;align-self:center}
+.todo li.done s{background:var(--good)}
+.todo li.done b{color:var(--ink-faint);text-decoration:line-through;text-decoration-color:var(--line)}
+.todo b{font-weight:500;color:var(--ink);flex:none;min-width:152px}
+.panel .todo li{padding:8px 0;font-size:13px}
+.panel .todo b{min-width:0}
+.panel .todo span{display:none}
+.todo span{color:var(--ink-faint);font-size:12.5px}
 
 /* ---------- aside ---------- */
 .panel h2{font-family:var(--serif);font-size:19px;font-weight:400;margin:8px 0 8px;letter-spacing:-.01em}
@@ -190,6 +202,7 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 <header class="top">
   <span class="mark">First <em>Proof</em></span>
   <span class="crumb" id="crumb"></span>
+  <button class="ghost" id="new">New release</button>
   <button class="ghost" id="theme" title="Switch theme">Theme</button>
 </header>
 
@@ -208,6 +221,34 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 // ═══════════════════════════════════════════════════ state
 // Only three things on this screen are written by a person. Everything else is
 // assembled from the release details and is not editable here, by design.
+// A new release starts empty except for what is true of every release: the
+// standard three features, the usual mechanic, the house window.
+function blankRelease(){
+  return {
+    facts: {
+      artist:"", collab_with:"", ordinal:"latest", handle:"", x_handle:"", hashtag:"", link:"",
+      title_1:"", title_2:"", title_3:"", is_series:"no",
+      edition_phrase:"", works:1, unit:"print",
+      mechanic:"timed", window:"one week", launch_at:"", closes_at:"",
+      beneficiary:"", beneficiary_handle:"",
+      advisor:"Sam", early_access_code:"000-000", framing_code:"", framing_percent:10,
+      f1:"Signed by the artist", f2:"Individually numbered", f3:"Free worldwide shipping", f4:"", f5:"",
+      quote:"", bio:""
+    },
+    blocks: { qualifier:"", hook:"", making:"", card_1:"", card_2:"", card_3:"" }
+  };
+}
+// what the opener cannot be built without
+const NEEDS = [
+  ["artist", "The artist", "everything is “by” this name"],
+  ["collab_with", "Who it is with", "the artist, or their estate"],
+  ["title_1", "The title", "or the series name, for untitled works"],
+  ["edition_phrase", "The edition phrase", "“a new limited edition print”"],
+  ["launch_at", "When it opens", "every deadline line comes from this"],
+  ["closes_at", "When it closes", ""]
+];
+const missing = () => NEEDS.filter(([k]) => !String(S.facts[k] ?? "").trim());
+
 const S = {
   view: "write",
   focus: "hook",
@@ -245,8 +286,8 @@ const join = a => a.length<2 ? (a[0]||"") : a.slice(0,-1).join(", ")+" and "+a[a
 function D(){
   const f = S.facts, d = {};
   const L = new Date(f.launch_at), C = new Date(f.closes_at);
-  const fmt = (x,pad) => `${pad?String(x.getDate()).padStart(2,"0"):x.getDate()} ${MONTHS[x.getMonth()]}`;
-  const tm  = x => `${String(x.getHours()).padStart(2,"0")}:${String(x.getMinutes()).padStart(2,"0")} UK time`;
+  const fmt = (x,pad) => isNaN(x) ? "[date]" : `${pad?String(x.getDate()).padStart(2,"0"):x.getDate()} ${MONTHS[x.getMonth()]}`;
+  const tm  = x => isNaN(x) ? "[time]" : `${String(x.getHours()).padStart(2,"0")}:${String(x.getMinutes()).padStart(2,"0")} UK time`;
   d.draw = f.mechanic === "draw";
   d.named = f.artist + (f.handle ? ` (@${f.handle})` : "");
   d.namedX = f.artist + (f.x_handle ? ` (@${f.x_handle})` : "");
@@ -268,8 +309,8 @@ function D(){
   d.featListSupport = d.featList + ((f.beneficiary && !d.hookNamesBen) ? `\n· Released in support of ${f.beneficiary}` : "");
   d.makingOurs = S.blocks.making.replace("printmakers at Make-Ready","our printmakers at Make-Ready");
   d.makingTagged = S.blocks.making.replace("printmakers at Make-Ready","our printmakers at Make-Ready (@make__ready)");
-  d.launchDate = fmt(L); d.launchDateDd = fmt(L,1); d.launchTime = tm(L); d.launchDay = DAYS[L.getDay()];
-  d.closeDate = fmt(C); d.closeDateDd = fmt(C,1); d.closeTime = tm(C); d.closeDay = DAYS[C.getDay()];
+  d.launchDate = fmt(L); d.launchDateDd = fmt(L,1); d.launchTime = tm(L); d.launchDay = isNaN(L) ? "[day]" : DAYS[L.getDay()];
+  d.closeDate = fmt(C); d.closeDateDd = fmt(C,1); d.closeTime = tm(C); d.closeDay = isNaN(C) ? "[day]" : DAYS[C.getDay()];
   d.collectPhrase = f.edition_phrase.replace(" new "," ");
   d.editionCap = cap(f.edition_phrase);
   d.windowCap = cap(f.window);
@@ -529,7 +570,9 @@ function checks(key){
 const $ = s => document.querySelector(s);
 const esc = s => (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const crumb = () => { const f=S.facts;
-  $("#crumb").innerHTML = `<b>${esc(f.artist)}</b> &middot; ${esc(f.title_1||"Untitled")} &middot; ${f.mechanic==="draw"?"draw":f.window}`; };
+  $("#crumb").innerHTML = (f.artist||f.title_1)
+    ? `<b>${esc(f.artist||"Untitled artist")}</b> &middot; ${esc(f.title_1||"untitled")} &middot; ${f.mechanic==="draw"?"draw":f.window}`
+    : `<b>New release</b> &middot; nothing entered yet`; };
 
 function render(){
   crumb();
@@ -539,7 +582,27 @@ function render(){
   document.querySelectorAll("nav button").forEach(b => b.setAttribute("aria-current", String(b.dataset.view===S.view)));
   if (S.view === "write") { renderWrite(); renderAside(); }
   else if (S.view === "facts") { renderFacts(); $("#aside").innerHTML = asideFacts(); }
-  else { renderOut(); $("#aside").innerHTML = asideOut(); }
+  else { renderOut(); $("#aside").innerHTML = missing().length ? asideFacts() : asideOut(); }
+}
+
+// ---------- write: nothing to write against until the frame stands up ----------
+function todoHTML(){
+  return `<ul class="todo">${NEEDS.map(([k,name,why])=>
+    `<li class="${String(S.facts[k] ?? "").trim() ? "done" : ""}"><s></s><b>${esc(name)}</b><span>${esc(why)}</span></li>`
+  ).join("")}</ul>`;
+}
+function renderNotReady(need){
+  $("#main").innerHTML = `
+    <div class="head">
+      <span class="lbl">Before you write</span>
+      <h1>The email is built around the release</h1>
+      <p>Every sentence you write here sits inside one the system supplies, and those are made from the details below. Fill in ${need.length === NEEDS.length ? "these" : `the ${need.length === 1 ? "one" : need.length} still missing`} and the announcement opens, ready to write into.</p>
+    </div>
+    <div class="sheet" style="padding:6px 22px 16px">
+      ${todoHTML()}
+      <button class="act" data-goto="facts" style="width:auto;padding:9px 16px">Go to the details</button>
+    </div>`;
+  $("#main").querySelectorAll("[data-goto]").forEach(b => b.onclick = () => { S.view = b.dataset.goto; render(); });
 }
 
 // ---------- write: the email, with three fields in it and nothing else editable ----------
@@ -555,6 +618,8 @@ function fld(k){
        + ` data-k="${k}" data-ph="${esc(PH[k]||PH.card)}" aria-label="${esc(spec(k).name)}">${esc(S.blocks[k])}</span>`;
 }
 function renderWrite(){
+  const need = missing();
+  if (need.length) return renderNotReady(need);
   const f = S.facts, d = D(), o = outputs(), fr = openerFrame();
   if (S.focus.startsWith("card_") && !d.cardKeys.includes(S.focus)) S.focus = "hook";   // a card that no longer exists
   const kicker = d.draw ? "Enter the draw" : "Launching " + d.launchDate;
@@ -689,6 +754,17 @@ function drawGutter(){
 
 // ---------- aside: whichever fragment has the cursor ----------
 function renderAside(){
+  const need = missing();
+  if (need.length) {
+    $("#aside").innerHTML = `<div class="panel"><span class="lbl">Order of work</span><h2>Details, then write</h2>
+      <p class="rule">The three paragraphs are written once and reused everywhere, so they are worth writing last, when the frame around them is settled.</p>
+      <section><h3>Then</h3>
+        <div class="chk" data-k="good"><s></s><span>Write the announcement: the opener, the hook, the making line, a line under each card.</span></div>
+        <div class="chk" data-k="good"><s></s><span>Claude reads each one in every place it lands.</span></div>
+        <div class="chk" data-k="good"><s></s><span>The posts, tweets and the other emails assemble themselves.</span></div>
+      </section></div>`;
+    return;
+  }
   const k = S.focus, sp = spec(k), hits = placements(k), cs = checks(k), ai = S.ai[k];
   $("#aside").innerHTML = `<div class="panel">
     <span class="lbl">Fragment</span>
@@ -828,6 +904,10 @@ function renderFacts(){
   }));
 }
 function asideFacts(){
+  const need = missing();
+  if (need.length) return `<div class="panel"><span class="lbl">From these facts</span><h2>What the frame needs</h2>
+    <p class="rule">These build the sentences around what you write. The lines they make appear here as you fill them in.</p>
+    <section>${todoHTML()}</section></div>`;
   const d = D(), f = S.facts;
   const rows = [
     ["Opener reads", openerText()],
@@ -844,6 +924,18 @@ function asideFacts(){
 
 // ---------- everything else ----------
 function renderOut(){
+  if (missing().length) {
+    $("#main").innerHTML = `
+      <div class="head">
+        <span class="lbl">Everything else</span>
+        <h1>Nothing to assemble yet</h1>
+        <p>The posts, tweets and the rest of the emails are built from the release details and the three paragraphs. Neither is in place.</p>
+      </div>
+      <div class="sheet" style="padding:6px 22px 16px">${todoHTML()}
+        <button class="act" data-goto="facts" style="width:auto;padding:9px 16px">Go to the details</button></div>`;
+    $("#main").querySelectorAll("[data-goto]").forEach(b => b.onclick = () => { S.view = b.dataset.goto; render(); });
+    return;
+  }
   const o = outputs();
   const block = (title, note, list, meta) => `<div class="groupline"><span class="lbl">${esc(title)}</span></div>
     <p class="note" style="max-width:60ch;margin:0 0 14px">${esc(note)}</p>
@@ -877,6 +969,17 @@ function asideOut(){
 
 // ═══════════════════════════════════════════════════ boot
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => { S.view = b.dataset.view; render(); });
+$("#new").onclick = () => {
+  const b = $("#new");
+  if (b.dataset.arm !== "1") {                       // arm first: this cannot be undone
+    b.dataset.arm = "1"; b.textContent = "Clear everything?"; b.classList.add("arm");
+    b._t = setTimeout(() => { b.dataset.arm = ""; b.textContent = "New release"; b.classList.remove("arm"); }, 4000);
+    return;
+  }
+  clearTimeout(b._t); b.dataset.arm = ""; b.textContent = "New release"; b.classList.remove("arm");
+  Object.assign(S, blankRelease(), {view:"facts", focus:"hook", lead:0, ai:{}});
+  render();
+};
 $("#theme").onclick = () => {
   const cur = document.documentElement.getAttribute("data-theme")
     || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");

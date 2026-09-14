@@ -16,8 +16,9 @@
 {% set fundraiser = release.fundraiser if release.fundraiser is defined and release.fundraiser else "" %}
 {% set bh = release.beneficiary_handle if release.beneficiary_handle is defined and release.beneficiary_handle else "" %}
 {% set ben_line = ("Released in support of " ~ fundraiser ~ ((" (@" ~ bh ~ ")") if bh else "") ~ ".") if fundraiser else "" %}
-{% set series = artworks[0].series if artworks[0].series is defined and artworks[0].series else "" %}
-{% set untitled = artworks[0].title == "Untitled" and series %}
+{# edition.series names the works in the prose; artworks[].series is only a fact #}
+{% set series = edition.series if edition.series is defined and edition.series else "" %}
+{% set untitled = series %}
 {% set work = ("the " ~ series ~ " series") if untitled else artworks|titles_q %}
 {% set plural = artworks|length > 1 or edition.count|int > 1 %}
 {% set feats = edition.features if edition.features is defined and edition.features else ["Signed by the artist", "Individually numbered"] %}

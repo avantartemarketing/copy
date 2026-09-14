@@ -28,21 +28,19 @@ def from_brief(path):
     b = yaml.safe_load(open(path, encoding="utf-8"))
     rel, art, ed, aw, ctx = b["release"], b["artist"], b["edition"], b["artworks"], b["context"]
     g = lambda d, k, default="": (d.get(k) if d.get(k) is not None else default)
-    series = g(aw[0], "series")
-    untitled = aw[0]["title"] == "Untitled" and bool(series)
     feats = list(ed.get("features") or ["Signed by the artist", "Individually numbered", "Free worldwide shipping"]) + [""] * 5
     return dict(
         artist=art["name"], collab_with=g(art, "collab_with", art["name"]), handle=g(art, "handle"), x_handle=g(art, "x_handle"),
         link=g(rel, "link"), hashtag=g(art, "hashtag"), ordinal=g(art, "collaboration_ordinal", "latest"),
-        title_1=series if untitled else aw[0]["title"], title_2="" if untitled or len(aw) < 2 else aw[1]["title"], title_3="" if untitled or len(aw) < 3 else aw[2]["title"],
-        is_series="yes" if untitled else "no",
+        title_1=aw[0]["title"], title_2="" if len(aw) < 2 else aw[1]["title"], title_3="" if len(aw) < 3 else aw[2]["title"],
+        series_name=g(ed, "series"),
         edition_phrase=phrase_of(ed), works=int(g(ed, "count", 1)), unit=g(ed, "unit", "print"),
         mechanic=g(rel, "mechanic", "timed"), window=g(rel, "window", "48 hours"), launch_at=dt(rel["launch_at"]), closes_at=dt(rel["closes_at"]),
         beneficiary=g(rel, "fundraiser"), beneficiary_handle=g(rel, "beneficiary_handle"), advisor=g(rel, "advisor", "Sam"),
         early_access_code=g(rel, "early_access_code", "000-000"), framing_code=g(rel, "framing_code"), framing_percent=int(g(rel, "framing_percent", 10)),
         feature_1=feats[0], feature_2=feats[1], feature_3=feats[2], feature_4=feats[3], feature_5=feats[4],
         bio=g(ctx, "artist_bio"), hook=ctx["hook"], making=ctx["making"], quote=g(art, "quote"), qualifier=g(ctx, "qualifier"),
-        card_line_1=g(aw[0], "card_line"), card_line_2="" if untitled or len(aw) < 2 else g(aw[1], "card_line"), card_line_3="" if untitled or len(aw) < 3 else g(aw[2], "card_line"),
+        card_line_1=g(aw[0], "card_line"), card_line_2="" if len(aw) < 2 else g(aw[1], "card_line"), card_line_3="" if len(aw) < 3 else g(aw[2], "card_line"),
     )
 
 
@@ -69,10 +67,10 @@ facts = [
     ("link", V["link"], "the release's short link, for tweets"),
     ("hashtag", V["hashtag"], "announcement post only; blank for none"),
     ("ordinal", V["ordinal"], "debut, latest or second"),
-    ("title_1", V["title_1"], "exactly as it appears; the set's one title if it has one; for untitled works from a named series, the series name"),
+    ("title_1", V["title_1"], "exactly as it appears, and what the card is headed with. Untitled works from a series still keep their own titles here"),
     ("title_2", V["title_2"], "for a pair or a trio with their own titles; blank otherwise"),
     ("title_3", V["title_3"], "blank otherwise. More than three titled works: give the set a collective title, or use the templates"),
-    ("is_series", V["is_series"], "yes only for untitled works from a named series"),
+    ("series_name", V["series_name"], "set it to name the works by their series in the prose, for untitled works; the cards keep their own titles. Blank otherwise"),
     ("edition_phrase", V["edition_phrase"], "e.g. a new limited edition print; a quartet of new limited edition embroideries; a new limited edition print in four colourways"),
     ("works", V["works"], "number of artworks: sets the plural wording"),
     ("unit", V["unit"], "what one is called: print, embroidery, sculpture, edition"),
@@ -126,9 +124,9 @@ F = {
  "named_x": f'={B("artist")}&IF({B("x_handle")}="",""," (@"&{B("x_handle")}&")")',
  "collab_x": f'=IF({B("collab_with")}={B("artist")},{B("named_x")},{B("collab_with")})',
  "a_unit": f'=IF(OR(LEFT({B("unit")},1)="a",LEFT({B("unit")},1)="e",LEFT({B("unit")},1)="i",LEFT({B("unit")},1)="o",LEFT({B("unit")},1)="u"),"an ","a ")&{B("unit")}',
- "work": f'=IF({B("is_series")}="yes","the "&{B("title_1")}&" series",IF({B("title_2")}="","‘"&{B("title_1")}&"’",IF({B("title_3")}="","‘"&{B("title_1")}&"’ and ‘"&{B("title_2")}&"’","‘"&{B("title_1")}&"’, ‘"&{B("title_2")}&"’ and ‘"&{B("title_3")}&"’")))',
+ "work": f'=IF({B("series_name")}<>"","the "&{B("series_name")}&" series",IF({B("title_2")}="","‘"&{B("title_1")}&"’",IF({B("title_3")}="","‘"&{B("title_1")}&"’ and ‘"&{B("title_2")}&"’","‘"&{B("title_1")}&"’, ‘"&{B("title_2")}&"’ and ‘"&{B("title_3")}&"’")))',
  "Work": f'=UPPER(LEFT({B("work")},1))&MID({B("work")},2,999)',
- "work_email": f'=IF({B("is_series")}="yes","the "&{B("title_1")}&" series",IF({B("title_2")}="",{B("title_1")},IF({B("title_3")}="",{B("title_1")}&" and "&{B("title_2")},{B("title_1")}&", "&{B("title_2")}&" and "&{B("title_3")})))',
+ "work_email": f'=IF({B("series_name")}<>"","the "&{B("series_name")}&" series",IF({B("title_2")}="",{B("title_1")},IF({B("title_3")}="",{B("title_1")}&" and "&{B("title_2")},{B("title_1")}&", "&{B("title_2")}&" and "&{B("title_3")})))',
  "Work_email": f'=UPPER(LEFT({B("work_email")},1))&MID({B("work_email")},2,999)',
  "work_intro": f'=IF({B("works")}=1,{B("title_1")}&", ","")&{B("edition_phrase")}&IF(OR({B("qualifier")}="",{B("support")}<>""),"",IF(LEFT({B("qualifier")},1)=",",""," ")&{B("qualifier")})',
  "support": f'=IF(OR({B("beneficiary")}="",{B("hook_names_beneficiary")}),"",", released in support of "&{B("beneficiary")})',
@@ -145,7 +143,7 @@ F = {
  "collect_phrase": f'=SUBSTITUTE({B("edition_phrase")}," new "," ",1)',
  "edition_phrase_cap": f'=UPPER(LEFT({B("edition_phrase")},1))&MID({B("edition_phrase")},2,999)',
  "window_cap": f'=UPPER(LEFT({B("window")},1))&MID({B("window")},2,999)',
- "card": f'=IF({B("is_series")}="yes","Untitled",{B("title_1")})&IF({B("card_line_1")}="","",{NL}&{B("card_line_1")})&IF({B("title_2")}="","",{PP}&"Card: "&{B("title_2")}&IF({B("card_line_2")}="","",{NL}&{B("card_line_2")}))&IF({B("title_3")}="","",{PP}&"Card: "&{B("title_3")}&IF({B("card_line_3")}="","",{NL}&{B("card_line_3")}))',
+ "card": f'={B("title_1")}&IF({B("card_line_1")}="","",{NL}&{B("card_line_1")})&IF({B("title_2")}="","",{PP}&"Card: "&{B("title_2")}&IF({B("card_line_2")}="","",{NL}&{B("card_line_2")}))&IF({B("title_3")}="","",{PP}&"Card: "&{B("title_3")}&IF({B("card_line_3")}="","",{NL}&{B("card_line_3")}))',
  "quote_line": f'=IF({B("quote")}="","","“"&{B("quote")}&"” – "&{B("artist")})',
  "each_artwork": f'=IF({B("works")}>1," for each artwork","")',
  "work_word": f'=IF({B("works")}>1,"works","work")',
@@ -294,7 +292,7 @@ MAIN, BOTH = "Main", "Main + Insiders"
 posts = [
  # name, channels, made of, status, substance, features, action, hashtag, caption
  ("coming soon", MAIN, "bio · status · action", f'={LC("post · coming soon · status")}', f'={IB("bio_tagged")}', '=""', f'={LC("post · coming soon · action")}', '=""', join(["F{r}", "E{r}", "H{r}"])),
- ("announce", BOTH, "status · hook · features + beneficiary · action · hashtag", f'=IF({IB("is_series")}="yes",{LC("post · announce · status, series")},{LC("post · announce · status")})', f'={IB("hook")}', f'={feat}&IF({IB("hook_names_beneficiary")},"",{benef})', f'={pre}', f'=IF({IB("hashtag")}="","",{LC("post · hashtag")})', join(["E{r}", "F{r}", "G{r}", "H{r}", "I{r}"])),
+ ("announce", BOTH, "status · hook · features + beneficiary · action · hashtag", f'=IF({IB("series_name")}<>"",{LC("post · announce · status, series")},{LC("post · announce · status")})', f'={IB("hook")}', f'={feat}&IF({IB("hook_names_beneficiary")},"",{benef})', f'={pre}', f'=IF({IB("hashtag")}="","",{LC("post · hashtag")})', join(["E{r}", "F{r}", "G{r}", "H{r}", "I{r}"])),
  ("sustain", MAIN, "status · making · features + beneficiary · action", f'={LC("post · sustain · status")}', f'={IB("making_ours_tagged")}', f'={feat}&{benef}', f'={pre}', '=""', join(["E{r}", "F{r}", "G{r}", "H{r}"])),
  ("sustain, the artist's words", MAIN, "quote · status · features + beneficiary · action", f'=IF({quote}="","{NO_QUOTE}",{words_status})', f'=IF({quote}="","",{words_second})', f'=IF({quote}="","",{feat}&{benef})', f'=IF({quote}="","",{pre})', '=""', join(["E{r}", "F{r}", "G{r}", "H{r}"], f'{quote}=""', NO_QUOTE)),
  ("live (timed only)", BOTH, "status · features + beneficiary · action", f'=IF({draw},"{NA_DRAW}",{LC("post · live · status")})', '=""', f'=IF({draw},"",{feat}&{benef})', f'=IF({draw},"",{opn})', '=""', join(["E{r}", "G{r}", "H{r}"], draw, NA_DRAW)),
@@ -319,7 +317,7 @@ X = lambda expr: f'SUBSTITUTE({expr},{IB("named")},{IB("named_x")})'          # 
 pre_t = f'IF({draw},{LC("tweet · action, draw")},{LC("tweet · action before launch, timed")})'
 opn_t = f'IF({draw},{LC("tweet · action, draw")},{LC("tweet · action while open, timed")})'
 ben_t = f'IF(OR({IB("beneficiary")}="",{IB("hook_names_beneficiary")}),"",{LC("tweet · beneficiary line")})'
-announce_status = f'IF({IB("is_series")}="yes",{LC("post · announce · status, series")},{LC("post · announce · status")})'
+announce_status = f'IF({IB("series_name")}<>"",{LC("post · announce · status, series")},{LC("post · announce · status")})'
 tweets = [
  ("coming soon", "status · action", f'={LC("tweet · coming soon · status")}', '=""', '=""', f'={LC("tweet · coming soon · action")}', join(["D{r}", "G{r}"])),
  ("announce", "status · hook · beneficiary · action", f'={X(announce_status)}', f'={IB("hook")}', f'={ben_t}', f'={pre_t}', join(["D{r}", "E{r}", "F{r}", "G{r}"])),

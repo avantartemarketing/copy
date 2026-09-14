@@ -229,7 +229,7 @@ function blankRelease(){
   return {
     facts: {
       artist:"", collab_with:"", ordinal:"latest", handle:"", x_handle:"", hashtag:"", link:"",
-      title_1:"", is_series:"no", artworks:1,
+      title_1:"", is_series:"no", series_name:"", artworks:1,
       edition_phrase:"", unit:"print",
       mechanic:"timed", window:"one week", launch_at:"", closes_at:"",
       beneficiary:"", beneficiary_handle:"",
@@ -259,7 +259,7 @@ const S = {
     artist:"Grayson Perry", collab_with:"Grayson Perry", ordinal:"latest",
     handle:"alanmeasles", x_handle:"", hashtag:"GraysonPerry",
     link:"https://avantarte.co/grayson-perry",
-    title_1:"The Changeling", is_series:"no", artworks:1,
+    title_1:"The Changeling", is_series:"no", series_name:"", artworks:1,
     edition_phrase:"a new limited edition print", unit:"print",
     mechanic:"timed", window:"one week",
     launch_at:"2026-04-30T14:00", closes_at:"2026-05-07T14:00",
@@ -303,9 +303,9 @@ function D(){
   const slots = all.map((t, i) => i).filter(i => all[i]);
   const titles = slots.map(i => all[i]);
   d.series = f.is_series === "yes";
-  d.work = d.series ? `the ${f.title_1} series` : join(titles.map(t=>`‘${t}’`));
+  d.work = d.series ? `the ${f.series_name} series` : join(titles.map(t=>`‘${t}’`));
   d.Work = cap(d.work);
-  d.workEmail = d.series ? `the ${f.title_1} series` : join(titles);
+  d.workEmail = d.series ? `the ${f.series_name} series` : join(titles);
   d.WorkEmail = cap(d.workEmail);
   d.plural = n > 1;
   d.hookNamesBen = !!(f.beneficiary && S.blocks.hook.toLowerCase().includes(f.beneficiary.toLowerCase()));
@@ -323,8 +323,8 @@ function D(){
   d.editionCap = cap(f.edition_phrase);
   d.windowCap = cap(f.window);
   // one card per work: its title, and the line the writer gives it
-  d.cardTitles = d.series ? ["Untitled"] : titles;   // an untitled artwork has no card yet
-  d.cardKeys = d.series ? ["card_1"] : slots.map(i => "card_" + (i+1));
+  d.cardTitles = titles;                      // an untitled artwork has no card yet
+  d.cardKeys = slots.map(i => "card_" + (i+1));
   d.cards = d.cardTitles.map((t,i)=>{ const l = blk(d.cardKeys[i]).trim(); return "Card: "+t+(l?"\n"+l:""); }).join("\n\n");
   d.quoteLine = f.quote ? `“${f.quote}” – ${f.artist}` : "";
   d.addWhat = d.plural ? d.aUnit : d.workEmail;
@@ -861,12 +861,12 @@ const rows = sec => typeof sec.f === "function" ? sec.f() : sec.f;
 // what the count produces downstream, said as it is typed
 function cardNote(){
   const d = D(), n = d.artworks, card = k => k === 1 ? "1 card" : k + " cards";
-  if (d.series) return `Untitled works from one series: ${card(1)}, headed “Untitled”, and the series name in the headline.`;
+  const series = d.series ? ` The prose calls them the ${S.facts.series_name || "…"} series; the cards keep their own titles.` : "";
   const many = `${n} artwork${n===1?"":"s"}`;
-  if (d.untitled === n) return `${many}, so ${card(n)} once ${n===1?"it is":"they are"} titled.`;
-  if (d.untitled) return `${many}, so ${card(n)} — ${d.untitled === 1 ? "one still needs" : d.untitled + " still need"} a title.`;
+  if (d.untitled === n) return `${many}, so ${card(n)} once ${n===1?"it is":"they are"} titled.` + series;
+  if (d.untitled) return `${many}, so ${card(n)} — ${d.untitled === 1 ? "one still needs" : d.untitled + " still need"} a title.` + series;
   const head = d.workEmail.length;
-  return `${many}, so ${card(n)}.` + (head > 90
+  return `${many}, so ${card(n)}.` + series + (head > 90
     ? ` The headline names all ${n}, which runs to ${head} characters: consider one collective title, or the series option.`
     : "");
 }
@@ -881,15 +881,15 @@ const FORM = [
     ["link","Release link","text","Used in tweets"],
     ["advisor","Advisor","select","Sam|Curtis|Sofiya"]
   ]},
-  {g:"The artworks", d:"How many the release holds, and what each is called. Every artwork gets its own title, its own card in the emails and its own name in the headline. Where they are untitled works from one named series, say so and the series stands in for all of them.", live:cardNote, f: () => {
+  {g:"The artworks", d:"How many the release holds, and what each is called. Every artwork gets its own title and its own card in the emails, however many there are. Where they are untitled works from one named series, the series can stand in for their titles in the prose — the cards still carry one each.", live:cardNote, f: () => {
     const n = D().artworks, series = S.facts.is_series === "yes";
     return [
       ["artworks","How many artworks","number","Each one gets a card in the emails"],
-      ["is_series","All untitled, from one named series","select","no|yes"],
-      ...(series
-        ? [["title_1","The series name","text","One card, headed “Untitled”"]]
-        : Array.from({length: n}, (_, i) =>
-            ["title_" + (i+1), n === 1 ? "Title" : `Artwork ${i+1}`, "text", i === 0 ? "Exactly as it is titled" : ""]))
+      ["is_series","Name them by their series","select","no|yes"],
+      ["series_name","The series name","text","Stands in for the titles in the prose", () => S.facts.is_series === "yes"],
+      ...Array.from({length: n}, (_, i) =>
+          ["title_" + (i+1), n === 1 ? "Title" : `Artwork ${i+1}`, "text",
+           i === 0 ? (series ? "Still headed by its own title on the card" : "Exactly as it is titled") : ""])
     ];
   }},
   {g:"The edition", d:"The edition phrase is the one that travels: it appears in the opener, the status lines and the footers, so it is written once here.", f:[
@@ -940,7 +940,7 @@ function renderFacts(){
     // there cannot be fewer works than titled artworks, so adding a title raises
     // the count. Raising it further by hand is the set-under-one-title case.
     // these two decide how many title boxes there are, so the group is rebuilt
-    if (k === "artworks" || k === "is_series") {
+    if (k === "artworks" || k === "is_series") {   // both change how many boxes there are
       const el0 = e.target, pos = el0.selectionStart;
       renderFacts(); crumb(); $("#aside").innerHTML = asideFacts();
       const el = $(`#f_${k}`);

@@ -34,6 +34,7 @@ artist:
 
 edition:
   unit: print
+  series: Dream House   # name the works by their series: they are untitled
   count: 6
   medium_prefix: ""
   suffix: from his iconic Dream House series

@@ -102,7 +102,7 @@ row += 1; ws[f"A{row}"] = "Fragments, written once per release. No we or our: th
 frags = [
     ("bio", V["bio"], "2 to 3 sentences on the artist, third person, no handle. Coming Soon post only."),
     ("hook", V["hook"], "2 to 3 sentences about the work. Write it as editorially as you like; the one test is that it must read as well in the middle of an email as at the top of a post. Self-contained, no rhetorical question. It reaches 16 slots, so it is the one fragment that must stand alone."),
-    ("qualifier", V["qualifier"], "a few words after the edition phrase in the email opener, e.g. spanning five decades of the artist's career. Ten words at most, a phrase not a sentence, no we or our, no artist name, no beneficiary. Leave it blank when the opener already names the work or says what it supports: with several works the title drops out of this line, and that is what it is for."),
+    ("qualifier", V["qualifier"], "a few words after the edition phrase in the email opener, e.g. spanning five decades of the artist's career. Ten words at most, a phrase not a sentence, no we or our, no artist name. Ignored when there is a beneficiary: 'released in support of X' fills the same opening. With several works the title drops out of this line, and that is what it is for."),
     ("making", V["making"], "one sentence on how the edition was made; write 'printmakers at Make-Ready' and the sheet adds 'our'."),
     ("card_line_1", V["card_line_1"], "one sentence on the first work, 15 to 30 words, under its card in six emails. With several works, say something different about each: the edition is described above the cards, so do not call each one a limited edition print."),
     ("card_line_2", V["card_line_2"], "the second titled work; blank otherwise"),
@@ -130,7 +130,7 @@ F = {
  "Work": f'=UPPER(LEFT({B("work")},1))&MID({B("work")},2,999)',
  "work_email": f'=IF({B("is_series")}="yes","the "&{B("title_1")}&" series",IF({B("title_2")}="",{B("title_1")},IF({B("title_3")}="",{B("title_1")}&" and "&{B("title_2")},{B("title_1")}&", "&{B("title_2")}&" and "&{B("title_3")})))',
  "Work_email": f'=UPPER(LEFT({B("work_email")},1))&MID({B("work_email")},2,999)',
- "work_intro": f'=IF({B("works")}=1,{B("title_1")}&", ","")&{B("edition_phrase")}&IF({B("qualifier")}="","",IF(LEFT({B("qualifier")},1)=",",""," ")&{B("qualifier")})',
+ "work_intro": f'=IF({B("works")}=1,{B("title_1")}&", ","")&{B("edition_phrase")}&IF(OR({B("qualifier")}="",{B("support")}<>""),"",IF(LEFT({B("qualifier")},1)=",",""," ")&{B("qualifier")})',
  "support": f'=IF(OR({B("beneficiary")}="",{B("hook_names_beneficiary")}),"",", released in support of "&{B("beneficiary")})',
  "beneficiary_tagged": f'=IF({B("beneficiary")}="","",{B("beneficiary")}&IF({B("beneficiary_handle")}="",""," (@"&{B("beneficiary_handle")}&")"))',
  "bio_tagged": f'=IF({B("handle")}="",{B("bio")},SUBSTITUTE({B("bio")},{B("artist")},{B("named")},1))',

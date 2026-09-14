@@ -200,7 +200,7 @@ def check_qualifier(q, brief):
     fundraiser = (brief.get("release") or {}).get("fundraiser") or ""
     hook = ((brief.get("context") or {}).get("hook") or "")
     if fundraiser.strip() and fundraiser not in hook:
-        warnings.append("qualifier: the opener already says what the release supports, so these words are a second clause after the dash")
+        errors.append(f"qualifier: not used, because “released in support of {fundraiser}” fills the same opening in the opener")
     elif len(brief.get("artworks") or []) == 1 and int((brief.get("edition") or {}).get("count") or 1) == 1:
         warnings.append("qualifier: the opener already names the work, so it is not bald without these words")
     return errors, warnings
@@ -210,7 +210,7 @@ def validate(text, brief):
     fact_nums, fact_words = facts(brief)
     errors, warnings = [], []
     q = (brief.get("context") or {}).get("qualifier")
-    if q and q.strip() in text:
+    if q and q.strip():
         e, w = check_qualifier(q, brief)
         errors += e
         warnings += w

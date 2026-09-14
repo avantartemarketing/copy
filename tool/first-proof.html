@@ -90,6 +90,7 @@ aside{border-left:1px solid var(--line);background:var(--surface)}
 .fld{display:block;cursor:text;color:var(--ink);background:var(--field);border-radius:5px;padding:3px 8px;margin:0 -8px;outline:none;transition:background .12s,box-shadow .12s}
 .fld.in{display:inline;padding:1px 4px 1px 5px;margin:0 -4px 0 0}
 .fld.in:empty{display:inline-block;min-width:2ch;vertical-align:baseline}
+.lock{display:inline;padding:1px 4px 1px 5px;margin:0 -4px 0 0;border-radius:5px;background:var(--sunk);color:var(--ink-soft);cursor:default}
 .fld:hover{background:var(--field-hi)}
 .fld:focus{background:var(--field-hi);box-shadow:0 0 0 2px var(--accent-line)}
 .fld:empty::before{content:attr(data-ph);color:var(--ink-faint);font-style:italic}
@@ -303,12 +304,17 @@ const LEADS = [
 // The opener is a fixed frame with one small opening in it. The head and tail are
 // built from the release details and are never editable; the writer's words go between.
 function openerFrame(){
-  const d = D(), L = LEADS[S.lead];
-  return { head: L.head(d), mid: d.workIntro, tail: (L.tail?L.tail(d):"") + d.support + "." };
+  const d = D(), L = LEADS[S.lead], lt = L.tail ? L.tail(d) : "";
+  // the sentence has one opening in it. A release that names what it supports
+  // fills that opening itself, and the writer's words would be a second clause
+  // on the same dash, so the slot is locked and the qualifier goes unused.
+  return d.support
+    ? { head: L.head(d), mid: d.workIntro + lt + ", ", slot: d.support.replace(/^,\s*/, ""), tail: "." }
+    : { head: L.head(d), mid: d.workIntro, slot: "", tail: lt + "." };
 }
-function qualifier(){ const q = S.blocks.qualifier.trim(); return q ? " " + q : ""; }
+function qualifier(){ const q = S.blocks.qualifier.trim(); return (q && !D().support) ? " " + q : ""; }
 function workIntro(){ return D().workIntro + qualifier(); }
-function openerText(){ const f = openerFrame(); return f.head + f.mid + qualifier() + f.tail; }
+function openerText(){ const f = openerFrame(); return f.head + f.mid + (f.slot || qualifier()) + f.tail; }
 
 // ═══════════════════════════════════════════════════ assembly
 function outputs(){
@@ -445,6 +451,7 @@ const SPEC = {
   qualifier:{ name:"Opener", sub:"a few words", max:10,
     rule:"The frame is built from the release details. Pick how it opens, and add a few words about the work if the line reads bald without them. A phrase, not a sentence — it is reused by four other emails.",
     full:"The frame is built from the release details — pick how it opens. This release already gives $, so the line is not bald and blank is usually the right answer: more words would be a second thing hanging off the same dash. Add a few only for a fact that belongs here and nowhere else.",
+    taken:"The frame is built from the release details — pick how it opens. There is nothing to write here: this release says what it supports, and that clause fills the opening in the sentence. Drop the beneficiary in the details, or name it in the hook, and the opening comes back.",
     bald:"The frame is built from the release details — pick how it opens. With more than one work the title drops out of this line, so it ends on the edition phrase and nothing else. This is where a few words about the work earn their place: a phrase, not a sentence, and it travels into four other emails."},
   // what the frame already says, and so whether the writer's words are wanted
   openerCarries(){
@@ -465,6 +472,7 @@ function spec(k){
   const d = D();
   if (k === "qualifier") {
     const has = SPEC.openerCarries();
+    if (d.support) return Object.assign({}, SPEC.qualifier, {sub:"none needed", rule: SPEC.qualifier.taken});
     return Object.assign({}, SPEC.qualifier, {
       sub: has.length ? "usually blank" : "a few words",
       rule: has.length ? SPEC.qualifier.full.replace("$", join(has)) : SPEC.qualifier.bald});
@@ -475,6 +483,8 @@ function spec(k){
 }
 function checks(key){
   const t = S.blocks[key].trim(), out = [], low = t.toLowerCase(), f = S.facts;
+  if (key === "qualifier" && D().support)
+    return [{k:"good", t:`Filled by the release details: “${D().support.replace(/^,\s*/, "")}”. Nothing to write here.`}];
   if (!t) {
     if (key !== "qualifier") return [{k:"warn", t:"Nothing written yet."}];
     const has = SPEC.openerCarries();
@@ -575,7 +585,7 @@ function renderWrite(){
       <div class="body">
         <div class="gutter" id="gutter"></div>
         <div class="doc" id="doc">
-          <p data-blk="qualifier"><span id="ohead">${esc(fr.head + fr.mid)}</span>${fld("qualifier")}<span id="otail">${esc(fr.tail)}</span></p>
+          <p data-blk="qualifier">${openerHTML()}</p>
           <p data-blk="hook">${fld("hook")}</p>
           <p data-blk="making">${fld("making")}</p>
           <ul>${d.feats.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
@@ -590,7 +600,15 @@ function renderWrite(){
       <div class="foot" id="foot">Then: ${o.posts.length} posts, ${o.tweets.length} tweets and ${live} more emails come from what you write here.</div>
     </div>`;
 
-  $("#main").querySelectorAll(".fld").forEach(el => {
+  wireFields($("#main")); wireLock($("#main"));
+  $("#main").querySelectorAll("[data-goto]").forEach(b => b.onclick = () => { S.view = b.dataset.goto; render(); });
+  requestAnimationFrame(drawGutter);
+}
+function wireLock(root){
+  root.querySelectorAll(".lock").forEach(el => el.onclick = () => { S.focus = "qualifier"; drawGutter(); renderAside(); });
+}
+function wireFields(root){
+  root.querySelectorAll(".fld").forEach(el => {
     el.addEventListener("input", () => onField(el));
     el.addEventListener("focus", () => { S.focus = el.dataset.k; drawGutter(); renderAside(); });
     el.addEventListener("paste", e => {
@@ -608,8 +626,14 @@ function renderWrite(){
       caret(el);
     });
   });
-  $("#main").querySelectorAll("[data-goto]").forEach(b => b.onclick = () => { S.view = b.dataset.goto; render(); });
-  requestAnimationFrame(drawGutter);
+}
+function openerHTML(){
+  const fr = openerFrame();
+  // the locked slot is still part of the opener row: clicking it opens the panel
+  // where the opening wording is chosen
+  return `<span id="ohead">${esc(fr.head + fr.mid)}</span>`
+       + (fr.slot ? `<span class="lock">${esc(fr.slot)}</span>` : fld("qualifier"))
+       + `<span id="otail">${esc(fr.tail)}</span>`;
 }
 // put the caret at the start of a field, and keep it there
 function caret(el){
@@ -632,9 +656,17 @@ function onField(el){
 // the opener's frame can move while you type: naming the beneficiary in the hook
 // drops "released in support of" from the opener. Update the locked text, never the field.
 function syncFrame(){
-  const fr = openerFrame(), h = $("#ohead"), tl = $("#otail");
+  const p = document.querySelector('[data-blk="qualifier"]'); if (!p) return;
+  const fr = openerFrame();
+  if (!!p.querySelector(".lock") !== !!fr.slot) {         // the opening changed hands
+    p.innerHTML = openerHTML();
+    wireFields(p); wireLock(p);
+    return;
+  }
+  const h = $("#ohead"), tl = $("#otail"), lk = p.querySelector(".lock");
   if (h && h.textContent !== fr.head + fr.mid) h.textContent = fr.head + fr.mid;
   if (tl && tl.textContent !== fr.tail) tl.textContent = fr.tail;
+  if (lk && lk.textContent !== fr.slot) lk.textContent = fr.slot;
 }
 function drawGutter(){
   const g = $("#gutter"); if (!g) return;
@@ -648,7 +680,8 @@ function drawGutter(){
   }).join("");
   g.querySelectorAll("[data-jump]").forEach(b => b.onclick = () => {
     const el = document.querySelector(`.fld[data-k="${b.dataset.jump}"]`);
-    if (el) { el.focus();
+    if (!el) { S.focus = b.dataset.jump; drawGutter(); renderAside(); return; }
+    { el.focus();
       const r = document.createRange(); r.selectNodeContents(el); r.collapse(false);
       const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
   });

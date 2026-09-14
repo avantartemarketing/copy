@@ -33,6 +33,7 @@
   --field:#20272F; --field-hi:#27303A;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
@@ -579,7 +580,7 @@ function render(){
   crumb();
   const o = outputs();
   $("#nout").textContent = o.posts.length + o.tweets.length + o.emails.length;
-  $("#nfacts").textContent = FORM.reduce((n,s)=>n+s.f.filter(r=>!r[4]||r[4]()).length,0);
+  $("#nfacts").textContent = shownFields();
   document.querySelectorAll("nav button").forEach(b => b.setAttribute("aria-current", String(b.dataset.view===S.view)));
   if (S.view === "write") { renderWrite(); renderAside(); }
   else if (S.view === "facts") { renderFacts(); $("#aside").innerHTML = asideFacts(); }
@@ -844,14 +845,20 @@ Reply with JSON only, no other text:
 // a field that only one mechanic uses
 const draw = () => S.facts.mechanic === "draw";
 const timed = () => !draw();
+// one title box at a time: the next appears once the one before it is filled,
+// so a single work shows one box rather than three, and nothing implies you
+// have to fill them. The count of works is a separate number, because a set of
+// four sold together, or one image in four colourways, is one titled artwork.
+const has = k => !!String(S.facts[k] ?? "").trim();
+const titleShown = i => has("title_" + (i-1)) || has("title_" + i);
 // the commonest surprise on this screen: three works, one title, one card
 function cardNote(){
   const d = D(), t = d.cardTitles.length, w = +S.facts.works || 1;
-  if (d.series) return "Untitled works from one series, so the email carries a single card headed “Untitled”.";
+  if (d.series) return "Untitled works from one series: one card, headed “Untitled”.";
   if (!t) return "No title yet, so no card.";
-  if (t === 1 && w > 1) return `${w} works under one title, so the email carries one card. If they are ${w} separate works, give each its own title here and each gets a card.`;
-  if (t < w) return `${t} titles for ${w} works, so ${t} cards.`;
-  return `${t} ${t===1 ? "card" : "cards"}, one per title.`;
+  if (t === w) return `${t} ${t===1 ? "artwork, so one card" : "artworks, so " + t + " cards"}.`;
+  if (t < w) return `${w} works under ${t === 1 ? "one title" : t + " titles"}, so ${t} ${t===1 ? "card" : "cards"}. Right for a set sold together or one image in several colourways — if they are separate works, give each its own title.`;
+  return `${t} titles but only ${w} work${w===1?"":"s"} in the edition. One of those is wrong.`;
 }
 const FORM = [
   {g:"The collaboration", d:"Who it is with, and how they are named. The works are always “by” the artist; the collaboration may be with an estate or a trust.", f:[
@@ -864,15 +871,15 @@ const FORM = [
     ["link","Release link","text","Used in tweets"],
     ["advisor","Advisor","select","Sam|Curtis|Sofiya"]
   ]},
-  {g:"The artworks", d:"Their own titles, one per work — the release itself is not titled. The emails carry one product card per title, and the headline names them. Several works share one title when they are sold as a set, or when one image comes in a few colourways. For untitled works from a named series, switch that on and put the series name in the first field.", live:cardNote, f:[
+  {g:"The artworks", d:"Titles, and how many things the edition holds. These are two different numbers: a quartet sold as a set, or one image in four colourways, is four works under one title. The emails carry one card per title, and the headline names them. Add a title and the next box appears.", live:cardNote, f:[
     ["title_1","First artwork","text","Exactly as it is titled"],
-    ["title_2","Second artwork","text","Blank if there is only one"],
-    ["title_3","Third artwork","text","More than three: give the set one collective title"],
-    ["is_series","All untitled, from one named series","select","no|yes"]
+    ["title_2","Second artwork","text","", () => titleShown(2)],
+    ["title_3","Third artwork","text","More than three: give the set one collective title", () => titleShown(3)],
+    ["is_series","All untitled, from one named series","select","no|yes"],
+    ["works","Works in the edition","number","How many things a collector could buy, titled or not"]
   ]},
   {g:"The edition", d:"The edition phrase is the one that travels: it appears in the opener, the status lines and the footers, so it is written once here.", f:[
     ["edition_phrase","Edition phrase","text","e.g. a quartet of new limited edition embroideries"],
-    ["works","Number of works","number","How many things are in the edition, which can be more than the number of titles"],
     ["unit","One of them is called a","text","print, embroidery, sculpture"],
     ["f1","Feature 1","text",""],["f2","Feature 2","text",""],["f3","Feature 3","text",""],
     ["f4","Feature 4","text","Bespoke to this release"],["f5","Feature 5","text",""]
@@ -902,7 +909,8 @@ function renderFacts(){
     </div>
     ${FORM.map(sec=>`<fieldset><legend>${esc(sec.g)}</legend><p>${esc(sec.d)}</p>
       <div class="grid${sec.f[0][2]==="textarea"?" wide":""}">
-      ${sec.f.filter(r=>!r[4]||r[4]()).map(([k,lab,type,hint])=>{
+      ${sec.f.map(r=>{
+        const [k,lab,type,hint] = r;
         const v = S.facts[k] ?? "";
         const ctl = type==="select"
           ? `<select id="f_${k}" data-f="${k}">${hint.split("|").map(o=>`<option ${o===String(v)?"selected":""}>${o}</option>`).join("")}</select>`
@@ -910,24 +918,35 @@ function renderFacts(){
             ? `<textarea id="f_${k}" data-f="${k}" rows="3">${esc(String(v))}</textarea>`
             : `<input id="f_${k}" data-f="${k}" type="${type}" value="${esc(String(v))}">`;
         const sub = (type==="select"||!hint) ? "" : `<small>${esc(hint)}</small>`;
-        return `<label><span>${esc(lab)}</span>${ctl}${sub}</label>`;
+        return `<label data-field="${k}"${r[4] && !r[4]() ? " hidden" : ""}><span>${esc(lab)}</span>${ctl}${sub}</label>`;
       }).join("")}</div>${sec.live?`<p class="live" data-live="${esc(sec.g)}">${esc(sec.live())}</p>`:""}</fieldset>`).join("")}`;
   $("#main").querySelectorAll("[data-f]").forEach(el => el.addEventListener("input", e => {
     const k = e.target.dataset.f;
     S.facts[k] = e.target.type === "number" ? (+e.target.value||0) : e.target.value;
-    if (k === "mechanic") {                        // the form itself changes shape
-      renderFacts(); $("#aside").innerHTML = asideFacts(); crumb();
-      const sel = $(`#f_${k}`); if (sel) sel.focus();
-      return;
+    // there cannot be fewer works than titled artworks, so adding a title raises
+    // the count. Raising it further by hand is the set-under-one-title case.
+    if (k.startsWith("title_")) {
+      const t = [1,2,3].filter(i => has("title_"+i)).length;
+      if (t > (+S.facts.works||0)) { S.facts.works = t; const w = $("#f_works"); if (w) w.value = t; }
     }
-    crumb();
-    $("#main").querySelectorAll("[data-live]").forEach(el => {
-      const sec = FORM.find(x => x.g === el.dataset.live);
-      if (sec) el.textContent = sec.live();
-    });
-    $("#aside").innerHTML = asideFacts();
+    crumb(); syncFields(); $("#aside").innerHTML = asideFacts();
   }));
+  syncFields();
 }
+// the form changes shape as it is filled in, without being rebuilt under the cursor
+function syncFields(){
+  FORM.forEach(sec => sec.f.forEach(r => {
+    if (!r[4]) return;
+    const el = $(`#main label[data-field="${r[0]}"]`);
+    if (el) el.hidden = !r[4]();
+  }));
+  $("#main").querySelectorAll("[data-live]").forEach(el => {
+    const sec = FORM.find(x => x.g === el.dataset.live);
+    if (sec) el.textContent = sec.live();
+  });
+  $("#nfacts").textContent = shownFields();
+}
+const shownFields = () => FORM.reduce((n,s)=>n+s.f.filter(r=>!r[4]||r[4]()).length,0);
 function asideFacts(){
   const need = missing();
   if (need.length) return `<div class="panel"><span class="lbl">From these facts</span><h2>What the frame needs</h2>

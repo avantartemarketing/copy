@@ -525,10 +525,10 @@ const BANNED = ["don't miss out","miss out","hurry","act now","shop now","last c
 const US = {color:"colour",colors:"colours",realize:"realise",center:"centre",gray:"grey",favorite:"favourite",honor:"honour",catalog:"catalogue",program:"programme"};
 const SPEC = {
   qualifier:{ name:"Opener", sub:"a few words", max:10,
-    rule:"The frame is built from the release details. Pick how it opens, and add a few words about the work if the line reads bald without them. A phrase, not a sentence — it is reused by four other emails.",
-    full:"The frame is built from the release details — pick how it opens. This release already gives $, so the line is not bald and blank is usually the right answer: more words would be a second thing hanging off the same dash. Add a few only for a fact that belongs here and nowhere else.",
-    taken:"The frame is built from the release details — pick how it opens. There is nothing to write here: this release says what it supports, and that clause fills the opening in the sentence. Drop the beneficiary in the details, or name it in the hook, and the opening comes back.",
-    bald:"The frame is built from the release details — pick how it opens. With more than one work the title drops out of this line, so it ends on the edition phrase and nothing else. This is where a few words about the work earn their place: a phrase, not a sentence, and it travels into four other emails."},
+    rule:"The frame is built from the release details. Pick how it opens, and add a few words about the work if the line reads bald without them. A phrase, not a sentence: it is reused by four other emails.",
+    full:"The frame is built from the release details. Pick how it opens. This release already gives $, so the line is not bald and blank is usually the right answer: more words would be a second thing hanging off the same dash. Add a few only for a fact that belongs here and nowhere else.",
+    taken:"The frame is built from the release details. Pick how it opens. There is nothing to write here: this release says what it supports, and that clause fills the opening in the sentence. Drop the beneficiary in the details, or name it in the hook, and the opening comes back.",
+    bald:"The frame is built from the release details. Pick how it opens. With more than one work the title drops out of this line, so it ends on the edition phrase and nothing else. This is where a few words about the work earn their place: a phrase, not a sentence, and it travels into four other emails."},
   // what the frame already says, and so whether the writer's words are wanted
   openerCarries(){
     const d = D(), f = S.facts, has = [];
@@ -537,7 +537,7 @@ const SPEC = {
     return has;
   },
   hook:{ name:"Hook", sub:"yours",
-    rule:"Two to three sentences about the work. As editorial as you like — this is where the release sounds like itself. The one test: it must read as well in the middle of an email as at the top of a post.", max:70 },
+    rule:"Two to three sentences about the work. As editorial as you like: this is where the release sounds like itself. The one test: it must read as well in the middle of an email as at the top of a post.", max:70 },
   making:{ name:"Making", sub:"yours",
     rule:"One sentence on how the edition was made. Write “printmakers at Make-Ready” and the system adds “our” where it belongs.", max:45 },
   card:{ name:"Card", sub:"yours",
@@ -574,12 +574,21 @@ function checks(key, text){
   }
   const words = t.split(/\s+/).length;
   BANNED.forEach(b => { if (new RegExp("(?<![\\w-])"+b.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(?![\\w-])").test(low)) out.push({k:"warn", t:`Banned phrase: “${b}”`}); });
-  Object.entries(US).forEach(([us,uk]) => { if (new RegExp("\\b"+us+"\\b").test(low)) out.push({k:"warn", t:`US spelling “${us}” — use “${uk}”`}); });
+  Object.entries(US).forEach(([us,uk]) => { if (new RegExp("\\b"+us+"\\b").test(low)) out.push({k:"warn", t:`US spelling “${us}”: use “${uk}”`}); });
   if (t.includes("—")) out.push({k:"warn", t:"Em dash. The house dash is a spaced en dash."});
   if (/\w[–—]\w/.test(t) && !/\d[–—]\d/.test(t)) out.push({k:"warn", t:"Unspaced dash."});
   if (t.includes("!")) out.push({k:"warn", t:"Exclamation mark."});
   if (/\b(we|our|we're)\b/.test(low)) out.push({k:"warn", t:"“we” or “our”. The frame around this supplies those."});
-  if (/limited-edition/.test(low)) out.push({k:"warn", t:"“limited-edition” — the house form has no hyphen."});
+  if (/limited-edition/.test(low)) out.push({k:"warn", t:"“limited-edition”: the house form has no hyphen."});
+  // the frame names the artist in full before any fragment lands, so inside one it is the surname
+  const artist = (f.artist || "").trim();
+  if (artist.split(/\s+/).length > 1 && t.includes(artist))
+    out.push({k:"warn", t:`“${artist}” in full. The frame has already named them by the time this lands, so the surname alone from here.`});
+  if (/(?<!\d)\s-\s(?!\d)/.test(t)) out.push({k:"warn", t:"A hyphen doing a dash's job. The house dash is a spaced en dash ( – ), and one at most."});
+  t.split(/(?<=[.!?])\s+/).forEach(sn => {
+    if ((sn.match(/\s[–—-]\s/g) || []).length >= 2)
+      out.push({k:"warn", t:"An aside set between two dashes. It reads as machine-written: make it a sentence, or use commas."});
+  });
   if ((S.page.description||"").trim()) {
     const known = new Set(("" + S.page.description + " " + S.page.medium + " " + S.page.authentication + " " + S.page.seo + " "
       + Object.values(S.facts).filter(v => typeof v === "string").join(" ")).match(/[\w'’.-]+/g) || []);
@@ -592,7 +601,7 @@ function checks(key, text){
     }));
   }
   if (key === "qualifier"){
-    if (words > 10) out.push({k:"warn", t:`${words} words. Ten is the cap — a phrase, not a sentence.`});
+    if (words > 10) out.push({k:"warn", t:`${words} words. Ten is the cap: a phrase, not a sentence.`});
     if (/[.!?]$/.test(t)) out.push({k:"warn", t:"No full stop. The frame closes the sentence."});
     if (f.artist && low.includes(f.artist.toLowerCase())) out.push({k:"warn", t:"The artist is already named in the frame."});
     if (f.beneficiary && low.includes(f.beneficiary.toLowerCase())) out.push({k:"warn", t:"The frame adds “released in support of” on its own."});
@@ -605,10 +614,10 @@ function checks(key, text){
     if (t.includes("?")) out.push({k:"warn", t:"Rhetorical question. It assumes the reader is at the start, and most of the time this is a middle paragraph."});
     t.split(/(?<=[.!?])\s+/).forEach(s => { const n=s.split(/\s+/).length; if (n>35) out.push({k:"warn", t:`A sentence of ${n} words. The cap is 35.`}); });
     if (words > spec(key).max) out.push({k:"warn", t:`${words} words. Aim for under ${spec(key).max}.`});
-    if (key==="making" && !/Make-Ready/.test(t)) out.push({k:"warn", t:"No mention of Make-Ready. Fine if this edition was made elsewhere — the system just won't add “our”."});
+    if (key==="making" && !/Make-Ready/.test(t)) out.push({k:"warn", t:"No mention of Make-Ready. Fine if this edition was made elsewhere; the system just won't add “our”."});
     if (key.startsWith("card_")) {
       const d = D();
-      if (d.cardTitles.length > 1 && /limited edition/.test(low)) out.push({k:"warn", t:"“limited edition” on a card. With several works it reads as filler under each one — the edition is described above the cards."});
+      if (d.cardTitles.length > 1 && /limited edition/.test(low)) out.push({k:"warn", t:"“limited edition” on a card. With several works it reads as filler under each one; the edition is described above the cards."});
       if (d.cardKeys.some(o => o !== key && blk(o).trim().toLowerCase() === low)) out.push({k:"warn", t:"The same line as another card."});
     }
   }
@@ -842,7 +851,7 @@ function renderAside(){
       ${hits.length?hits.map(h=>`<div class="use">
         <h4>${esc(h.kind)} · ${esc(h.name)}</h4>
         <div class="q">${h.before?esc(trim(h.before))+"\n\n":""}<mark>${esc(trim(h.line))}</mark>${h.after?"\n\n"+esc(trim(h.after)):""}</div>
-      </div>`).join(""):`<p class="note">Nothing yet — write the fragment and its uses appear here.</p>`}
+      </div>`).join(""):`<p class="note">Nothing yet. Write the fragment and its uses appear here.</p>`}
     </section>
   </div>`;
 
@@ -865,11 +874,11 @@ async function proofread(k){
     const sample = await claude.use("sample");
     if (!sample) throw new Error("unavailable");
     const hits = placements(k);
-    const ctx = hits.map((h,i)=>`${i+1}. ${h.kind} — ${h.name}\n${h.before?h.before+"\n\n":""}>>> ${h.line}\n${h.after?"\n"+h.after:""}`).join("\n\n");
+    const ctx = hits.map((h,i)=>`${i+1}. ${h.kind} · ${h.name}\n${h.before?h.before+"\n\n":""}>>> ${h.line}\n${h.after?"\n"+h.after:""}`).join("\n\n");
     const res = await sample.json(
 `You are proofreading one fragment of copy for Avant Arte, a publisher of limited edition artworks. The same fragment is reused across a campaign, so it has to work in every place it lands.
 
-THE FRAGMENT — the "${spec(k).name}":
+THE FRAGMENT, the "${spec(k).name}":
 ${blk(k) || "(empty)"}
 
 WHAT IT IS FOR: ${spec(k).rule}
@@ -877,9 +886,9 @@ WHAT IT IS FOR: ${spec(k).rule}
 EVERY PLACE IT LANDS, with the copy either side of it (the fragment is marked >>>):
 ${ctx}
 ${(S.page.description||"").trim() ? `\nTHE PRODUCT PAGE this release was written from. Every fact in the fragment should be here or in the release details; flag any that is not:\n${S.page.description.trim()}\n` : ""}
-HOUSE RULES: British spelling. The house dash is a spaced en dash, never an em dash. No exclamation marks and no rhetorical questions. Sentences under 35 words. Times written as "14:00 UK time", dates as "30 April". Never say "we" or "our" inside the fragment — the frame around it supplies those. Every fact must be true of this release: do not invent dates, numbers, places or names.
+HOUSE RULES: British spelling. The house dash is a spaced en dash, never an em dash and never a hyphen; use one at most in a sentence, and never set an aside between a pair of them, which reads as machine-written. Refer to the artist by surname alone: the full name has already been used before the fragment lands. No exclamation marks and no rhetorical questions. Sentences under 35 words. Times written as "14:00 UK time", dates as "30 April". Never say "we" or "our" inside the fragment; the frame around it supplies those. Every fact must be true of this release: do not invent dates, numbers, places or names.
 
-Judge two things. First, does the fragment read well on its own? Second, and more important, does it still read well in EACH place above — check especially whether it assumes it is the first thing being read, because in most of these places it is a middle paragraph. Also flag repetition with the copy either side of it.
+Judge two things. First, does the fragment read well on its own? Second, and more important, does it still read well in EACH place above: check especially whether it assumes it is the first thing being read, because in most of these places it is a middle paragraph. Also flag repetition with the copy either side of it.
 
 Be sparing. Only report real problems a careful editor would raise. Ignore matters of taste.
 
@@ -906,7 +915,7 @@ function pageNote(){
   if (!st.words) return "Nothing written yet. The pages that went out ran to about 127 words in three or four paragraphs.";
   const shape = `${st.words} words in ${st.paras} paragraph${st.paras===1?"":"s"}.`;
   return shape + (st.making ? " It says how the work was made, so the making line can be drawn from it."
-                            : " It does not say how the work was made, and nor does the medium field — the making line will need writing by hand.");
+                            : " It does not say how the work was made, and nor does the medium field, so the making line will need writing by hand.");
 }
 const PAGE_FIELDS = [
   ["seo", "SEO line", "text", "One sentence, about 25 words. Most open “Collect a … by …”"],
@@ -980,7 +989,7 @@ function renderPageAside(){
                  ...d.cardKeys.map((k,i)=>[k, "Card · " + d.cardTitles[i], cards[i]])];
     const usable = all.filter(([k,,x]) => x && (x.text||"").trim() && blk(k).trim() !== x.text.trim());
     body = `<span class="lbl">From the page</span><h2>Suggested</h2>
-      <p class="rule">Each one is a shortening of the page. Use it, or write your own in the email — the mechanical checks have already run on them.</p>
+      <p class="rule">Each one is a shortening of the page. Use it, or write your own in the email. The mechanical checks have already run on them.</p>
       ${usable.length ? `<button class="act" id="useall">Use all ${usable.length}</button>` : `<button class="act" id="goemail">Go to the email</button>`}
       <section><h3>Fragments</h3>${all.map(([k,n,x])=>frag(k,n,x)).join("")}</section>
       ${(r.notes||[]).length ? `<section><h3>Claude noted</h3>${r.notes.map(n=>`<div class="chk" data-k="warn"><s></s><span>${esc(n)}</span></div>`).join("")}</section>` : ""}`;
@@ -1005,7 +1014,7 @@ async function suggest(){
     const f = S.facts, d = D(), pg = S.page;
     const bald = !SPEC.openerCarries().length && !d.support;
     const res = await sample.json(
-`You are drafting fragments of campaign copy for Avant Arte, a publisher of limited edition artworks, from a product page a person has already written and approved. Every fragment must be a shortening or re-voicing of what is on the page or in its fields. Add no fact of any kind — no date, number, place, name, material, exhibition or claim — that is not there. If a fragment cannot be written from the page, return null for its text and say why in "from".
+`You are drafting fragments of campaign copy for Avant Arte, a publisher of limited edition artworks, from a product page a person has already written and approved. Every fragment must be a shortening or re-voicing of what is on the page or in its fields. Add no fact of any kind that is not there: no date, number, place, name, material, exhibition or claim. If a fragment cannot be written from the page, return null for its text and say why in "from".
 
 THE PRODUCT PAGE:
 ${pg.description.trim()}
@@ -1022,12 +1031,12 @@ THE RELEASE:
 - mechanic: ${d.draw ? "allocated by draw" : "timed, " + f.window}${f.beneficiary ? "\n- released in support of " + f.beneficiary : ""}
 
 WRITE, in British English, plain prose, no markdown, no quotation marks around the text:
-1. hook — ${SPEC.hook.rule} Do not open with a rhetorical question or a lede that assumes it is read first.
-2. making — ${SPEC.making.rule} Write "printmakers at Make-Ready" exactly if the page says Make-Ready; the system adds "our". If neither the page nor the medium description says how the work was physically made, return null.
-3. cards — one line per artwork, in the order given. ${SPEC.card.rule} The SEO line, if present, is written in this register.
-4. qualifier — ${bald ? "the opener reads “… – " + f.edition_phrase + "” with nothing after it, so add a few words about the work (at most ten, a phrase not a sentence, no full stop, no artist name)." : "return null: the opener already names the work or what it supports."}
+1. hook: ${SPEC.hook.rule} Do not open with a rhetorical question or a lede that assumes it is read first.
+2. making: ${SPEC.making.rule} Write "printmakers at Make-Ready" exactly if the page says Make-Ready; the system adds "our". If neither the page nor the medium description says how the work was physically made, return null.
+3. cards: one line per artwork, in the order given. ${SPEC.card.rule} The SEO line, if present, is written in this register.
+4. qualifier: ${bald ? "the opener reads “… – " + f.edition_phrase + "” with nothing after it, so add a few words about the work (at most ten, a phrase not a sentence, no full stop, no artist name)." : "return null: the opener already names the work or what it supports."}
 
-HOUSE RULES: British spelling. The house dash is a spaced en dash, never an em dash. No exclamation marks and no rhetorical questions. Sentences under 35 words. Never say "we" or "our" inside a fragment. Never write "limited-edition" with a hyphen.
+HOUSE RULES: British spelling. The house dash is a spaced en dash, never an em dash and never a hyphen; use one at most in a sentence, and never set an aside between a pair of them, which reads as machine-written. Refer to the artist by surname alone (single-name artists as they are): the full name has already been used by the frame before any fragment lands. No exclamation marks and no rhetorical questions. Sentences under 35 words. Never say "we" or "our" inside a fragment. Never write "limited-edition" with a hyphen.
 
 For each, "from" is a short phrase saying where on the page it came from, e.g. "paragraph 2" or "the medium description", or, when text is null, why nothing could be written.
 
@@ -1057,7 +1066,7 @@ function cardNote(){
   const series = d.series ? ` The prose calls them the ${S.facts.series_name || "…"} series; the cards keep their own titles.` : "";
   const many = `${n} artwork${n===1?"":"s"}`;
   if (d.untitled === n) return `${many}, so ${card(n)} once ${n===1?"it is":"they are"} titled.` + series;
-  if (d.untitled) return `${many}, so ${card(n)} — ${d.untitled === 1 ? "one still needs" : d.untitled + " still need"} a title.` + series;
+  if (d.untitled) return `${many}, so ${card(n)}, though ${d.untitled === 1 ? "one still needs" : d.untitled + " still need"} a title.` + series;
   const head = d.workEmail.length;
   return `${many}, so ${card(n)}.` + series + (head > 90
     ? ` The headline names all ${n}, which runs to ${head} characters: consider one collective title, or the series option.`
@@ -1074,7 +1083,7 @@ const FORM = [
     ["link","Release link","text","Used in tweets"],
     ["advisor","Advisor","select","Sam|Curtis|Sofiya"]
   ]},
-  {g:"The artworks", d:"How many the release holds, and what each is called. Every artwork gets its own title and its own card in the emails, however many there are. Where they are untitled works from one named series, the series can stand in for their titles in the prose — the cards still carry one each.", live:cardNote, f: () => {
+  {g:"The artworks", d:"How many the release holds, and what each is called. Every artwork gets its own title and its own card in the emails, however many there are. Where they are untitled works from one named series, the series can stand in for their titles in the prose; the cards still carry one each.", live:cardNote, f: () => {
     const n = D().artworks, series = S.facts.is_series === "yes";
     return [
       ["artworks","How many artworks","number","Each one gets a card in the emails"],
@@ -1199,7 +1208,7 @@ function renderOut(){
     <div class="head">
       <span class="lbl">Then</span>
       <h1>Everything else</h1>
-      <p>Built from what you wrote and the release details. Nothing here needs writing — read it, and if a line is wrong, fix the fragment or the fact it came from.</p>
+      <p>Built from what you wrote and the release details. Nothing here needs writing. Read it, and if a line is wrong, fix the fragment or the fact it came from.</p>
     </div>
     ${block("Instagram", "The Insiders account posts the same caption as the main feed; the plan says which.", o.posts, true)}
     ${block("Twitter", "The status line with the X handle, the hook on the announcement only, and an action line that ends with the link.", o.tweets, true)}

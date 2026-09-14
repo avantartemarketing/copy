@@ -23,6 +23,7 @@ enforces the mechanical ones.
 | Rule | Evidence |
 |---|---|
 | The house dash is a spaced en dash ( – ). No em dashes, no unspaced dashes | 1,020 spaced en dashes vs 244 em dashes; the em dashes are almost all in the advisor-written Monthly Preview |
+| One dash at most in a sentence. No aside set between a pair of dashes, and never a hyphen doing a dash's job ( - ) | house rule, September 2026: the paired-dash aside is the commonest sign of machine writing |
 | No exclamation marks | 0.1 per email, nearly all in two locked lines ("Great choice!", "and we will!") |
 | No questions in the body. Questions belong only in survey subject lines ("Any feedback?") | 0.07 per email |
 | No emoji in the body. The only emoji anywhere is 🔓 in Early Access subjects | 0 in bodies |

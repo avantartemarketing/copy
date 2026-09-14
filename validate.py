@@ -95,6 +95,8 @@ def dash_and_spelling(text, low, errors):
         errors.append("em dash (—): the house dash is a spaced en dash ( – )")
     if any(not (m.group(0)[0].isdigit() and m.group(0)[-1].isdigit()) for m in re.finditer(r"\w[–—]\w", text)):
         errors.append("unspaced dash: use a spaced en dash ( – )")        # a date range like 1952–2002 is fine
+    if re.search(r"(?<!\d)\s-\s(?!\d)", text):                             # "23 - 30 October" in post-purchase dates is house
+        errors.append("a hyphen used as a dash ( - ): the house dash is a spaced en dash ( – )")
     for us, uk in US_SPELLING.items():
         if re.search(rf"\b{us}\b", low):
             errors.append(f"US spelling “{us}”: use “{uk}”")
@@ -117,6 +119,8 @@ def check_bounded(name, text, fact_nums, fact_words):
         n = len(s.split())
         if n > 35:
             errors.append(f"sentence of {n} words (max 35): “{s[:48]}…”")
+        if len(re.findall(r"\s[–—-]\s", s)) >= 2:
+            warnings.append(f"an aside set between two dashes, which reads as machine-written: “{s[:48]}…”")
     if len(text.split()) > 70:
         warnings.append(f"{len(text.split())} words (house paragraphs: median 24, p90 50)")
     for w, cap in CAPPED.items():
@@ -223,10 +227,15 @@ def validate(text, brief):
         for i, a in enumerate(brief.get("artworks") or []):
             if not (a.get("card_line") or "").strip():
                 warnings.append(f"artworks.{i}.card_line: not written; the card shows its title and nothing else")
+    artist = ((brief.get("artist") or {}).get("name") or "").strip()
     for name, value in bounded_fields(brief):
         if value.strip() not in text:          # only the slots this email actually uses
             continue
         e, w = check_bounded(name, value, fact_nums, fact_words)
+        # the frame has used the full name before any fragment lands; the bio is the one exception,
+        # since it opens the Coming Soon post and is that first mention
+        if len(artist.split()) > 1 and artist in value and not name.endswith("artist_bio"):
+            w.append(f"{name}: “{artist}” in full; the frame has already named them, so the surname alone")
         errors += e
         warnings += w
     return sorted(set(errors)), sorted(set(warnings))

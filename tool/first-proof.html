@@ -229,8 +229,8 @@ function blankRelease(){
   return {
     facts: {
       artist:"", collab_with:"", ordinal:"latest", handle:"", x_handle:"", hashtag:"", link:"",
-      title_1:"", title_2:"", title_3:"", is_series:"no", artworks:1,
-      edition_phrase:"", works:1, unit:"print",
+      title_1:"", is_series:"no", artworks:1,
+      edition_phrase:"", unit:"print",
       mechanic:"timed", window:"one week", launch_at:"", closes_at:"",
       beneficiary:"", beneficiary_handle:"",
       advisor:"Sam", early_access_code:"000-000", framing_code:"", framing_percent:10,
@@ -259,8 +259,8 @@ const S = {
     artist:"Grayson Perry", collab_with:"Grayson Perry", ordinal:"latest",
     handle:"alanmeasles", x_handle:"", hashtag:"GraysonPerry",
     link:"https://avantarte.co/grayson-perry",
-    title_1:"The Changeling", title_2:"", title_3:"", is_series:"no", artworks:1,
-    edition_phrase:"a new limited edition print", works:1, unit:"print",
+    title_1:"The Changeling", is_series:"no", artworks:1,
+    edition_phrase:"a new limited edition print", unit:"print",
     mechanic:"timed", window:"one week",
     launch_at:"2026-04-30T14:00", closes_at:"2026-05-07T14:00",
     beneficiary:"the Foundling Museum", beneficiary_handle:"foundlingmuseum",
@@ -295,19 +295,19 @@ function D(){
   d.namedX = f.artist + (f.x_handle ? ` (@${f.x_handle})` : "");
   d.collabX = f.collab_with === f.artist ? d.namedX : f.collab_with;
   d.aUnit = ("aeiou".includes((f.unit||"print")[0].toLowerCase()) ? "an " : "a ") + (f.unit||"print");
-  const n = Math.min(3, Math.max(1, +f.artworks || 1));
+  const n = Math.max(1, Math.min(24, Math.round(+f.artworks) || 1));
   d.artworks = n;
   // only the first n count: reducing the number puts a title out of use
   // without throwing away what was typed
-  const all = [f.title_1,f.title_2,f.title_3];
-  const slots = [0,1,2].slice(0, n).filter(i => all[i]);
+  const all = Array.from({length: n}, (_, i) => f["title_" + (i+1)] || "");
+  const slots = all.map((t, i) => i).filter(i => all[i]);
   const titles = slots.map(i => all[i]);
   d.series = f.is_series === "yes";
   d.work = d.series ? `the ${f.title_1} series` : join(titles.map(t=>`‘${t}’`));
   d.Work = cap(d.work);
   d.workEmail = d.series ? `the ${f.title_1} series` : join(titles);
   d.WorkEmail = cap(d.workEmail);
-  d.plural = (+f.works) > 1;
+  d.plural = n > 1;
   d.hookNamesBen = !!(f.beneficiary && S.blocks.hook.toLowerCase().includes(f.beneficiary.toLowerCase()));
   d.support = (f.beneficiary && !d.hookNamesBen) ? `, released in support of ${f.beneficiary}` : "";
   d.benTagged = f.beneficiary ? f.beneficiary + (f.beneficiary_handle ? ` (@${f.beneficiary_handle})` : "") : "";
@@ -325,13 +325,13 @@ function D(){
   // one card per work: its title, and the line the writer gives it
   d.cardTitles = d.series ? ["Untitled"] : titles;   // an untitled artwork has no card yet
   d.cardKeys = d.series ? ["card_1"] : slots.map(i => "card_" + (i+1));
-  d.cards = d.cardTitles.map((t,i)=>{ const l = S.blocks[d.cardKeys[i]].trim(); return "Card: "+t+(l?"\n"+l:""); }).join("\n\n");
+  d.cards = d.cardTitles.map((t,i)=>{ const l = blk(d.cardKeys[i]).trim(); return "Card: "+t+(l?"\n"+l:""); }).join("\n\n");
   d.quoteLine = f.quote ? `“${f.quote}” – ${f.artist}` : "";
   d.addWhat = d.plural ? d.aUnit : d.workEmail;
   d.framingWelcome = f.framing_code ? `As a welcome gesture, enjoy ${f.framing_percent}% off our in-house framing on your first purchase using the code ${f.framing_code} at checkout.` : "";
   d.framingRemind  = f.framing_code ? `As a reminder, you can enjoy ${f.framing_percent}% off our in-house framing on your first purchase using the code ${f.framing_code} at checkout.` : "";
   // the opener frame: what the system supplies, either side of the writer's words
-  d.workIntro = ((+f.works)===1 && titles.length ? `${f.title_1}, ` : "") + f.edition_phrase;
+  d.workIntro = (n === 1 && titles.length ? `${f.title_1}, ` : "") + f.edition_phrase;
   d.untitled = n - titles.length;   // artworks still waiting for a title
   return d;
 }
@@ -468,7 +468,7 @@ function outputs(){
 
 // where does a block land, and what sits either side of it there?
 function placements(key){
-  const text = S.blocks[key].trim();
+  const text = blk(key).trim();
   if (!text && key !== "qualifier") return [];
   const o = outputs(), hits = [];
   const scan = (list, kind) => list.forEach(x => {
@@ -532,7 +532,7 @@ function spec(k){
   return SPEC[k];
 }
 function checks(key){
-  const t = S.blocks[key].trim(), out = [], low = t.toLowerCase(), f = S.facts;
+  const t = blk(key).trim(), out = [], low = t.toLowerCase(), f = S.facts;
   if (key === "qualifier" && D().support)
     return [{k:"good", t:`Filled by the release details: “${D().support.replace(/^,\s*/, "")}”. Nothing to write here.`}];
   if (!t) {
@@ -568,7 +568,7 @@ function checks(key){
     if (key.startsWith("card_")) {
       const d = D();
       if (d.cardTitles.length > 1 && /limited edition/.test(low)) out.push({k:"warn", t:"“limited edition” on a card. With several works it reads as filler under each one — the edition is described above the cards."});
-      if (d.cardKeys.some(o => o !== key && S.blocks[o].trim().toLowerCase() === low)) out.push({k:"warn", t:"The same line as another card."});
+      if (d.cardKeys.some(o => o !== key && blk(o).trim().toLowerCase() === low)) out.push({k:"warn", t:"The same line as another card."});
     }
   }
   if (!out.length) out.push({k:"good", t:`Clean. ${words} word${words===1?"":"s"}, ${placements(key).length} places.`});
@@ -624,7 +624,7 @@ const PH = {
 function fld(k){
   const cls = k==="qualifier" ? " in" : k.startsWith("card_") ? " cd" : "";
   return `<span class="fld${cls}" contenteditable="true" spellcheck="true" role="textbox"`
-       + ` data-k="${k}" data-ph="${esc(PH[k]||PH.card)}" aria-label="${esc(spec(k).name)}">${esc(S.blocks[k])}</span>`;
+       + ` data-k="${k}" data-ph="${esc(PH[k]||PH.card)}" aria-label="${esc(spec(k).name)}">${esc(blk(k))}</span>`;
 }
 function renderWrite(){
   const need = missing();
@@ -825,7 +825,7 @@ async function proofread(k){
 `You are proofreading one fragment of copy for Avant Arte, a publisher of limited edition artworks. The same fragment is reused across a campaign, so it has to work in every place it lands.
 
 THE FRAGMENT — the "${spec(k).name}":
-${S.blocks[k] || "(empty)"}
+${blk(k) || "(empty)"}
 
 WHAT IT IS FOR: ${spec(k).rule}
 
@@ -852,25 +852,23 @@ Reply with JSON only, no other text:
 // a field that only one mechanic uses
 const draw = () => S.facts.mechanic === "draw";
 const timed = () => !draw();
-// one title box at a time: the next appears once the one before it is filled,
-// so a single work shows one box rather than three, and nothing implies you
-// have to fill them. The count of works is a separate number, because a set of
-// four sold together, or one image in four colourways, is one titled artwork.
+// how many artworks the release holds is the only count: it decides how many
+// title boxes are asked for, how many cards the emails carry, and the plural
+// wording. There is no second number.
 const has = k => !!String(S.facts[k] ?? "").trim();
-const titleShown = i => i <= (+S.facts.artworks || 1);
-// the commonest surprise on this screen: three works, one title, one card
+const blk = k => S.blocks[k] ?? "";       // cards are created as the release grows
+const rows = sec => typeof sec.f === "function" ? sec.f() : sec.f;
+// what the count produces downstream, said as it is typed
 function cardNote(){
-  const d = D(), n = d.artworks, w = +S.facts.works || 1, card = k => k === 1 ? "1 card" : k + " cards";
-  if (d.series) return `Untitled works from one series: ${card(1)}, headed “Untitled”.`;
+  const d = D(), n = d.artworks, card = k => k === 1 ? "1 card" : k + " cards";
+  if (d.series) return `Untitled works from one series: ${card(1)}, headed “Untitled”, and the series name in the headline.`;
   const many = `${n} artwork${n===1?"":"s"}`;
   if (d.untitled === n) return `${many}, so ${card(n)} once ${n===1?"it is":"they are"} titled.`;
   if (d.untitled) return `${many}, so ${card(n)} — ${d.untitled === 1 ? "one still needs" : d.untitled + " still need"} a title.`;
-  const cards = `${many}, so ${card(n)}`;
-  if (w === n) return cards + ".";
-  if (w > n) return cards + (n === 1
-    ? `. ${w} in the edition under that one title: a set sold together, or one image in several colourways.`
-    : `, across ${w} pieces in the edition.`);
-  return `${cards}, but only ${w} in the edition. There cannot be fewer of those than artworks.`;
+  const head = d.workEmail.length;
+  return `${many}, so ${card(n)}.` + (head > 90
+    ? ` The headline names all ${n}, which runs to ${head} characters: consider one collective title, or the series option.`
+    : "");
 }
 const FORM = [
   {g:"The collaboration", d:"Who it is with, and how they are named. The works are always “by” the artist; the collaboration may be with an estate or a trust.", f:[
@@ -883,14 +881,17 @@ const FORM = [
     ["link","Release link","text","Used in tweets"],
     ["advisor","Advisor","select","Sam|Curtis|Sofiya"]
   ]},
-  {g:"The artworks", d:"How many distinct artworks this release holds. Each gets its own title, its own card in the emails, and its own name in the headline. More than three: give them one collective title and count them as one. The second number is different — four prints under a single title is four in the edition, but one artwork.", live:cardNote, f:[
-    ["artworks","How many artworks","select","1|2|3"],
-    ["works","How many in the edition","select","1|2|3|4|5|6|7|8|9|10|12"],
-    ["is_series","All untitled, from one named series","select","no|yes"],
-    ["title_1","First artwork","text","Exactly as it is titled"],
-    ["title_2","Second artwork","text","", () => titleShown(2)],
-    ["title_3","Third artwork","text","", () => titleShown(3)]
-  ]},
+  {g:"The artworks", d:"How many the release holds, and what each is called. Every artwork gets its own title, its own card in the emails and its own name in the headline. Where they are untitled works from one named series, say so and the series stands in for all of them.", live:cardNote, f: () => {
+    const n = D().artworks, series = S.facts.is_series === "yes";
+    return [
+      ["artworks","How many artworks","number","Each one gets a card in the emails"],
+      ["is_series","All untitled, from one named series","select","no|yes"],
+      ...(series
+        ? [["title_1","The series name","text","One card, headed “Untitled”"]]
+        : Array.from({length: n}, (_, i) =>
+            ["title_" + (i+1), n === 1 ? "Title" : `Artwork ${i+1}`, "text", i === 0 ? "Exactly as it is titled" : ""]))
+    ];
+  }},
   {g:"The edition", d:"The edition phrase is the one that travels: it appears in the opener, the status lines and the footers, so it is written once here.", f:[
     ["edition_phrase","Edition phrase","text","e.g. a quartet of new limited edition embroideries"],
     ["unit","One of them is called a","text","print, embroidery, sculpture"],
@@ -921,8 +922,8 @@ function renderFacts(){
       <p>The facts. Everything the copy states about dates, names, counts and codes comes from here, so it is stated once and cannot drift between a post and an email.</p>
     </div>
     ${FORM.map(sec=>`<fieldset><legend>${esc(sec.g)}</legend><p>${esc(sec.d)}</p>
-      <div class="grid${sec.f[0][2]==="textarea"?" wide":""}">
-      ${sec.f.map(r=>{
+      <div class="grid${rows(sec)[0][2]==="textarea"?" wide":""}">
+      ${rows(sec).map(r=>{
         const [k,lab,type,hint] = r;
         const v = S.facts[k] ?? "";
         const ctl = type==="select"
@@ -938,10 +939,13 @@ function renderFacts(){
     S.facts[k] = e.target.type === "number" ? (+e.target.value||0) : e.target.value;
     // there cannot be fewer works than titled artworks, so adding a title raises
     // the count. Raising it further by hand is the set-under-one-title case.
-    // the edition can never hold fewer pieces than it has artworks
-    if (k === "artworks" && (+S.facts.works||0) < +S.facts.artworks) {
-      S.facts.works = +S.facts.artworks;
-      const w = $("#f_works"); if (w) w.value = S.facts.works;
+    // these two decide how many title boxes there are, so the group is rebuilt
+    if (k === "artworks" || k === "is_series") {
+      const el0 = e.target, pos = el0.selectionStart;
+      renderFacts(); crumb(); $("#aside").innerHTML = asideFacts();
+      const el = $(`#f_${k}`);
+      if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch (_) {} }
+      return;
     }
     crumb(); syncFields(); $("#aside").innerHTML = asideFacts();
   }));
@@ -949,7 +953,7 @@ function renderFacts(){
 }
 // the form changes shape as it is filled in, without being rebuilt under the cursor
 function syncFields(){
-  FORM.forEach(sec => sec.f.forEach(r => {
+  FORM.forEach(sec => rows(sec).forEach(r => {
     if (!r[4]) return;
     const el = $(`#main label[data-field="${r[0]}"]`);
     if (el) el.hidden = !r[4]();
@@ -960,7 +964,7 @@ function syncFields(){
   });
   $("#nfacts").textContent = shownFields();
 }
-const shownFields = () => FORM.reduce((n,s)=>n+s.f.filter(r=>!r[4]||r[4]()).length,0);
+const shownFields = () => FORM.reduce((n,s)=>n+rows(s).filter(r=>!r[4]||r[4]()).length,0);
 function asideFacts(){
   const need = missing();
   if (need.length) return `<div class="panel"><span class="lbl">From these facts</span><h2>What the frame needs</h2>

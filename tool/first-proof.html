@@ -342,6 +342,7 @@ function D(){
   d.hookNamesBen = !!(f.beneficiary && S.blocks.hook.toLowerCase().includes(f.beneficiary.toLowerCase()));
   d.support = (f.beneficiary && !d.hookNamesBen) ? `, released in support of ${f.beneficiary}` : "";
   d.benTagged = f.beneficiary ? f.beneficiary + (f.beneficiary_handle ? ` (@${f.beneficiary_handle})` : "") : "";
+  d.bioTagged = (!f.bio || !f.artist || !f.handle || f.bio.includes("@"+f.handle)) ? (f.bio||"") : f.bio.replace(f.artist, `${f.artist} (@${f.handle})`);
   d.feats = [f.f1,f.f2,f.f3,f.f4,f.f5].filter(Boolean);
   d.featLine = d.feats.join(". ") + ".";
   d.featList = d.feats.map(x=>"· "+x).join("\n");
@@ -650,7 +651,7 @@ function render(){
   if (S.view === "write") { renderWrite(); renderAside(); }
   else if (S.view === "facts") { renderFacts(); $("#aside").innerHTML = asideFacts(); }
   else if (S.view === "page") { renderPage(); renderPageAside(); }
-  else { renderOut(); $("#aside").innerHTML = missing().length ? asideFacts() : asideOut(); }
+  else { renderOut(); $("#aside").innerHTML = missing().length ? asideFacts() : asideOut(); if (!missing().length) notionPanel(); }
 }
 
 // ---------- write: nothing to write against until the frame stands up ----------
@@ -777,6 +778,7 @@ function caret(el){
 function onField(el){
   S.blocks[el.dataset.k] = el.innerText.replace(/\s+/g," ").trim();
   delete S.from[el.dataset.k];                       // edited, so it is the writer's now
+  S.server = {};                                     // the templates will need to run again
   // deleting the last word can leave a stray <br>, which loses :empty and the
   // placeholder with it. Clear it out and put the caret back.
   if (!el.textContent.trim() && el.innerHTML !== "") { el.innerHTML = ""; caret(el); }
@@ -874,14 +876,39 @@ function renderAI(r){
     (r.issues||[]).map(i=>`<div class="chk" data-k="warn"><s></s><span><b>${esc(i.where||"")}</b> ${esc(i.note||"")}${i.fix?`<br><em>Try:</em> ${esc(i.fix)}`:""}</span></div>`).join("");
 }
 
+// Inside claude.ai the page asks Claude directly; served from its own server it asks the
+// server, which holds the key. The prompt and the JSON shape are the same either way.
+const HTTP = location.protocol.startsWith("http");
+let SERVED = false;                                  // true once /api/health has answered: app.py is serving the page
+async function aiJSON(prompt, schema){
+  if (typeof claude !== "undefined") {
+    const sample = await claude.use("sample");
+    if (!sample) throw {code:"not_granted"};
+    return sample.json(prompt, {modelTier:"default"});
+  }
+  if (!SERVED) throw {code:"unavailable"};
+  const r = await fetch("/api/claude", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({prompt, schema})});
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw {code: r.status === 503 ? "not_configured" : "server", message: j.error || r.statusText};
+  return j.result;
+}
+const AI_ERR = e => (e && e.code === "not_granted") ? "Claude was not allowed to run here."
+  : (e && e.code === "not_configured") ? (e.message || "Claude is not set up on this server.")
+  : (e && e.message) ? e.message : "Could not reach Claude just now.";
+const SCHEMA_PROOF = {type:"object", additionalProperties:false, required:["verdict","summary","issues"], properties:{
+  verdict:{type:"string", enum:["good","fix"]}, summary:{type:"string"},
+  issues:{type:"array", items:{type:"object", additionalProperties:false, required:["where","note","fix"], properties:{where:{type:"string"}, note:{type:"string"}, fix:{type:["string","null"]}}}}}};
+const FRAG = {type:"object", additionalProperties:false, required:["text","from"], properties:{text:{type:["string","null"]}, from:{type:"string"}}};
+const SCHEMA_SUGGEST = {type:"object", additionalProperties:false, required:["hook","making","qualifier","cards","notes"], properties:{
+  hook:FRAG, making:FRAG, qualifier:FRAG,
+  cards:{type:"array", items:{type:"object", additionalProperties:false, required:["title","text","from"], properties:{title:{type:"string"}, text:{type:["string","null"]}, from:{type:"string"}}}},
+  notes:{type:"array", items:{type:"string"}}}};
 async function proofread(k){
   S.ai[k] = {busy:true}; renderAside();
   try{
-    const sample = await claude.use("sample");
-    if (!sample) throw new Error("unavailable");
     const hits = placements(k);
     const ctx = hits.map((h,i)=>`${i+1}. ${h.kind} · ${h.name}\n${h.before?h.before+"\n\n":""}>>> ${h.line}\n${h.after?"\n"+h.after:""}`).join("\n\n");
-    const res = await sample.json(
+    const res = await aiJSON(
 `You are proofreading one fragment of copy for Avant Arte, a publisher of limited edition artworks. The same fragment is reused across a campaign, so it has to work in every place it lands.
 
 THE FRAGMENT, the "${spec(k).name}":
@@ -900,10 +927,10 @@ Be sparing. Only report real problems a careful editor would raise. Ignore matte
 
 Reply with JSON only, no other text:
 {"verdict":"good"|"fix","summary":"one short sentence","issues":[{"where":"the place, or 'everywhere'","note":"one sentence","fix":"a suggested rewrite, or null"}]}`,
-      {modelTier:"default"});
+      SCHEMA_PROOF);
     S.ai[k] = {res};
   }catch(e){
-    S.ai[k] = {err: (e && e.code === "not_granted") ? "Claude was not allowed to run here." : "Could not reach Claude just now. The mechanical checks above still apply."};
+    S.ai[k] = {err: AI_ERR(e) + " The mechanical checks above still apply."};
   }
   renderAside();
 }
@@ -1036,7 +1063,7 @@ function renderPageAside(){
   const use = key => {
     const r = key.startsWith("card_") ? (sg.res.cards||[])[+key.slice(5)-1] : sg.res[key];
     if (!r || !(r.text||"").trim()) return;
-    S.blocks[key] = r.text.trim(); S.from[key] = "page"; S.ai[key] = undefined;
+    S.blocks[key] = r.text.trim(); S.from[key] = "page"; S.ai[key] = undefined; S.server = {};
   };
   $("#aside").querySelectorAll("[data-use]").forEach(b => b.onclick = () => { use(b.dataset.use); renderPageAside(); });
   const ua = $("#useall"); if (ua) ua.onclick = () => { ["hook","making","qualifier",...D().cardKeys].forEach(use); renderPageAside(); };
@@ -1082,12 +1109,10 @@ Reply with JSON only:
 async function suggest(){
   S.suggest = {busy:true}; renderPage(); renderPageAside();
   try{
-    const sample = (typeof claude !== "undefined") ? await claude.use("sample") : null;
-    if (!sample) throw new Error("unavailable");
-    const res = await sample.json(suggestPrompt(), {modelTier:"default"});
+    const res = await aiJSON(suggestPrompt(), SCHEMA_SUGGEST);
     S.suggest = {res};
   }catch(e){
-    S.suggest = {err: (e && e.code === "not_granted") ? "Claude was not allowed to run here." : "Could not reach Claude just now. The pages are unchanged; try again in a moment."};
+    S.suggest = {err: AI_ERR(e) + " The pages are unchanged."};
   }
   renderPage(); renderPageAside();
 }
@@ -1181,6 +1206,7 @@ function renderFacts(){
   $("#main").querySelectorAll("[data-f]").forEach(el => el.addEventListener("input", e => {
     const k = e.target.dataset.f;
     S.facts[k] = e.target.type === "number" ? (+e.target.value||0) : e.target.value;
+    S.server = {};
     // there cannot be fewer works than titled artworks, so adding a title raises
     // the count. Raising it further by hand is the set-under-one-title case.
     // these two decide how many title boxes there are, so the group is rebuilt
@@ -1229,6 +1255,67 @@ function asideFacts(){
 }
 
 // ---------- everything else ----------
+// Served from its own server, the final copy comes from the same templates as the command
+// line, validated. The page's own assembly is then a preview, and is checked against them.
+S.server = S.server || {};
+async function serverRender(){
+  if (!SERVED || missing().length) return;
+  const stamp = JSON.stringify({f:S.facts, b:S.blocks, p:S.page, l:S.lead});
+  if (S.server.stamp === stamp && S.server.out) return S.server.out;
+  S.server.busy = true;
+  try {
+    const r = await fetch("/api/render", {method:"POST", headers:{"content-type":"application/json"},
+      body: JSON.stringify({facts:S.facts, blocks:S.blocks, page:S.page, lead:S.lead})});
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.statusText);
+    S.server = {stamp, out: j, busy:false};
+  } catch (e) { S.server = {stamp, err: String(e.message || e), busy:false}; }
+  return S.server.out;
+}
+let HEALTH;                                          // the one probe, shared
+function serverHealth(){
+  if (!HTTP) return Promise.resolve(null);
+  HEALTH ??= fetch("/api/health", {cache:"no-store"}).then(r => r.ok ? r.json() : null).catch(() => null)
+    .then(h => { S.health = h && h.ok ? h : null; SERVED = !!S.health; return S.health; });
+  return HEALTH;
+}
+const norm = t => (t || "").split(/\s+/).join(" ").trim();
+// an item's name as the plan and the page both spell it: "Early Access (TL Insiders), signed by the advisor"
+// and "Early Access (Insiders), signed by the advisor" are one key; "Now live" and "live" too
+const NKEY = {announcement:"announce", "now live":"live", "sustain the making":"sustain"};
+const nkey = n => { const k = (n||"").toLowerCase().replace(/\b(tl|le) /g, "").replace(/ non flow\)/g, ")").replace(/[,·]/g, " ").replace(/\s+/g, " ").trim(); return NKEY[k] || k; };
+const nkeys = n => [nkey(n), ...(n||"").split(" · ").map(nkey)];
+// the server's item for one of the page's, by name
+function pairUp(mine, srv){
+  const left = srv.slice();
+  const pairs = mine.map(x => { const ks = nkeys(x.n); const i = left.findIndex(a => ks.includes(nkey(a.name))); return {x, a: i < 0 ? null : left.splice(i, 1)[0]}; });
+  return {pairs, extra: left};
+}
+// the page's email is the body copy; the templates' carries the HubSpot markers around it
+const MARK = /^\[(SUBJECT|PREVIEW|FOOTER|QUOTE|QUOTE ATTRIBUTION|PARAGRAPH)\]/;
+// line by line: a paragraph is one line in both, and the image-led emails are only marker lines
+function emailParas(text, page){
+  const t = page ? text.replace(/^Card: /gm, "[CARD] ").replace(/^Kicker: /gm, "[KICKER] ").replace(/^Headline: /gm, "[HEADLINE] ").replace(/^CTA: /gm, "[CTA] ") : text;
+  return t.split("\n").map(norm).filter(l => l && !MARK.test(l) && l !== "[BODY]" && l !== "[FEATURES]" && l !== "No body: this one is image-led.");
+}
+function parity(out){
+  const o = outputs(), sets = [["ig-set", o.posts], ["twitter-set", o.tweets], ["email-set", o.emails]];
+  const diffs = [];
+  let n = 0, extra = 0;                              // extra: items only the templates make, shown as theirs
+  sets.forEach(([set, mine]) => {
+    const {pairs} = pairUp(mine.filter(x => !x.t.startsWith("—")), out.outputs[set] || []);
+    pairs.forEach(({x, a}) => {
+      n++;
+      if (!a) { diffs.push(`${set} · ${x.n}: the templates have no item for it`); return; }
+      if (set !== "email-set") { if (norm(a.text) !== norm(x.t)) diffs.push(`${set} · ${a.name}: differs from the page's`); return; }
+      const mineP = emailParas(x.t, true), srvP = emailParas(a.text, false), srvSet = new Set(srvP), mineSet = new Set(mineP);
+      const gone = mineP.filter(p => !srvSet.has(p)), added = srvP.filter(p => !mineSet.has(p) && !/^\[(KICKER|HEADLINE|CTA)\]/.test(p));
+      if (gone.length || added.length) diffs.push(`${set} · ${a.name}: ${gone.map(p => `the page says “${p.slice(0, 60)}…”`).concat(added.map(p => `the templates add “${p.slice(0, 60)}…”`)).join("; ")}`);
+    });
+    extra += pairUp(mine, out.outputs[set] || []).extra.filter(a => a.text.trim()).length;
+  });
+  return {n, diffs, extra};
+}
 function renderOut(){
   if (missing().length) {
     $("#main").innerHTML = `
@@ -1243,6 +1330,17 @@ function renderOut(){
     return;
   }
   const o = outputs();
+  if (SERVED && !S.server.out && !S.server.err) { serverRender().then(() => { if (S.view === "out") render(); }); }
+  const srv = S.server.out, band = !SERVED ? "" : srv
+    ? (() => { const pv = parity(srv); return `<p class="live" id="band">Rendered by the templates on the server${srv.errors.length ? `: <b>${srv.errors.length} validator error${srv.errors.length===1?"":"s"}</b>` : ", validator clean"}${srv.warnings.length ? `, ${srv.warnings.length} warning${srv.warnings.length===1?"":"s"}` : ""}. The page's own assembly ${pv.diffs.length ? `<b>differs in ${pv.diffs.length}</b> of ${pv.n} items.` : `matches all ${pv.n} items.`}${pv.extra ? ` ${pv.extra} more come from the templates only.` : ""}</p>`
+        + ((srv.errors.length || srv.warnings.length || pv.diffs.length) ? `<details class="out"><summary><b>Detail</b></summary><pre>${esc([...srv.errors.map(x=>"error: "+x), ...srv.warnings.map(x=>"warning: "+x), ...pv.diffs.map(x=>"assembly: "+x)].join("\n"))}</pre></details>` : ""); })()
+    : S.server.err ? `<p class="live">The server could not render this release: ${esc(S.server.err)}. Showing the page's own assembly.</p>`
+    : `<p class="live">Rendering on the server…</p>`;
+  // when the server has rendered, its text is the copy; the page's lists keep their names and channel tags
+  const withServer = (mine, set) => { if (!srv) return mine; const {pairs, extra} = pairUp(mine.filter(x => !x.t.startsWith("—")), srv.outputs[set] || []);
+    const by = new Map(pairs.filter(p => p.a).map(p => [p.x, p.a.text]));
+    return mine.map(x => by.has(x) ? Object.assign({}, x, {t: by.get(x)}) : x).concat(extra.filter(a => a.text.trim()).map(a => ({n: a.name, use: "from the templates", t: a.text}))); };
+  const posts = withServer(o.posts, "ig-set"), tweets = withServer(o.tweets, "twitter-set"), emails = withServer(o.emails, "email-set");
   const block = (title, note, list, meta) => `<div class="groupline"><span class="lbl">${esc(title)}</span></div>
     <p class="note" style="max-width:60ch;margin:0 0 14px">${esc(note)}</p>
     ${list.map(x=>`<details class="out"><summary><b>${esc(x.n)}</b>${x.ch?`<span class="note">${esc(x.ch)}</span>`:""}${x.use?`<span class="note">${esc(x.use)}</span>`:""}<i>${x.t.startsWith("—")?"not used":(meta?x.t.length+" chars":"")}</i></summary><pre>${x.t.startsWith("—")?`<span class="na">${esc(x.t)}</span>`:esc(x.t)}</pre></details>`).join("")}`;
@@ -1252,9 +1350,10 @@ function renderOut(){
       <h1>Everything else</h1>
       <p>Built from the fragments and the details. If a line is wrong, fix the fragment or the fact it came from.</p>
     </div>
-    ${block("Instagram", "Insiders posts the same caption; the plan says which.", o.posts, true)}
-    ${block("Twitter", "Status line with the X handle, the hook on the announcement, an action line ending in the link.", o.tweets, true)}
-    ${block("Email", "Body copy only. Subject, preview, kicker and headline are on the writing screen.", o.emails, false)}`;
+    ${band}
+    ${block("Instagram", "Insiders posts the same caption; the plan says which.", posts, true)}
+    ${block("Twitter", "Status line with the X handle, the hook on the announcement, an action line ending in the link.", tweets, true)}
+    ${block("Email", srv ? "Whole emails, with the HubSpot module markers." : "Body copy only. Subject, preview, kicker and headline are on the writing screen.", emails, false)}`;
 }
 function asideOut(){
   const o = outputs(), live = o.emails.filter(e=>!e.t.startsWith("—")).length;
@@ -1271,6 +1370,47 @@ function asideOut(){
   <section><h3>Still by hand</h3>
   <p class="note">Deep dives, sustain posts, the rest of the Monthly Preview, past-works carousels, games, exhibition news and the artist's own email.</p>
   </section></div>`;
+}
+
+// ---------- Notion: the plan's rows for this campaign, and the copy written into them ----------
+S.notion = S.notion || {};
+async function notionPanel(){
+  const h = await serverHealth(); if (!h || !h.notion || S.view !== "out") return;
+  const f = S.facts, N = S.notion;
+  N.campaign ??= `${f.artist} - ${f.title_1 || ""}`.trim();
+  const rows = N.rows || [], srv = S.server.out;
+  const items = !srv ? [] : [
+    ...(srv.outputs["ig-set"]||[]).map(x => ({channel:"ig", name:x.name, text:x.text})),
+    ...(srv.outputs["twitter-set"]||[]).map(x => ({channel:"twitter", name:x.name, text:x.text})),
+    ...(srv.outputs["email-set"]||[]).filter(x => x.text.trim()).map(x => ({channel:"email", name:x.name, text:x.text}))];
+  const html = `<section><h3>Notion</h3>
+    <label><span>Campaign, as named in the plan</span><input id="ncamp" type="text" value="${esc(N.campaign)}"></label>
+    <button class="act" id="ncheck"${N.busy?" disabled":""}>${N.busy ? "…" : "Check the plan"}</button>
+    ${N.err ? `<p class="note">${esc(N.err)}</p>` : ""}
+    ${N.rows ? `<p class="note">${rows.length} rows for this campaign${rows.length ? `; ${rows.filter(r=>r.has_copy).length} already carry copy` : ""}.</p>
+      ${rows.length ? `<details class="out"><summary><b>Rows</b></summary><pre>${esc(rows.map(r=>`${r.channel} · ${r.name}${r.has_copy?"  (has copy)":""}`).join("\n"))}</pre></details>
+      <button class="act" id="npush"${(N.busy||!srv)?" disabled":""}>Write ${items.length} items into Copy</button>
+      <p class="note">Writes the templates' text into each matching row's Copy field, overwriting what is there. Unmatched items are listed, not written.</p>` : ""}` : ""}
+    ${N.result ? `<p class="note">Written: ${N.result.written.length}. Unmatched: ${N.result.unmatched.length}.</p>
+      <details class="out"><summary><b>What happened</b></summary><pre>${esc([...N.result.written.map(w=>"wrote  "+w.channel+" · "+w.name), ...N.result.unmatched.map(u=>"no row  "+u.channel+" · "+u.name)].join("\n"))}</pre></details>` : ""}
+  </section>`;
+  const panel = $("#aside .panel"); if (!panel) return;
+  const old = $("#notion"); const wrap = old || document.createElement("div"); wrap.id = "notion"; wrap.innerHTML = html; if (!old) panel.appendChild(wrap);
+  $("#ncamp").oninput = e => { N.campaign = e.target.value; };
+  $("#ncheck").onclick = async () => {
+    N.busy = true; N.err = null; N.result = null; notionPanel();
+    try { const r = await fetch("/api/notion/rows", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({campaign:N.campaign})});
+          const j = await r.json(); if (!r.ok) throw new Error(j.error); N.rows = j.rows; }
+    catch (e) { N.err = String(e.message || e); N.rows = null; }
+    N.busy = false; notionPanel();
+  };
+  const push = $("#npush"); if (push) push.onclick = async () => {
+    N.busy = true; N.err = null; notionPanel();
+    try { const r = await fetch("/api/notion/push", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({campaign:N.campaign, items})});
+          const j = await r.json(); if (!r.ok) throw new Error(j.error); N.result = j; N.rows = null; }
+    catch (e) { N.err = String(e.message || e); }
+    N.busy = false; notionPanel();
+  };
 }
 
 // ═══════════════════════════════════════════════════ boot
@@ -1292,5 +1432,6 @@ $("#theme").onclick = () => {
   document.documentElement.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
 };
 addEventListener("resize", () => { if (S.view === "write") drawGutter(); });
+serverHealth().then(h => { if (h && S.view === "out") render(); });
 render();
 </script>

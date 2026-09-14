@@ -182,6 +182,10 @@ briefs/       one YAML per release: robert-longo-le-26 (draw), gregory-crewdson-
 templates/    ig-set (the Instagram feed set), email-set (the comms plan's emails), trns-printing, and the earlier single-email templates
 render.py     brief + template → text, with date, count and phrase filters
 validate.py   the mechanical rules
+app.py        the page served from a small server: the templates render it, Claude is called with a server-side key, Notion is read and written
+bridge.py     the page's state as a brief, and a rendered set split into the plan's items
+notion.py     the comms plan in Notion: find the campaign's rows, write each item's Copy
+render.yaml   the Render blueprint; requirements.txt, what it installs
 prompts/      the AI slot contract
 docs/         the taxonomy of your emails, the voice rules with evidence, the brief checklist, the comms plan item by item, what the framework covers and what it never will
 out/          the three campaigns rendered, so you can compare with what was sent
@@ -249,6 +253,40 @@ Each rendered file carries the HubSpot internal name in your convention, the sub
 preview text, and the body with module boundaries marked (`[KICKER]`, `[BODY]`, `[CTA]`,
 `[CARD]`, `[QUOTE]`, `[FOOTER]`, `[SMART CONTENT]`) so it maps onto your HubSpot template
 one block at a time.
+
+**Running it on Render.** `app.py` serves the same page from a small Flask server, so it runs
+outside claude.ai and can reach Notion. Served that way, the Everything else screen is rendered
+by the templates in `templates/` and checked by `validate.py`, exactly as the command line does.
+The page's own assembly is then compared against the templates' text item by item, and the band
+at the top of the screen says whether they agree and lists any difference; the product pages
+count as the release's facts, so a number or a name that is on the page passes the validator.
+Claude is called from the server, with a key that never reaches the browser. When Notion is
+configured, a panel on the right reads the comms plan's rows for the campaign, shows which
+already carry copy, and writes each item's text into its row's Copy field.
+
+`render.yaml` describes the service. On Render, create a Blueprint from this repository and set
+the variables it declares:
+
+```
+ANTHROPIC_API_KEY    for the two AI buttons; without it they say so and the checks still run
+NOTION_TOKEN         an internal integration; share the comms plan database with it in Notion
+NOTION_DATABASE_ID   the database's id, the 32 characters in its URL
+APP_PASSWORD         optional; if set, the whole app asks for it (any username)
+CLAUDE_MODEL         optional, default claude-opus-5
+```
+
+The plan's property names and types are read from the database rather than assumed. The
+defaults are "Campaign text" for the campaign, "Channel Name" for the channel and "Copy" for
+the copy; set `NOTION_PROP_CAMPAIGN`, `NOTION_PROP_CHANNEL` or `NOTION_PROP_COPY` if the
+database names them differently. Copy has to be a rich text property to be written. Items are
+matched to rows by channel and name: an Instagram caption goes to the Main and Insiders rows
+where the plan has both, an email that stands for two rows ("Now Live (TL Flow and Non-flow)")
+is written to both, and an item with no row is listed rather than written. Nothing is written
+until "Write … items into Copy" is pressed, and it overwrites what is there.
+
+Locally: `pip install -r requirements.txt`, copy `.env.example` to `.env` and fill in what you
+have (nothing is required), then `python3 app.py` and open http://127.0.0.1:8000. `.env` is
+ignored by git.
 
 How it would grow into the tool you described:
 

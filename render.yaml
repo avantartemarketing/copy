@@ -1,0 +1,22 @@
+# Render Blueprint: one web service. Set the secrets in the dashboard after the first deploy.
+services:
+  - type: web
+    name: first-proof
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 2 --timeout 120
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: NOTION_TOKEN
+        sync: false
+      - key: NOTION_DATABASE_ID
+        sync: false
+      - key: APP_PASSWORD
+        sync: false
+      - key: CLAUDE_MODEL
+        value: claude-opus-5

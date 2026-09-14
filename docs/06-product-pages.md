@@ -68,32 +68,50 @@ longer to assemble than the 127 words take to write. The gain is consistency, no
 
 ## 3. Can they feed the campaign? Yes, and this is the better direction
 
-The product page and the campaign are describing the same things in the same order. Testing the
-three releases where both exist, by word overlap between each campaign fragment and each paragraph:
+The product page and the campaign describe the same things. The material is there. **What is not
+there is a paragraph-to-fragment map** — an earlier draft of this note claimed one, and the three
+releases where both exist do not support it.
 
-| release | hook lands in | making lands in | card line lands in |
+**The hook sometimes sits in one paragraph and sometimes is spliced from two.** Word overlap between
+the hook and the best single paragraph, against the hook and the whole page:
+
+| release | best single paragraph | whole page | |
 |---|---|---|---|
-| Robert Longo, *Untitled (Sandy)* | paragraph 3 of 4 — 45% | paragraph 4 of 4 — 57% | paragraph 2 |
-| Gregory Crewdson, *Dream House* | paragraph 2 of 3 — 83% | paragraph 2 of 3 — 36% | paragraph 3 |
-| Glenn Ligon, *Stranger* | paragraph 2 of 3 — 48% | paragraph 3 of 3 — 33% | paragraph 2 |
+| Gregory Crewdson, *Dream House* | 82% | 85% | one paragraph, cleanly |
+| Glenn Ligon, *Stranger* | 48% | 54% | mostly one paragraph |
+| Robert Longo, *Untitled (Sandy)* | 42% | 73% | **spliced**: the figure from paragraph 2, "only the second time it has been editioned" from paragraph 3 |
 
-The hook is a compression of the work paragraph. The making line is a compression of the making
-paragraph. The card line and the `seoDescription` do the same job in the same register.
+**The making line often has no paragraph to come from.** Crewdson's page has no making paragraph at
+all — its third paragraph is atmosphere ("Meticulous, still and unsettling…"), and the email's making
+line was written from the facts in paragraph 2 plus house copy. Across all 415 pages:
 
-So the flow is:
+| | pages | |
+|---|---|---|
+| mentions how it was made, anywhere on the page | 78% | |
+| …and it is in the final paragraph | **51%** | so half the time the position is wrong |
+| `mediumDescription` filled in | 49% | the other source |
+| one or the other | 85% | |
+| **neither — nothing to write a making line from** | **14%** | 62 pages |
+
+So the flow is not a map. It is: give the model the whole page and the technique fields, and let it
+select.
 
 ```
-product page (written by a person, ~127 words)
-        │
-        ├── paragraph 2  ──▶  hook      (2–3 sentences, reaches 16 slots)
-        ├── paragraph 3  ──▶  making    (one sentence)
-        ├── seoDescription ─▶  card line (15–30 words)
-        └── mediumDescription, authentication ─▶ features, technique facts
+product page (written by a person, ~127 words)  ─┐
+mediumDescription, authentication               ─┤──▶  hook      (2–3 sentences, 16 slots)
+                                                 │      making    (one sentence, absent 14% of the time)
+                                                 └──▶  card line (15–30 words)
 ```
+
+`seoDescription` is the exception and is a true one-to-one: it does the card line's job in the card
+line's register, on every page that has a description.
 
 This is a far safer use of AI than writing the page. Everything it produces is a shortening of text
 a person has already written and approved, so it cannot invent a fact: the source text is the facts
 list. `validate.py` needs no change to police it — the page becomes the fact corpus for the release.
+
+The 14% with no making detail anywhere are the case to design for. There the model should say it has
+nothing rather than write around the gap, and the writer fills that one field by hand.
 
 It also fits what the tool already does. The write screen asks for the hook, the making line and a
 line per card. If the product page exists first, those three arrive as suggestions to accept or

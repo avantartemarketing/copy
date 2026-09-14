@@ -42,6 +42,7 @@ def from_brief(path):
         early_access_code=g(rel, "early_access_code", "000-000"), framing_code=g(rel, "framing_code"), framing_percent=int(g(rel, "framing_percent", 10)),
         feature_1=feats[0], feature_2=feats[1], feature_3=feats[2], feature_4=feats[3], feature_5=feats[4],
         bio=g(ctx, "artist_bio"), hook=ctx["hook"], making=ctx["making"], quote=g(art, "quote"), qualifier=g(ctx, "qualifier"),
+        card_line_1=g(aw[0], "card_line"), card_line_2="" if untitled or len(aw) < 2 else g(aw[1], "card_line"), card_line_3="" if untitled or len(aw) < 3 else g(aw[2], "card_line"),
     )
 
 
@@ -103,6 +104,9 @@ frags = [
     ("hook", V["hook"], "2 to 3 sentences about the work. Write it as editorially as you like; the one test is that it must read as well in the middle of an email as at the top of a post. Self-contained, no rhetorical question. It reaches 16 slots, so it is the one fragment that must stand alone."),
     ("qualifier", V["qualifier"], "a few words after the edition phrase in the email opener, e.g. spanning five decades of the artist's career. Ten words at most, a phrase not a sentence, no we or our, no artist name, no beneficiary. Blank for none."),
     ("making", V["making"], "one sentence on how the edition was made; write 'printmakers at Make-Ready' and the sheet adds 'our'."),
+    ("card_line_1", V["card_line_1"], "one sentence on the first work, 15 to 30 words, under its card in six emails. With several works, say something different about each: the edition is described above the cards, so do not call each one a limited edition print."),
+    ("card_line_2", V["card_line_2"], "the second titled work; blank otherwise"),
+    ("card_line_3", V["card_line_3"], "the third; blank otherwise"),
     ("quote", V["quote"], "verbatim, a complete sentence, or blank"),
 ]
 for k, v, note in frags:
@@ -114,7 +118,7 @@ B = lambda k: f"$B${R[k]}"
 derived = ["named", "named_x", "collab_x", "a_unit", "work", "Work", "work_email", "Work_email", "work_intro", "support", "beneficiary_tagged", "bio_tagged", "hook_names_beneficiary",
            "features", "features_list", "features_list_support", "making_ours", "making_ours_tagged",
            "launch_date", "launch_time", "launch_weekday", "launch_date_dd", "close_date", "close_time", "close_weekday", "close_date_dd",
-           "collect_phrase", "edition_phrase_cap", "window_cap", "card_line", "card", "quote_line", "each_artwork", "work_word", "add_what"]
+           "collect_phrase", "edition_phrase_cap", "window_cap", "card", "quote_line", "each_artwork", "work_word", "add_what"]
 for k in derived:
     R[k] = row; ws[f"A{row}"] = k; ws[f"A{row}"].font = ARIAL; ws[f"B{row}"].font = ARIAL; ws[f"B{row}"].alignment = WRAP; row += 1
 F = {
@@ -141,8 +145,7 @@ F = {
  "collect_phrase": f'=SUBSTITUTE({B("edition_phrase")}," new "," ",1)',
  "edition_phrase_cap": f'=UPPER(LEFT({B("edition_phrase")},1))&MID({B("edition_phrase")},2,999)',
  "window_cap": f'=UPPER(LEFT({B("window")},1))&MID({B("window")},2,999)',
- "card_line": f'=IF({B("title_2")}="",{B("edition_phrase_cap")},"A limited edition "&{B("unit")})&" by "&{B("artist")}&"."',
- "card": f'=IF({B("is_series")}="yes","Untitled",{B("title_1")})&{NL}&{B("card_line")}&IF({B("title_2")}="","",{PP}&"Card: "&{B("title_2")}&{NL}&{B("card_line")})&IF({B("title_3")}="","",{PP}&"Card: "&{B("title_3")}&{NL}&{B("card_line")})',
+ "card": f'=IF({B("is_series")}="yes","Untitled",{B("title_1")})&IF({B("card_line_1")}="","",{NL}&{B("card_line_1")})&IF({B("title_2")}="","",{PP}&"Card: "&{B("title_2")}&IF({B("card_line_2")}="","",{NL}&{B("card_line_2")}))&IF({B("title_3")}="","",{PP}&"Card: "&{B("title_3")}&IF({B("card_line_3")}="","",{NL}&{B("card_line_3")}))',
  "quote_line": f'=IF({B("quote")}="","","“"&{B("quote")}&"” – "&{B("artist")})',
  "each_artwork": f'=IF({B("works")}>1," for each artwork","")',
  "work_word": f'=IF({B("works")}>1,"works","work")',

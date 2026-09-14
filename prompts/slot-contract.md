@@ -15,8 +15,9 @@ SLOT: [hook | card_line | subject_hook | early_access_note | technique_sentence 
 TASK: [per slot, one of:]
 - hook: one or two sentences, 45 words at most, placing the artist and this work for a
   reader who follows contemporary art. Surname only; the full name is already used.
-- card_line: one sentence, 15 to 30 words, describing this one artwork. Mention that it is
-  a limited edition [print | sculpture | collectable] once.
+- card_line: one sentence, 15 to 30 words, describing this one artwork. When the release
+  has several works each card gets its own line, so say something different about each, and
+  do not call each one a limited edition print: the edition is described above the cards.
 - subject_hook: three to eight words that follow "[Artist] – " in a subject line. No verbs
   of urgency. No punctuation except an ampersand or quotation marks around a series name.
 - early_access_note: one to three sentences, 60 words at most, on why this particular

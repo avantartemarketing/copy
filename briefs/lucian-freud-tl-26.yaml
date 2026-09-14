@@ -52,6 +52,7 @@ edition:
 
 artworks:
   - title: Portraits, 1952–2002
+    card_line: "Four portraits across five decades, from Girl in Bed in 1953 to the late Self-Portrait (Reflection) of 2002, available individually, as pairs or as the complete quartet."   # BOUNDED: one sentence on this work, 15 to 30 words
     series: ""
     facts:
       - four works spanning five decades of Freud's portrait practice

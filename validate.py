@@ -208,6 +208,10 @@ def validate(text, brief):
             e, w = check_email(part)
             errors += e
             warnings += w
+    if "[CARD]" in text:                                             # a card with nothing under its title
+        for i, a in enumerate(brief.get("artworks") or []):
+            if not (a.get("card_line") or "").strip():
+                warnings.append(f"artworks.{i}.card_line: not written; the card shows its title and nothing else")
     for name, value in bounded_fields(brief):
         if value.strip() not in text:          # only the slots this email actually uses
             continue

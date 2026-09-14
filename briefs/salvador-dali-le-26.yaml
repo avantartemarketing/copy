@@ -49,12 +49,15 @@ edition:
 
 artworks:
   - title: The Spectre of Sex Appeal
+    card_line: "The human form made strange and architectural, a swollen body held up by crutches on an empty shore."   # BOUNDED: one sentence on this work, 15 to 30 words
     facts:
       - the human form becomes strange and architectural, supported by crutches
   - title: Millet's Architectonic Angelus
+    card_line: "Millet's painting of quiet piety rebuilt as two monumental stone forms; Dalí's original hangs in Madrid's Reina Sofía."   # BOUNDED: one sentence on this work, 15 to 30 words
     facts:
       - reimagines a 19th-century painting of quiet piety; the original hangs in Madrid's Reina Sofía
   - title: The Phantom Cart
+    card_line: "A wagon crossing an empty plain towards a distant city, its passengers and the city's towers merging into one shifting illusion."   # BOUNDED: one sentence on this work, 15 to 30 words
     facts:
       - a wagon and a distant city merge into one shifting illusion
 

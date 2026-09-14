@@ -48,6 +48,7 @@ edition:
 
 artworks:
   - title: Window
+    card_line: "The duct-taped banana of Comedian, transplanted from the gallery wall to a hyper-realistic landscape, in four silkscreen layers sealed with matte varnish."   # BOUNDED: one sentence on this work, 15 to 30 words
     facts:
       - reimagines Comedian against hyper-realistic natural landscapes
       - serene compositions of subtly absurd beauty

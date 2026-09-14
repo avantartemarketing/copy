@@ -50,6 +50,7 @@ edition:
 
 artworks:
   - title: I Love You
+    card_line: "Three words, as direct as Mesler gets, in a 9-colour split fountain silkscreen finished with metallic shimmer and high-gloss varnish, in a choice of four colourways."   # BOUNDED: one sentence on this work, 15 to 30 words
     series: ""
     facts:
       - a declaration of love, the colour of the text changing across the quartet

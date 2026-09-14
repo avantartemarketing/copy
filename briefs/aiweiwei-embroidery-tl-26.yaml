@@ -50,6 +50,7 @@ edition:
 
 artworks:
   - title: Self-Portrait Embroidery
+    card_line: "The artist's defiant self-portrait, first made in toy bricks in 2016, rendered in approximately 460,000 stitches and offered in four colour combinations."   # BOUNDED: one sentence on this work, 15 to 30 words
     series: ""
     facts:
       - pixelates an image of the artist with a shaved head and a scar

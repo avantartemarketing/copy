@@ -5,8 +5,9 @@ export (3,630 emails), looking for releases the framework cannot generate. For e
 was whether it could have been written differently so that it fits, or whether it will always be
 written by hand.
 
-The framework is: one skeleton per output set, four fragments per release (bio, hook, making,
-quote), a features list, and facts. Two mechanics, draw and timed. See the README.
+The framework is: one skeleton per output set, the fragments per release (bio, hook, qualifier,
+making, quote, and a line under each artwork's card), a features list, and facts. Two mechanics,
+draw and timed. See the README.
 
 ## The headline
 

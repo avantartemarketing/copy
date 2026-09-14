@@ -48,7 +48,9 @@ edition:
 
 artworks:
   - title: Untitled (White on White)
+    card_line: "Baldwin's words in white on white, the text dissolving into the surface until reading becomes an act of looking."   # BOUNDED: one sentence on this work, 15 to 30 words
   - title: Untitled (Black on Black)
+    card_line: "The same passage in black on black, coal dust and oil stick giving Baldwin's sentences a physical weight that resists easy reading."   # BOUNDED: one sentence on this work, 15 to 30 words
 
 context:
   artist_bio: "For more than two decades, Glenn Ligon has returned to James Baldwin's Stranger in the Village, building repeated passages into layered compositions that reward a closer look. His text-based paintings and prints have made him one of the defining conceptual artists of his generation."

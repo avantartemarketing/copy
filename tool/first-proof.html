@@ -531,10 +531,10 @@ const BANNED = ["don't miss out","miss out","hurry","act now","shop now","last c
 const US = {color:"colour",colors:"colours",realize:"realise",center:"centre",gray:"grey",favorite:"favourite",honor:"honour",catalog:"catalogue",program:"programme"};
 const SPEC = {
   qualifier:{ name:"Opener", sub:"a few words", max:10,
-    rule:"The frame is built from the release details. Pick how it opens, and add a few words about the work if the line reads bald without them. A phrase, not a sentence: it is reused by four other emails.",
-    full:"The frame is built from the release details. Pick how it opens. This release already gives $, so the line is not bald and blank is usually the right answer: more words would be a second thing hanging off the same dash. Add a few only for a fact that belongs here and nowhere else.",
-    taken:"The frame is built from the release details. Pick how it opens. There is nothing to write here: this release says what it supports, and that clause fills the opening in the sentence. Drop the beneficiary in the details, or name it in the hook, and the opening comes back.",
-    bald:"The frame is built from the release details. Pick how it opens. With more than one work the title drops out of this line, so it ends on the edition phrase and nothing else. This is where a few words about the work earn their place: a phrase, not a sentence, and it travels into four other emails."},
+    rule:"Pick how it opens. Add a few words only if the line reads bald without them: a phrase, not a sentence.",
+    full:"Pick how it opens. The line already gives $, so blank is usually right. Add words only for a fact that belongs nowhere else.",
+    taken:"Pick how it opens. “Released in support of…” fills the slot, so there is nothing to write. Name the beneficiary in the hook and the slot comes back.",
+    bald:"Pick how it opens. With several works the title drops out and the line ends on the edition phrase, so a few words earn their place: a phrase, not a sentence."},
   // what the frame already says, and so whether the writer's words are wanted
   openerCarries(){
     const d = D(), f = S.facts, has = [];
@@ -543,11 +543,11 @@ const SPEC = {
     return has;
   },
   hook:{ name:"Hook", sub:"yours",
-    rule:"Two to three sentences about the work. As editorial as you like: this is where the release sounds like itself. The one test: it must read as well in the middle of an email as at the top of a post.", max:70 },
+    rule:"Two or three sentences on the work, as editorial as you like. It must read as well mid-email as at the top of a post.", max:70 },
   making:{ name:"Making", sub:"yours",
-    rule:"One sentence on how the edition was made. Write “printmakers at Make-Ready” and the system adds “our” where it belongs.", max:45 },
+    rule:"One sentence on how it was made. Write “printmakers at Make-Ready”; the system adds “our”.", max:45 },
   card:{ name:"Card", sub:"yours",
-    rule:"One sentence on this one work, 15 to 30 words, under its card in six emails. With a pair or a trio each card gets its own line, so say something different about each. The edition is described above the cards, so there is no need to call each one a limited edition print.", max:30 }
+    rule:"One sentence on this work, 15 to 30 words. With several works, say something different about each; no need to call each one a limited edition print.", max:30 }
 };
 // the cards share one rule; the gutter labels the row, the aside names the card
 function spec(k){
@@ -570,13 +570,13 @@ function spec(k){
 function checks(key, text){
   const t = (text ?? blk(key)).trim(), out = [], low = t.toLowerCase(), f = S.facts;
   if (key === "qualifier" && D().support)
-    return [{k:"good", t:`Filled by the release details: “${D().support.replace(/^,\s*/, "")}”. Nothing to write here.`}];
+    return [{k:"good", t:`Filled by the details: “${D().support.replace(/^,\s*/, "")}”.`}];
   if (!t) {
     if (key !== "qualifier") return [{k:"warn", t:"Nothing written yet."}];
     const has = SPEC.openerCarries();
     return [has.length
-      ? {k:"good", t:`Nothing added, which is right: the opener already gives ${join(has)}.`}
-      : {k:"warn", t:"Nothing added, and with more than one work the opener names none of them: it ends on the edition phrase alone."}];
+      ? {k:"good", t:`Blank, rightly: the opener already gives ${join(has)}.`}
+      : {k:"warn", t:"Blank, and with several works the opener ends on the edition phrase alone."}];
   }
   const words = t.split(/\s+/).length;
   BANNED.forEach(b => { if (new RegExp("(?<![\\w-])"+b.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(?![\\w-])").test(low)) out.push({k:"warn", t:`Banned phrase: “${b}”`}); });
@@ -589,11 +589,11 @@ function checks(key, text){
   // the frame names the artist in full before any fragment lands, so inside one it is the surname
   const artist = (f.artist || "").trim();
   if (artist.split(/\s+/).length > 1 && t.includes(artist))
-    out.push({k:"warn", t:`“${artist}” in full. The frame has already named them by the time this lands, so the surname alone from here.`});
-  if (/(?<!\d)\s-\s(?!\d)/.test(t)) out.push({k:"warn", t:"A hyphen doing a dash's job. The house dash is a spaced en dash ( – ), and one at most."});
+    out.push({k:"warn", t:`“${artist}” in full. The frame has already named them: surname only.`});
+  if (/(?<!\d)\s-\s(?!\d)/.test(t)) out.push({k:"warn", t:"A hyphen as a dash. The house dash is a spaced en dash ( – )."});
   t.split(/(?<=[.!?])\s+/).forEach(sn => {
     if ((sn.match(/\s[–—-]\s/g) || []).length >= 2)
-      out.push({k:"warn", t:"An aside set between two dashes. It reads as machine-written: make it a sentence, or use commas."});
+      out.push({k:"warn", t:"An aside between two dashes reads as machine-written. Use commas or a new sentence."});
   });
   if (pageText().trim()) {
     const known = new Set((pageText() + " " + pages().map(x => (x.page.medium||"") + " " + (x.page.seo||"")).join(" ") + " " + S.page.authentication + " "
@@ -613,17 +613,17 @@ function checks(key, text){
     if (f.beneficiary && low.includes(f.beneficiary.toLowerCase())) out.push({k:"warn", t:"The frame adds “released in support of” on its own."});
     const n = openerText().split(/\s+/).length;
     if (f.beneficiary && !D().hookNamesBen)
-      out.push({k:"warn", t:`Two clauses after the dash now: your words, then “released in support of ${f.beneficiary}”. That is ${n} words; house openers sit between 22 and 27.`});
+      out.push({k:"warn", t:`Two clauses after the dash: yours, then “released in support of ${f.beneficiary}”. ${n} words; house openers run 22 to 27.`});
     else if (n > 28)
-      out.push({k:"warn", t:`The opener runs to ${n} words with these in it. House openers sit between 22 and 27.`});
+      out.push({k:"warn", t:`${n} words with these in. House openers run 22 to 27.`});
   } else {
-    if (t.includes("?")) out.push({k:"warn", t:"Rhetorical question. It assumes the reader is at the start, and most of the time this is a middle paragraph."});
+    if (t.includes("?")) out.push({k:"warn", t:"Rhetorical question, and this is usually a middle paragraph."});
     t.split(/(?<=[.!?])\s+/).forEach(s => { const n=s.split(/\s+/).length; if (n>35) out.push({k:"warn", t:`A sentence of ${n} words. The cap is 35.`}); });
     if (words > spec(key).max) out.push({k:"warn", t:`${words} words. Aim for under ${spec(key).max}.`});
-    if (key==="making" && !/Make-Ready/.test(t)) out.push({k:"warn", t:"No mention of Make-Ready. Fine if this edition was made elsewhere; the system just won't add “our”."});
+    if (key==="making" && !/Make-Ready/.test(t)) out.push({k:"warn", t:"No Make-Ready. Fine if made elsewhere; “our” won't be added."});
     if (key.startsWith("card_")) {
       const d = D();
-      if (d.cardTitles.length > 1 && /limited edition/.test(low)) out.push({k:"warn", t:"“limited edition” on a card. With several works it reads as filler under each one; the edition is described above the cards."});
+      if (d.cardTitles.length > 1 && /limited edition/.test(low)) out.push({k:"warn", t:"“limited edition” under each of several cards reads as filler."});
       if (d.cardKeys.some(o => o !== key && blk(o).trim().toLowerCase() === low)) out.push({k:"warn", t:"The same line as another card."});
     }
   }
@@ -663,8 +663,8 @@ function renderNotReady(need){
   $("#main").innerHTML = `
     <div class="head">
       <span class="lbl">Before you write</span>
-      <h1>The email is built around the release</h1>
-      <p>Every sentence you write here sits inside one the system supplies, and those are made from the details below. Fill in ${need.length === NEEDS.length ? "these" : `the ${need.length === 1 ? "one" : need.length} still missing`} and the announcement opens, ready to write into.</p>
+      <h1>The details first</h1>
+      <p>Fill in ${need.length === NEEDS.length ? "these" : `the ${need.length === 1 ? "one" : need.length} still missing`} and the email opens.</p>
     </div>
     <div class="sheet" style="padding:6px 22px 16px">
       ${todoHTML()}
@@ -676,7 +676,7 @@ function renderNotReady(need){
 // ---------- write: the email, with three fields in it and nothing else editable ----------
 const PH = {
   qualifier:" + a few words ",
-  hook:"What is this work? Two or three sentences, as editorial as you like.",
+  hook:"Two or three sentences on the work.",
   making:"How was it made? One sentence.",
   card:"A sentence on this work."
 };
@@ -701,10 +701,10 @@ function renderWrite(){
     <div class="head">
       <span class="lbl">Step three</span>
       <h1>The announcement email</h1>
-      <p>Everything you write is written once per release, and this is the natural place to write it: in the email it opens, with the rest already around it.</p>
+      <p>Written once, reused everywhere. Write it here, in the email it opens.</p>
       <div class="key">
-        <span><i></i> <span>Yours to write: the three paragraphs, and a line under each card. They seed every other post, tweet and email.</span></span>
-        <span><i class="fx"></i> <span>Built from the release details, the quote included. Fixed here, so a name or a date cannot drift between one email and the next.</span></span>
+        <span><i></i> <span>Yours: three paragraphs and a line per card. Everything else is built from them.</span></span>
+        <span><i class="fx"></i> <span>From the details. Fixed here.</span></span>
       </div>
     </div>
     <div class="sheet">
@@ -730,7 +730,7 @@ function renderWrite(){
           <p class="sig">${esc(d.draw?`Collect ${d.collectPhrase}`:`Launching ${d.launchDate}`)}</p>
         </div>
       </div>
-      <div class="foot" id="foot">Then: ${o.posts.length} posts, ${o.tweets.length} tweets and ${live} more emails come from what you write here.</div>
+      <div class="foot" id="foot">${o.posts.length} posts, ${o.tweets.length} tweets and ${live} more emails follow from these.</div>
     </div>`;
 
   wireFields($("#main")); wireLock($("#main"));
@@ -784,7 +784,7 @@ function onField(el){
   syncFrame();
   const o = outputs(), live = o.emails.filter(e=>!e.t.startsWith("—")).length;
   const foot = $("#foot");
-  if (foot) foot.textContent = `Then: ${o.posts.length} posts, ${o.tweets.length} tweets and ${live} more emails come from what you write here.`;
+  if (foot) foot.textContent = `${o.posts.length} posts, ${o.tweets.length} tweets and ${live} more emails follow from these.`;
   drawGutter(); renderAside();
 }
 // the opener's frame can move while you type: naming the beneficiary in the hook
@@ -826,10 +826,10 @@ function renderAside(){
   const need = missing();
   if (need.length) {
     $("#aside").innerHTML = `<div class="panel"><span class="lbl">Order of work</span><h2>Details, the page, then write</h2>
-      <p class="rule">The fragments are written once and reused everywhere, so they come last, when the frame around them is settled and the product page exists to draw on.</p>
+      <p class="rule">The fragments come last, once the frame and the page exist to draw on.</p>
       <section><h3>Then</h3>
-        <div class="chk" data-k="good"><s></s><span>Write the product page, and let Claude suggest the hook, the making line and a line per card from it.</span></div>
-        <div class="chk" data-k="good"><s></s><span>Accept or rewrite them in the announcement, where Claude reads each one in every place it lands.</span></div>
+        <div class="chk" data-k="good"><s></s><span>Write the product page; Claude suggests the fragments from it.</span></div>
+        <div class="chk" data-k="good"><s></s><span>Accept or rewrite them in the announcement.</span></div>
         <div class="chk" data-k="good"><s></s><span>The posts, tweets and the other emails assemble themselves.</span></div>
       </section></div>`;
     return;
@@ -842,7 +842,7 @@ function renderAside(){
 
     ${k === "qualifier" ? `<section><h3>How it opens</h3>
       ${LEADS.map((L,i)=>`<button class="opt" data-lead="${i}" aria-pressed="${i===S.lead}"><u>${esc(L.note)}</u>${esc(L.head(D()))}…</button>`).join("")}
-      <p class="note">The rest of the sentence is built from the release details. Your words sit inside it, and travel with it into the four emails below.</p>
+      <p class="note">The rest of the sentence is built from the details and travels into four emails.</p>
     </section>` : ""}
 
     <section><h3>Checks</h3>
@@ -850,14 +850,14 @@ function renderAside(){
       <button class="act" id="proof"${(ai&&ai.busy)?" disabled":""}>${ai&&ai.busy?"Reading…":"Proofread in all "+hits.length+" places"}</button>
       ${ai&&ai.err?`<p class="note">${esc(ai.err)}</p>`:""}
       ${ai&&ai.res?renderAI(ai.res):""}
-      <p class="note">The checks above are mechanical and run as you type. The button asks Claude to read the fragment in every place it lands and say where it does not sit well.</p>
+      <p class="note">These run as you type. The button has Claude read the fragment in every place it lands.</p>
     </section>
 
     <section><h3>Where it lands · ${hits.length}</h3>
       ${hits.length?hits.map(h=>`<div class="use">
         <h4>${esc(h.kind)} · ${esc(h.name)}</h4>
         <div class="q">${h.before?esc(trim(h.before))+"\n\n":""}<mark>${esc(trim(h.line))}</mark>${h.after?"\n\n"+esc(trim(h.after)):""}</div>
-      </div>`).join(""):`<p class="note">Nothing yet. Write the fragment and its uses appear here.</p>`}
+      </div>`).join(""):`<p class="note">Write the fragment and its uses appear here.</p>`}
     </section>
   </div>`;
 
@@ -922,8 +922,8 @@ function pageText(){ return pages().map(x => x.page.description || "").join("\n\
 function pageDiff(i){
   if (i === 0) return "";
   const a = paras(pageOf(0).description), b = paras(pageOf(i).description);
-  if (!b.length) return "Nothing written for this artwork yet.";
-  if (a.join("\n\n") === b.join("\n\n")) return "Identical to the first artwork's page. Nothing on it distinguishes this work, so its card line would have to be written by hand.";
+  if (!b.length) return "Nothing yet.";
+  if (a.join("\n\n") === b.join("\n\n")) return "Identical to the first artwork's page, so nothing here distinguishes this work.";
   const diff = b.map((x, j) => x !== (a[j] || "") ? j + 1 : 0).filter(Boolean);
   return diff.length ? `Differs from the first artwork's page in paragraph${diff.length > 1 ? "s" : ""} ${diff.join(", ")}.` : "";
 }
@@ -936,14 +936,14 @@ function pageStats(i){
 }
 function pageNote(i){
   const st = pageStats(i);
-  if (!st.words) return i ? pageDiff(i) : "Nothing written yet. The pages that went out ran to about 127 words in three or four paragraphs.";
+  if (!st.words) return i ? pageDiff(i) : "Nothing yet. Pages that went out ran to about 127 words.";
   const shape = `${st.words} words in ${st.paras} paragraph${st.paras===1?"":"s"}. ` + (i ? pageDiff(i) + " " : "");
-  return shape + (st.making ? "The pages say how the work was made, so the making line can be drawn from them."
-                            : "Neither the pages nor the medium fields say how the work was made, so the making line will need writing by hand.");
+  return shape + (st.making ? "Says how it was made."
+                            : "Neither this nor the medium field says how it was made; write the making line by hand.");
 }
 const PAGE_FIELDS = [
-  ["seo", "SEO line", "One sentence, about 25 words. Most open “Collect a … by …”"],
-  ["medium", "Medium description", "The technique in full. Sibling prints can differ here, and the making line has to be true of all of them"]
+  ["seo", "SEO line", "About 25 words; most open “Collect a … by …”"],
+  ["medium", "Medium description", "The technique in full; it can differ between artworks"]
 ];
 function renderPage(){
   const need = missing(), n = D().artworks, all = pages();
@@ -955,10 +955,10 @@ function renderPage(){
     <div class="head">
       <span class="lbl">Step two</span>
       <h1>The product page${n > 1 ? "s" : ""}</h1>
-      <p>${n > 1 ? `One per artwork, as on the site. Write the first in full; the others start as copies of it, and what you change is what distinguishes each work.` : `Written in full, as it will go to the site.`} ${n > 1 ? "They are" : "It is"} also the source: Claude reads ${n > 1 ? "them" : "it"} and suggests the email's fragments from ${n > 1 ? "them" : "it"}, and from nothing else.</p>
+      <p>${n > 1 ? `One per artwork. Write the first; the others start as copies of it.` : `As it will go to the site.`} Claude suggests the email from ${n > 1 ? "these" : "this"}, and from nothing else.</p>
     </div>
     <fieldset><legend>The description</legend>
-      <p>Three or four paragraphs: what it is and who it is by; the work and where it comes from; how it was made. Everything the campaign says about the work should be true here first.</p>
+      <p>Three or four paragraphs: what it is, the work and where it comes from, how it was made.</p>
       ${n > 1 ? `<div class="tabs">${all.map(x => `<button data-tab="${x.i}" aria-current="${x.i===S.pageTab}">${esc(x.title)}${(x.page.description||"").trim() ? "" : "<i>·</i>"}</button>`).join("")}</div>` : ""}
       <div class="grid wide"><label><span>Description${n > 1 ? " · " + esc(cur.title) : ""}</span>
         <textarea class="pagebox" data-p="description" spellcheck="true" placeholder="The work, the artist, where it comes from, how it was made.">${esc(cur.page.description || "")}</textarea></label></div>
@@ -966,16 +966,16 @@ function renderPage(){
       <p class="live" id="pagenote">${esc(pageNote(S.pageTab))}</p>
     </fieldset>
     <fieldset><legend>The page's fields</legend>
-      <p>The structured fields beside the description. ${n > 1 ? "The SEO line and the medium are per artwork; the authentication is shared." : "The medium description is where the making line gets its technique when the prose does not carry it."}</p>
+      <p>${n > 1 ? "SEO line and medium per artwork; authentication shared." : "The medium description supplies the making line's technique when the prose doesn't."}</p>
       <div class="grid">${PAGE_FIELDS.map(([k,lab,hint]) =>
         `<label><span>${esc(lab)}${n > 1 ? " · " + esc(cur.title) : ""}</span><input data-p="${k}" type="text" value="${esc(cur.page[k]||"")}"><small>${esc(hint)}</small></label>`).join("")}
         <label><span>Authentication${n > 1 ? " · all" : ""}</span><input data-p="authentication" type="text" value="${esc(S.page.authentication||"")}"><small>e.g. Signed by the artist. Individually numbered.</small></label>
       </div>
     </fieldset>
     <fieldset><legend>Then</legend>
-      <p>Claude reads the page${n > 1 ? "s" : ""} and the fields and drafts the hook, the making line and a line for each card${n > 1 ? ", each from its own artwork's page" : ""}. Each comes with where it came from, and you accept or rewrite them in the email.</p>
+      <p>Claude drafts the hook, the making line and a line per card, each with where it came from. Accept or rewrite them in the email.</p>
       <button class="act" id="suggest" style="width:auto;padding:9px 16px"${can && !(S.suggest&&S.suggest.busy) ? "" : " disabled"}>${S.suggest&&S.suggest.busy ? "Reading…" : `Suggest the email from ${n > 1 ? "these pages" : "this page"}`}</button>
-      ${need.length ? `<p class="note">Needs the release details first: ${esc(need.map(x=>x[1].toLowerCase()).join(", "))}.</p>` : (!pageStats(0).words ? `<p class="note">Write the first artwork's description first.</p>` : "")}
+      ${need.length ? `<p class="note">Needs the details first: ${esc(need.map(x=>x[1].toLowerCase()).join(", "))}.</p>` : (!pageStats(0).words ? `<p class="note">Write the description first.</p>` : "")}
     </fieldset>`;
   $("#main").querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { S.pageTab = +b.dataset.tab; renderPage(); renderPageAside(); });
   const cf = $("#copyfirst"); if (cf) cf.onclick = () => {
@@ -1012,14 +1012,14 @@ function renderPageAside(){
   };
   let body;
   if (!sg) body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>What Claude will draw from ${n>1?"them":"it"}</h2>
-    <p class="rule">Nothing is written that is not on the page${n>1?"s":""} or in the fields. Where they do not say how the work was made, the making line comes back empty rather than invented.</p>
+    <p class="rule">Only what is on the page${n>1?"s":""}. Where the making isn't described, that line comes back empty.</p>
     <section><h3>It will suggest</h3>
-      <div class="chk" data-k="good"><s></s><span><b>Hook</b> · two or three sentences on the work${n>1?"s":""}, one for the release.</span></div>
-      <div class="chk" data-k="good"><s></s><span><b>Making</b> · one sentence, from the making paragraph or the medium description${n>1?"s, true of every artwork":""}.</span></div>
-      <div class="chk" data-k="good"><s></s><span><b>Card line${n===1?"":"s"}</b> · ${n===1?"one sentence":n+" sentences, each from its own artwork's page"}, the SEO line's register.</span></div>
-      <div class="chk" data-k="good"><s></s><span><b>Opener</b> · a few words only where the opener is bald; otherwise left blank.</span></div>
+      <div class="chk" data-k="good"><s></s><span><b>Hook</b> · two or three sentences, one for the release.</span></div>
+      <div class="chk" data-k="good"><s></s><span><b>Making</b> · one sentence${n>1?", true of every artwork":""}.</span></div>
+      <div class="chk" data-k="good"><s></s><span><b>Card line${n===1?"":"s"}</b> · ${n===1?"one sentence":"one per artwork, from its own page"}.</span></div>
+      <div class="chk" data-k="good"><s></s><span><b>Opener</b> · a few words, only where the line is bald.</span></div>
     </section>`;
-  else if (sg.busy) body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>Reading…</h2><p class="rule">Claude is reading the page${n>1?"s":""} and the fields.</p>`;
+  else if (sg.busy) body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>Reading…</h2><p class="rule">Reading the page${n>1?"s":""}.</p>`;
   else if (sg.err) body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>Nothing came back</h2><p class="rule">${esc(sg.err)}</p>`;
   else {
     const r = sg.res || {}, cards = r.cards || [];
@@ -1027,7 +1027,7 @@ function renderPageAside(){
                  ...d.cardKeys.map((k,i)=>[k, "Card · " + d.cardTitles[i], cards[+k.slice(5)-1]])];
     const usable = all.filter(([k,,x]) => x && (x.text||"").trim() && blk(k).trim() !== x.text.trim());
     body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>Suggested</h2>
-      <p class="rule">Each one is a shortening of the page${n>1?"s":""}. Use it, or write your own in the email. The mechanical checks have already run on them.</p>
+      <p class="rule">Use it, or write your own in the email. The checks have already run.</p>
       ${usable.length ? `<button class="act" id="useall">Use all ${usable.length}</button>` : `<button class="act" id="goemail">Go to the email</button>`}
       <section><h3>Fragments</h3>${all.map(([k,nm,x])=>frag(k,nm,x)).join("")}</section>
       ${(r.notes||[]).length ? `<section><h3>Claude noted</h3>${r.notes.map(x=>`<div class="chk" data-k="warn"><s></s><span>${esc(x)}</span></div>`).join("")}</section>` : ""}`;
@@ -1105,19 +1105,19 @@ const rows = sec => typeof sec.f === "function" ? sec.f() : sec.f;
 // what the count produces downstream, said as it is typed
 function cardNote(){
   const d = D(), n = d.artworks, card = k => k === 1 ? "1 card" : k + " cards";
-  const series = d.series ? ` The prose calls them the ${S.facts.series_name || "…"} series; the cards keep their own titles.` : "";
+  const series = d.series ? ` Named as the ${S.facts.series_name || "…"} series in the prose.` : "";
   const many = `${n} artwork${n===1?"":"s"}`;
   if (d.untitled === n) return `${many}, so ${card(n)} once ${n===1?"it is":"they are"} titled.` + series;
   if (d.untitled) return `${many}, so ${card(n)}, though ${d.untitled === 1 ? "one still needs" : d.untitled + " still need"} a title.` + series;
   const head = d.workEmail.length;
   return `${many}, so ${card(n)}.` + series + (head > 90
-    ? ` The headline names all ${n}, which runs to ${head} characters: consider one collective title, or the series option.`
+    ? ` The headline names all ${n} (${head} characters); consider a collective title or the series.`
     : "");
 }
 const FORM = [
-  {g:"The collaboration", d:"Who it is with, and how they are named. The works are always “by” the artist; the collaboration may be with an estate or a trust.", f:[
+  {g:"The collaboration", d:"The works are “by” the artist; the collaboration may be with an estate.", f:[
     ["artist","Artist","text","The works are by this name"],
-    ["collab_with","Collaboration is with","text","Usually the same; for an estate, “the Lucian Freud Estate”"],
+    ["collab_with","Collaboration is with","text","Or “the Lucian Freud Estate”"],
     ["ordinal","Which collaboration","select","debut|latest|second"],
     ["handle","Instagram handle","text","Without the @"],
     ["x_handle","X handle","text","Leave blank if none"],
@@ -1125,24 +1125,24 @@ const FORM = [
     ["link","Release link","text","Used in tweets"],
     ["advisor","Advisor","select","Sam|Curtis|Sofiya"]
   ]},
-  {g:"The artworks", d:"How many the release holds, and what each is called. Every artwork gets its own title and its own card in the emails, however many there are. Where they are untitled works from one named series, the series can stand in for their titles in the prose; the cards still carry one each.", live:cardNote, f: () => {
+  {g:"The artworks", d:"One title and one card per artwork. For untitled works from a named series, the series stands in for the titles in the prose.", live:cardNote, f: () => {
     const n = D().artworks, series = S.facts.is_series === "yes";
     return [
-      ["artworks","How many artworks","number","Each one gets a card in the emails"],
+      ["artworks","How many artworks","number","One card each"],
       ["is_series","Name them by their series","select","no|yes"],
-      ["series_name","The series name","text","Stands in for the titles in the prose", () => S.facts.is_series === "yes"],
+      ["series_name","The series name","text","Used in place of the titles", () => S.facts.is_series === "yes"],
       ...Array.from({length: n}, (_, i) =>
           ["title_" + (i+1), n === 1 ? "Title" : `Artwork ${i+1}`, "text",
            i === 0 ? (series ? "Still headed by its own title on the card" : "Exactly as it is titled") : ""])
     ];
   }},
-  {g:"The edition", d:"The edition phrase is the one that travels: it appears in the opener, the status lines and the footers, so it is written once here.", f:[
+  {g:"The edition", d:"The edition phrase appears in the opener, the status lines and the footers.", f:[
     ["edition_phrase","Edition phrase","text","e.g. a quartet of new limited edition embroideries"],
     ["unit","One of them is called a","text","print, embroidery, sculpture"],
     ["f1","Feature 1","text",""],["f2","Feature 2","text",""],["f3","Feature 3","text",""],
     ["f4","Feature 4","text","Bespoke to this release"],["f5","Feature 5","text",""]
   ]},
-  {g:"The release", d:"Enter each date and time once. Every deadline sentence across the campaign is derived from these two.", f:[
+  {g:"The release", d:"Every deadline line comes from these two dates.", f:[
     ["mechanic","Mechanic","select","timed|draw"],
     ["window","Window","select","48 hours|one week", timed],
     ["launch_at","Opens","datetime-local","UK time"],
@@ -1153,7 +1153,7 @@ const FORM = [
     ["framing_code","Framing offer code","text","Blank for no offer", timed],
     ["framing_percent","Framing offer %","number","", timed]
   ]},
-  {g:"Written elsewhere", d:"The quote is copied exactly as the artist said it. The bio opens the Coming Soon post, and nothing else.", f:[
+  {g:"Written elsewhere", d:"The quote verbatim. The bio opens the Coming Soon post only.", f:[
     ["quote","Artist quote","textarea","Verbatim, or blank"],
     ["bio","Artist bio","textarea","Two or three sentences, third person"]
   ]}
@@ -1163,7 +1163,7 @@ function renderFacts(){
     <div class="head">
       <span class="lbl">Step one</span>
       <h1>Release details</h1>
-      <p>The facts. Everything the copy states about dates, names, counts and codes comes from here, so it is stated once and cannot drift between a post and an email.</p>
+      <p>Stated once here. Every date, name and count in the copy comes from these.</p>
     </div>
     ${FORM.map(sec=>`<fieldset><legend>${esc(sec.g)}</legend><p>${esc(sec.d)}</p>
       <div class="grid${rows(sec)[0][2]==="textarea"?" wide":""}">
@@ -1212,7 +1212,7 @@ const shownFields = () => FORM.reduce((n,s)=>n+rows(s).filter(r=>!r[4]||r[4]()).
 function asideFacts(){
   const need = missing();
   if (need.length) return `<div class="panel"><span class="lbl">From these facts</span><h2>What the frame needs</h2>
-    <p class="rule">These build the sentences around what you write. The lines they make appear here as you fill them in.</p>
+    <p class="rule">The sentences around what you write are built from these.</p>
     <section>${todoHTML()}</section></div>`;
   const d = D(), f = S.facts;
   const rows = [
@@ -1222,7 +1222,7 @@ function asideFacts(){
     ["Footer", d.draw?`Collect ${d.collectPhrase}`:`Launching ${d.launchDate}`]
   ];
   return `<div class="panel"><span class="lbl">From these facts</span><h2>What changes</h2>
-    <p class="rule">A sample of the lines these fields build. Edit a field and watch them move.</p>
+    <p class="rule">Lines built from these fields. Edit one and watch them move.</p>
     <section><h3>Live</h3>
     ${rows.map(([k,v])=>`<div class="use"><h4>${esc(k)}</h4><div class="q">${esc(v)}</div></div>`).join("")}
     </section></div>`;
@@ -1235,7 +1235,7 @@ function renderOut(){
       <div class="head">
         <span class="lbl">Everything else</span>
         <h1>Nothing to assemble yet</h1>
-        <p>The posts, tweets and the rest of the emails are built from the release details and the three paragraphs. Neither is in place.</p>
+        <p>Built from the details and the fragments. Neither is in place yet.</p>
       </div>
       <div class="sheet" style="padding:6px 22px 16px">${todoHTML()}
         <button class="act" data-goto="facts" style="width:auto;padding:9px 16px">Go to the details</button></div>`;
@@ -1250,17 +1250,17 @@ function renderOut(){
     <div class="head">
       <span class="lbl">Then</span>
       <h1>Everything else</h1>
-      <p>Built from what you wrote and the release details. Nothing here needs writing. Read it, and if a line is wrong, fix the fragment or the fact it came from.</p>
+      <p>Built from the fragments and the details. If a line is wrong, fix the fragment or the fact it came from.</p>
     </div>
-    ${block("Instagram", "The Insiders account posts the same caption as the main feed; the plan says which.", o.posts, true)}
-    ${block("Twitter", "The status line with the X handle, the hook on the announcement only, and an action line that ends with the link.", o.tweets, true)}
+    ${block("Instagram", "Insiders posts the same caption; the plan says which.", o.posts, true)}
+    ${block("Twitter", "Status line with the X handle, the hook on the announcement, an action line ending in the link.", o.tweets, true)}
     ${block("Email", "Body copy only. Subject, preview, kicker and headline are on the writing screen.", o.emails, false)}`;
 }
 function asideOut(){
   const o = outputs(), live = o.emails.filter(e=>!e.t.startsWith("—")).length;
   const hand = (S.blocks.qualifier+" "+S.blocks.hook+" "+S.blocks.making).split(/\s+/).filter(Boolean).length;
   return `<div class="panel"><span class="lbl">This campaign</span><h2>What you wrote</h2>
-  <p class="rule">Three fragments, and this is their reach.</p>
+  <p class="rule">Their reach.</p>
   <section><h3>Reach</h3>
     <div class="chk" data-k="good"><s></s><span><b>Hook</b> · ${placements("hook").length} places</span></div>
     <div class="chk" data-k="good"><s></s><span><b>Making</b> · ${placements("making").length} places</span></div>
@@ -1269,7 +1269,7 @@ function asideOut(){
     <div class="chk" data-k="good"><s></s><span>${hand} words written by hand</span></div>
   </section>
   <section><h3>Still by hand</h3>
-  <p class="note">Deep dives and sustain posts, the Monthly Preview around this paragraph, past-works carousels, games and competitions, exhibition news, and the artist's own email. None of those are release comms in the sense this tool means.</p>
+  <p class="note">Deep dives, sustain posts, the rest of the Monthly Preview, past-works carousels, games, exhibition news and the artist's own email.</p>
   </section></div>`;
 }
 

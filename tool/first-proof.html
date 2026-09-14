@@ -229,7 +229,7 @@ function blankRelease(){
   return {
     facts: {
       artist:"", collab_with:"", ordinal:"latest", handle:"", x_handle:"", hashtag:"", link:"",
-      title_1:"", title_2:"", title_3:"", is_series:"no",
+      title_1:"", title_2:"", title_3:"", is_series:"no", artworks:1,
       edition_phrase:"", works:1, unit:"print",
       mechanic:"timed", window:"one week", launch_at:"", closes_at:"",
       beneficiary:"", beneficiary_handle:"",
@@ -259,7 +259,7 @@ const S = {
     artist:"Grayson Perry", collab_with:"Grayson Perry", ordinal:"latest",
     handle:"alanmeasles", x_handle:"", hashtag:"GraysonPerry",
     link:"https://avantarte.co/grayson-perry",
-    title_1:"The Changeling", title_2:"", title_3:"", is_series:"no",
+    title_1:"The Changeling", title_2:"", title_3:"", is_series:"no", artworks:1,
     edition_phrase:"a new limited edition print", works:1, unit:"print",
     mechanic:"timed", window:"one week",
     launch_at:"2026-04-30T14:00", closes_at:"2026-05-07T14:00",
@@ -295,7 +295,13 @@ function D(){
   d.namedX = f.artist + (f.x_handle ? ` (@${f.x_handle})` : "");
   d.collabX = f.collab_with === f.artist ? d.namedX : f.collab_with;
   d.aUnit = ("aeiou".includes((f.unit||"print")[0].toLowerCase()) ? "an " : "a ") + (f.unit||"print");
-  const titles = [f.title_1,f.title_2,f.title_3].filter(Boolean);
+  const n = Math.min(3, Math.max(1, +f.artworks || 1));
+  d.artworks = n;
+  // only the first n count: reducing the number puts a title out of use
+  // without throwing away what was typed
+  const all = [f.title_1,f.title_2,f.title_3];
+  const slots = [0,1,2].slice(0, n).filter(i => all[i]);
+  const titles = slots.map(i => all[i]);
   d.series = f.is_series === "yes";
   d.work = d.series ? `the ${f.title_1} series` : join(titles.map(t=>`‘${t}’`));
   d.Work = cap(d.work);
@@ -317,8 +323,8 @@ function D(){
   d.editionCap = cap(f.edition_phrase);
   d.windowCap = cap(f.window);
   // one card per work: its title, and the line the writer gives it
-  d.cardTitles = d.series ? ["Untitled"] : titles;
-  d.cardKeys = d.cardTitles.map((t,i)=>"card_"+(i+1));
+  d.cardTitles = d.series ? ["Untitled"] : titles;   // an untitled artwork has no card yet
+  d.cardKeys = d.series ? ["card_1"] : slots.map(i => "card_" + (i+1));
   d.cards = d.cardTitles.map((t,i)=>{ const l = S.blocks[d.cardKeys[i]].trim(); return "Card: "+t+(l?"\n"+l:""); }).join("\n\n");
   d.quoteLine = f.quote ? `“${f.quote}” – ${f.artist}` : "";
   d.addWhat = d.plural ? d.aUnit : d.workEmail;
@@ -326,6 +332,7 @@ function D(){
   d.framingRemind  = f.framing_code ? `As a reminder, you can enjoy ${f.framing_percent}% off our in-house framing on your first purchase using the code ${f.framing_code} at checkout.` : "";
   // the opener frame: what the system supplies, either side of the writer's words
   d.workIntro = ((+f.works)===1 && titles.length ? `${f.title_1}, ` : "") + f.edition_phrase;
+  d.untitled = n - titles.length;   // artworks still waiting for a title
   return d;
 }
 
@@ -850,15 +857,20 @@ const timed = () => !draw();
 // have to fill them. The count of works is a separate number, because a set of
 // four sold together, or one image in four colourways, is one titled artwork.
 const has = k => !!String(S.facts[k] ?? "").trim();
-const titleShown = i => has("title_" + (i-1)) || has("title_" + i);
+const titleShown = i => i <= (+S.facts.artworks || 1);
 // the commonest surprise on this screen: three works, one title, one card
 function cardNote(){
-  const d = D(), t = d.cardTitles.length, w = +S.facts.works || 1;
-  if (d.series) return "Untitled works from one series: one card, headed “Untitled”.";
-  if (!t) return "No title yet, so no card.";
-  if (t === w) return `${t} ${t===1 ? "artwork, so one card" : "artworks, so " + t + " cards"}.`;
-  if (t < w) return `${w} works under ${t === 1 ? "one title" : t + " titles"}, so ${t} ${t===1 ? "card" : "cards"}. Right for a set sold together or one image in several colourways — if they are separate works, give each its own title.`;
-  return `${t} titles but only ${w} work${w===1?"":"s"} in the edition. One of those is wrong.`;
+  const d = D(), n = d.artworks, w = +S.facts.works || 1, card = k => k === 1 ? "1 card" : k + " cards";
+  if (d.series) return `Untitled works from one series: ${card(1)}, headed “Untitled”.`;
+  const many = `${n} artwork${n===1?"":"s"}`;
+  if (d.untitled === n) return `${many}, so ${card(n)} once ${n===1?"it is":"they are"} titled.`;
+  if (d.untitled) return `${many}, so ${card(n)} — ${d.untitled === 1 ? "one still needs" : d.untitled + " still need"} a title.`;
+  const cards = `${many}, so ${card(n)}`;
+  if (w === n) return cards + ".";
+  if (w > n) return cards + (n === 1
+    ? `. ${w} in the edition under that one title: a set sold together, or one image in several colourways.`
+    : `, across ${w} pieces in the edition.`);
+  return `${cards}, but only ${w} in the edition. There cannot be fewer of those than artworks.`;
 }
 const FORM = [
   {g:"The collaboration", d:"Who it is with, and how they are named. The works are always “by” the artist; the collaboration may be with an estate or a trust.", f:[
@@ -871,12 +883,13 @@ const FORM = [
     ["link","Release link","text","Used in tweets"],
     ["advisor","Advisor","select","Sam|Curtis|Sofiya"]
   ]},
-  {g:"The artworks", d:"Titles, and how many things the edition holds. These are two different numbers: a quartet sold as a set, or one image in four colourways, is four works under one title. The emails carry one card per title, and the headline names them. Add a title and the next box appears.", live:cardNote, f:[
+  {g:"The artworks", d:"How many distinct artworks this release holds. Each gets its own title, its own card in the emails, and its own name in the headline. More than three: give them one collective title and count them as one. The second number is different — four prints under a single title is four in the edition, but one artwork.", live:cardNote, f:[
+    ["artworks","How many artworks","select","1|2|3"],
+    ["works","How many in the edition","select","1|2|3|4|5|6|7|8|9|10|12"],
+    ["is_series","All untitled, from one named series","select","no|yes"],
     ["title_1","First artwork","text","Exactly as it is titled"],
     ["title_2","Second artwork","text","", () => titleShown(2)],
-    ["title_3","Third artwork","text","More than three: give the set one collective title", () => titleShown(3)],
-    ["is_series","All untitled, from one named series","select","no|yes"],
-    ["works","Works in the edition","number","How many things a collector could buy, titled or not"]
+    ["title_3","Third artwork","text","", () => titleShown(3)]
   ]},
   {g:"The edition", d:"The edition phrase is the one that travels: it appears in the opener, the status lines and the footers, so it is written once here.", f:[
     ["edition_phrase","Edition phrase","text","e.g. a quartet of new limited edition embroideries"],
@@ -925,9 +938,10 @@ function renderFacts(){
     S.facts[k] = e.target.type === "number" ? (+e.target.value||0) : e.target.value;
     // there cannot be fewer works than titled artworks, so adding a title raises
     // the count. Raising it further by hand is the set-under-one-title case.
-    if (k.startsWith("title_")) {
-      const t = [1,2,3].filter(i => has("title_"+i)).length;
-      if (t > (+S.facts.works||0)) { S.facts.works = t; const w = $("#f_works"); if (w) w.value = t; }
+    // the edition can never hold fewer pieces than it has artworks
+    if (k === "artworks" && (+S.facts.works||0) < +S.facts.artworks) {
+      S.facts.works = +S.facts.artworks;
+      const w = $("#f_works"); if (w) w.value = S.facts.works;
     }
     crumb(); syncFields(); $("#aside").innerHTML = asideFacts();
   }));

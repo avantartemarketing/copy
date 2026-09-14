@@ -127,6 +127,10 @@ aside{border-left:1px solid var(--line);background:var(--surface)}
 .todo span{color:var(--ink-faint);font-size:12.5px}
 .live{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line-soft);font-size:12.5px;color:var(--ink-soft)}
 .pagebox{font-family:var(--serif);font-size:15.5px;line-height:1.6;min-height:280px;resize:vertical;padding:14px 16px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.tabs button{padding:6px 11px;border:1px solid var(--line);border-radius:6px;font-size:12.5px;color:var(--ink-soft);background:var(--surface);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabs button[aria-current="true"]{border-color:var(--accent-line);background:var(--accent-soft);color:var(--accent);font-weight:500}
+.tabs button i{font-style:normal;color:var(--warn);margin-left:5px}
 .sug{border:1px solid var(--line);border-radius:7px;padding:10px 11px;margin-bottom:8px;background:var(--paper)}
 .sug h4{display:flex;align-items:baseline;gap:8px;margin:0 0 6px;font-size:11px;font-weight:600;color:var(--ink-soft);letter-spacing:.02em}
 .sug h4 span{flex:1}
@@ -251,7 +255,7 @@ function blankRelease(){
       quote:"", bio:""
     },
     blocks: { qualifier:"", hook:"", making:"", card_1:"", card_2:"", card_3:"" },
-    page: { description:"", seo:"", medium:"", authentication:"" },
+    page: { description:"", seo:"", medium:"", authentication:"", more: [] },
     suggest: null,     // Claude's reading of the page, once asked for
     from: {}           // fragment key -> "page" while it is the accepted suggestion, untouched
   };
@@ -297,8 +301,10 @@ const S = {
     description:"Grayson Perry turns his inimitable hand to a new silkscreen print launched in support of the Foundling Museum.\n\nThe Changeling is a vivid artwork that portrays changeling folklore when a child is swapped by malevolent spirits – reinterpreted by the artist for the digital age. Grayson Perry describes the artwork as intentionally “quite disturbing”, reflecting on how digital culture and AI are callously shaping our sense of self. His newly imagined changeling challenges us to rethink identity, belonging, and what truly makes us human. It sits in contrast to the stories and lives of foundlings, children ‘found’ and cared for by supportive communities.\n\nThis 9-colour silkscreen print was carefully produced at our London studio, Make-Ready, in close collaboration with the artist to capture the vivid detail of his world-renowned drawing style, exemplified in this new design.\n\nFor each artwork sold, a minimum of €195 will be donated to the Foundling Museum. The total donation made to the charity will depend on the final number of artworks sold in the edition",
     seo:"",
     medium:"9 colour silkscreen on bespoke 410gsm Somerset White Rough Textured M-R 100% cotton paper.",
-    authentication:"Signed by the artist. Individually numbered."
+    authentication:"Signed by the artist. Individually numbered.",
+    more: []
   },
+  pageTab: 0,
   suggest: null,
   from: {},
   ai: {}
@@ -550,7 +556,7 @@ function spec(k){
     const has = SPEC.openerCarries();
     if (d.support) return Object.assign({}, SPEC.qualifier, {sub:"none needed", rule: SPEC.qualifier.taken});
     return Object.assign({}, SPEC.qualifier, {
-      sub: has.length ? "usually blank" : "a few words",
+      sub: S.from.qualifier === "page" && blk("qualifier").trim() ? "from the page" : has.length ? "usually blank" : "a few words",
       rule: has.length ? SPEC.qualifier.full.replace("$", join(has)) : SPEC.qualifier.bald});
   }
   if (k === "card") {
@@ -589,8 +595,8 @@ function checks(key, text){
     if ((sn.match(/\s[–—-]\s/g) || []).length >= 2)
       out.push({k:"warn", t:"An aside set between two dashes. It reads as machine-written: make it a sentence, or use commas."});
   });
-  if ((S.page.description||"").trim()) {
-    const known = new Set(("" + S.page.description + " " + S.page.medium + " " + S.page.authentication + " " + S.page.seo + " "
+  if (pageText().trim()) {
+    const known = new Set((pageText() + " " + pages().map(x => (x.page.medium||"") + " " + (x.page.seo||"")).join(" ") + " " + S.page.authentication + " "
       + Object.values(S.facts).filter(v => typeof v === "string").join(" ")).match(/[\w'’.-]+/g) || []);
     const seen = new Set();
     for (const w of [...known]) { seen.add(w); seen.add(w.replace(/['’]s$/, "")); seen.add(w.replace(/[.'’-]+$/, "")); }
@@ -638,7 +644,7 @@ function render(){
   const o = outputs();
   $("#nout").textContent = o.posts.length + o.tweets.length + o.emails.length;
   $("#nfacts").textContent = shownFields();
-  const pw = pageStats().words; $("#npage").textContent = pw ? pw + " words" : "";
+  const pw = pageStats().total; $("#npage").textContent = pw ? pw + " words" : "";
   $("#nwrite").textContent = (3 + D().cardTitles.length) + " fields";
   document.querySelectorAll("nav button").forEach(b => b.setAttribute("aria-current", String(b.dataset.view===S.view)));
   if (S.view === "write") { renderWrite(); renderAside(); }
@@ -885,7 +891,7 @@ WHAT IT IS FOR: ${spec(k).rule}
 
 EVERY PLACE IT LANDS, with the copy either side of it (the fragment is marked >>>):
 ${ctx}
-${(S.page.description||"").trim() ? `\nTHE PRODUCT PAGE this release was written from. Every fact in the fragment should be here or in the release details; flag any that is not:\n${S.page.description.trim()}\n` : ""}
+${pageText().trim() ? `\nTHE PRODUCT PAGE${D().artworks>1?"S":""} this release was written from. Every fact in the fragment should be here or in the release details; flag any that is not:\n${pages().map(x => (D().artworks>1 ? "── " + x.title + "\n" : "") + (x.page.description||"").trim()).join("\n\n")}\n` : ""}
 HOUSE RULES: British spelling. The house dash is a spaced en dash, never an em dash and never a hyphen; use one at most in a sentence, and never set an aside between a pair of them, which reads as machine-written. Refer to the artist by surname alone: the full name has already been used before the fragment lands. No exclamation marks and no rhetorical questions. Sentences under 35 words. Times written as "14:00 UK time", dates as "30 April". Never say "we" or "our" inside the fragment; the frame around it supplies those. Every fact must be true of this release: do not invent dates, numbers, places or names.
 
 Judge two things. First, does the fragment read well on its own? Second, and more important, does it still read well in EACH place above: check especially whether it assumes it is the first thing being read, because in most of these places it is a middle paragraph. Also flag repetition with the copy either side of it.
@@ -902,64 +908,96 @@ Reply with JSON only, no other text:
   renderAside();
 }
 
-// ---------- the product page: written in full, and the source the email is suggested from ----------
+// ---------- the product pages: one per artwork, as on the site, and the source the email is suggested from ----------
+// On Storyblok every artwork has its own page. Siblings share the announcement and the
+// authentication and differ in the paragraph about the work, sometimes in the provenance,
+// the SEO line and even the medium. So the first artwork's page is the release's page and
+// the others are kept as edits of it.
 const MAKE = /printmaker|silkscreen|screenprint|lithograph|etching|\blayers?\b|\bgsm\b|\bpaper\b|varnish|hand-(finish|paint|pull|colour|color)|foundry|cast in|kiln|fired|glaze|woven|stitch|embroider|\bpress\b|\bplate\b|pigment|archival|Make-Ready|transparenc/i;
-function pageStats(){
-  const d = (S.page.description || "").trim();
-  const paras = d ? d.split(/\n\s*\n/).filter(x => x.trim()).length : 0;
-  return { words: d ? d.split(/\s+/).length : 0, paras,
-           making: MAKE.test(d) || MAKE.test(S.page.medium || "") };
+const paras = t => (t || "").trim() ? t.trim().split(/\n\s*\n/).map(x => x.trim()).filter(Boolean) : [];
+function pageOf(i){ if (i === 0) return S.page; S.page.more ??= []; return S.page.more[i-1] ??= {description:"", seo:"", medium:""}; }
+function pages(){ return Array.from({length: D().artworks}, (_, i) => ({i, title: S.facts["title_"+(i+1)] || `Artwork ${i+1}`, page: pageOf(i)})); }
+function pageText(){ return pages().map(x => x.page.description || "").join("\n\n"); }
+// how artwork i's page stands to the first artwork's
+function pageDiff(i){
+  if (i === 0) return "";
+  const a = paras(pageOf(0).description), b = paras(pageOf(i).description);
+  if (!b.length) return "Nothing written for this artwork yet.";
+  if (a.join("\n\n") === b.join("\n\n")) return "Identical to the first artwork's page. Nothing on it distinguishes this work, so its card line would have to be written by hand.";
+  const diff = b.map((x, j) => x !== (a[j] || "") ? j + 1 : 0).filter(Boolean);
+  return diff.length ? `Differs from the first artwork's page in paragraph${diff.length > 1 ? "s" : ""} ${diff.join(", ")}.` : "";
 }
-function pageNote(){
-  const st = pageStats();
-  if (!st.words) return "Nothing written yet. The pages that went out ran to about 127 words in three or four paragraphs.";
-  const shape = `${st.words} words in ${st.paras} paragraph${st.paras===1?"":"s"}.`;
-  return shape + (st.making ? " It says how the work was made, so the making line can be drawn from it."
-                            : " It does not say how the work was made, and nor does the medium field, so the making line will need writing by hand.");
+function pageStats(i){
+  const d = (pageOf(i ?? 0).description || "").trim();
+  const all = pages();
+  return { words: d ? d.split(/\s+/).length : 0, paras: paras(d).length,
+           total: all.reduce((n, x) => n + ((x.page.description || "").trim() ? x.page.description.trim().split(/\s+/).length : 0), 0),
+           making: all.some(x => MAKE.test(x.page.description || "") || MAKE.test(x.page.medium || "")) };
+}
+function pageNote(i){
+  const st = pageStats(i);
+  if (!st.words) return i ? pageDiff(i) : "Nothing written yet. The pages that went out ran to about 127 words in three or four paragraphs.";
+  const shape = `${st.words} words in ${st.paras} paragraph${st.paras===1?"":"s"}. ` + (i ? pageDiff(i) + " " : "");
+  return shape + (st.making ? "The pages say how the work was made, so the making line can be drawn from them."
+                            : "Neither the pages nor the medium fields say how the work was made, so the making line will need writing by hand.");
 }
 const PAGE_FIELDS = [
-  ["seo", "SEO line", "text", "One sentence, about 25 words. Most open “Collect a … by …”"],
-  ["medium", "Medium description", "text", "The technique in full, e.g. 9 colour silkscreen with matte varnish seal on Somerset 410gsm"],
-  ["authentication", "Authentication", "text", "e.g. Signed by the artist. Individually numbered."]
+  ["seo", "SEO line", "One sentence, about 25 words. Most open “Collect a … by …”"],
+  ["medium", "Medium description", "The technique in full. Sibling prints can differ here, and the making line has to be true of all of them"]
 ];
 function renderPage(){
-  const need = missing(), st = pageStats();
-  const can = !need.length && st.words > 0;
+  const need = missing(), n = D().artworks, all = pages();
+  S.pageTab = Math.min(S.pageTab || 0, n - 1);
+  const cur = all[S.pageTab], st = pageStats(S.pageTab);
+  const can = !need.length && pageStats(0).words > 0;
+  const empty = !(cur.page.description || "").trim() && S.pageTab > 0 && (pageOf(0).description || "").trim();
   $("#main").innerHTML = `
     <div class="head">
       <span class="lbl">Step two</span>
-      <h1>The product page</h1>
-      <p>Written in full, as it will go to the site. It is also the source: once it is down, Claude reads it and suggests the email's fragments from it, and from nothing else.</p>
+      <h1>The product page${n > 1 ? "s" : ""}</h1>
+      <p>${n > 1 ? `One per artwork, as on the site. Write the first in full; the others start as copies of it, and what you change is what distinguishes each work.` : `Written in full, as it will go to the site.`} ${n > 1 ? "They are" : "It is"} also the source: Claude reads ${n > 1 ? "them" : "it"} and suggests the email's fragments from ${n > 1 ? "them" : "it"}, and from nothing else.</p>
     </div>
     <fieldset><legend>The description</legend>
       <p>Three or four paragraphs: what it is and who it is by; the work and where it comes from; how it was made. Everything the campaign says about the work should be true here first.</p>
-      <div class="grid wide"><label><span>Description</span>
-        <textarea class="pagebox" data-p="description" spellcheck="true" placeholder="The work, the artist, where it comes from, how it was made.">${esc(S.page.description)}</textarea></label></div>
-      <p class="live" id="pagenote">${esc(pageNote())}</p>
+      ${n > 1 ? `<div class="tabs">${all.map(x => `<button data-tab="${x.i}" aria-current="${x.i===S.pageTab}">${esc(x.title)}${(x.page.description||"").trim() ? "" : "<i>·</i>"}</button>`).join("")}</div>` : ""}
+      <div class="grid wide"><label><span>Description${n > 1 ? " · " + esc(cur.title) : ""}</span>
+        <textarea class="pagebox" data-p="description" spellcheck="true" placeholder="The work, the artist, where it comes from, how it was made.">${esc(cur.page.description || "")}</textarea></label></div>
+      ${empty ? `<button class="mini" id="copyfirst" style="margin-top:8px">Start from the first artwork's page</button>` : ""}
+      <p class="live" id="pagenote">${esc(pageNote(S.pageTab))}</p>
     </fieldset>
     <fieldset><legend>The page's fields</legend>
-      <p>The structured fields beside the description. The medium description is where the making line gets its technique when the prose does not carry it.</p>
-      <div class="grid">${PAGE_FIELDS.map(([k,lab,type,hint]) =>
-        `<label><span>${esc(lab)}</span><input data-p="${k}" type="${type}" value="${esc(S.page[k]||"")}"><small>${esc(hint)}</small></label>`).join("")}</div>
+      <p>The structured fields beside the description. ${n > 1 ? "The SEO line and the medium are per artwork; the authentication is shared." : "The medium description is where the making line gets its technique when the prose does not carry it."}</p>
+      <div class="grid">${PAGE_FIELDS.map(([k,lab,hint]) =>
+        `<label><span>${esc(lab)}${n > 1 ? " · " + esc(cur.title) : ""}</span><input data-p="${k}" type="text" value="${esc(cur.page[k]||"")}"><small>${esc(hint)}</small></label>`).join("")}
+        <label><span>Authentication${n > 1 ? " · all" : ""}</span><input data-p="authentication" type="text" value="${esc(S.page.authentication||"")}"><small>e.g. Signed by the artist. Individually numbered.</small></label>
+      </div>
     </fieldset>
     <fieldset><legend>Then</legend>
-      <p>Claude reads the page and the fields and drafts the hook, the making line and a line for each card. Each comes with where on the page it came from, and you accept or rewrite them in the email.</p>
-      <button class="act" id="suggest" style="width:auto;padding:9px 16px"${can && !(S.suggest&&S.suggest.busy) ? "" : " disabled"}>${S.suggest&&S.suggest.busy ? "Reading the page…" : "Suggest the email from this page"}</button>
-      ${need.length ? `<p class="note">Needs the release details first: ${esc(need.map(x=>x[1].toLowerCase()).join(", "))}.</p>` : (!st.words ? `<p class="note">Write the description first.</p>` : "")}
+      <p>Claude reads the page${n > 1 ? "s" : ""} and the fields and drafts the hook, the making line and a line for each card${n > 1 ? ", each from its own artwork's page" : ""}. Each comes with where it came from, and you accept or rewrite them in the email.</p>
+      <button class="act" id="suggest" style="width:auto;padding:9px 16px"${can && !(S.suggest&&S.suggest.busy) ? "" : " disabled"}>${S.suggest&&S.suggest.busy ? "Reading…" : `Suggest the email from ${n > 1 ? "these pages" : "this page"}`}</button>
+      ${need.length ? `<p class="note">Needs the release details first: ${esc(need.map(x=>x[1].toLowerCase()).join(", "))}.</p>` : (!pageStats(0).words ? `<p class="note">Write the first artwork's description first.</p>` : "")}
     </fieldset>`;
+  $("#main").querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { S.pageTab = +b.dataset.tab; renderPage(); renderPageAside(); });
+  const cf = $("#copyfirst"); if (cf) cf.onclick = () => {
+    const src = pageOf(0), dst = pageOf(S.pageTab);
+    dst.description = src.description; dst.seo = src.seo; dst.medium = src.medium;
+    renderPage(); renderPageAside(); $("#main textarea").focus();
+  };
   $("#main").querySelectorAll("[data-p]").forEach(el => el.addEventListener("input", e => {
-    S.page[e.target.dataset.p] = e.target.value;
-    S.suggest = null;                                   // the page changed under the reading
-    const n = $("#pagenote"); if (n) n.textContent = pageNote();
-    const b = $("#suggest"); if (b) { b.disabled = !( !missing().length && pageStats().words > 0 ); b.textContent = "Suggest the email from this page"; }
-    const pw = pageStats().words; $("#npage").textContent = pw ? pw + " words" : "";
+    const k = e.target.dataset.p;
+    if (k === "authentication") S.page.authentication = e.target.value; else pageOf(S.pageTab)[k] = e.target.value;
+    S.suggest = null;                                   // the pages changed under the reading
+    const nt = $("#pagenote"); if (nt) nt.textContent = pageNote(S.pageTab);
+    const b = $("#suggest"); if (b) { b.disabled = !( !missing().length && pageStats(0).words > 0 ); b.textContent = `Suggest the email from ${D().artworks > 1 ? "these pages" : "this page"}`; }
+    const tw = pageStats().total; $("#npage").textContent = tw ? tw + " words" : "";
+    const tab = $(`[data-tab="${S.pageTab}"] i`); if (tab && e.target.value.trim()) tab.remove();
     renderPageAside();
   }));
   const b = $("#suggest"); if (b) b.onclick = suggest;
 }
 // what a suggestion is held to, as text rather than as the field's current value
 function renderPageAside(){
-  const sg = S.suggest, d = D();
+  const sg = S.suggest, d = D(), n = d.artworks;
   const frag = (key, name, r) => {
     if (!r) return "";
     const text = (r.text || "").trim(), used = text && blk(key).trim() === text;
@@ -973,26 +1011,26 @@ function renderPageAside(){
       ${warns.map(c=>`<div class="chk" data-k="warn"><s></s><span>${esc(c.t)}</span></div>`).join("")}</div>`;
   };
   let body;
-  if (!sg) body = `<span class="lbl">From the page</span><h2>What Claude will draw from it</h2>
-    <p class="rule">Nothing is written that is not on the page or in its fields. Where the page does not say how the work was made, the making line comes back empty rather than invented.</p>
+  if (!sg) body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>What Claude will draw from ${n>1?"them":"it"}</h2>
+    <p class="rule">Nothing is written that is not on the page${n>1?"s":""} or in the fields. Where they do not say how the work was made, the making line comes back empty rather than invented.</p>
     <section><h3>It will suggest</h3>
-      <div class="chk" data-k="good"><s></s><span><b>Hook</b> · two or three sentences on the work, from the page's middle.</span></div>
-      <div class="chk" data-k="good"><s></s><span><b>Making</b> · one sentence, from the making paragraph or the medium description.</span></div>
-      <div class="chk" data-k="good"><s></s><span><b>Card line${d.cardTitles.length===1?"":"s"}</b> · ${d.cardTitles.length===1?"one sentence":d.cardTitles.length+" sentences, one per artwork"}, the SEO line's register.</span></div>
+      <div class="chk" data-k="good"><s></s><span><b>Hook</b> · two or three sentences on the work${n>1?"s":""}, one for the release.</span></div>
+      <div class="chk" data-k="good"><s></s><span><b>Making</b> · one sentence, from the making paragraph or the medium description${n>1?"s, true of every artwork":""}.</span></div>
+      <div class="chk" data-k="good"><s></s><span><b>Card line${n===1?"":"s"}</b> · ${n===1?"one sentence":n+" sentences, each from its own artwork's page"}, the SEO line's register.</span></div>
       <div class="chk" data-k="good"><s></s><span><b>Opener</b> · a few words only where the opener is bald; otherwise left blank.</span></div>
     </section>`;
-  else if (sg.busy) body = `<span class="lbl">From the page</span><h2>Reading…</h2><p class="rule">Claude is reading the page and the fields.</p>`;
-  else if (sg.err) body = `<span class="lbl">From the page</span><h2>Nothing came back</h2><p class="rule">${esc(sg.err)}</p>`;
+  else if (sg.busy) body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>Reading…</h2><p class="rule">Claude is reading the page${n>1?"s":""} and the fields.</p>`;
+  else if (sg.err) body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>Nothing came back</h2><p class="rule">${esc(sg.err)}</p>`;
   else {
     const r = sg.res || {}, cards = r.cards || [];
     const all = [["hook","Hook",r.hook],["making","Making",r.making],["qualifier","Opener, a few words",r.qualifier],
-                 ...d.cardKeys.map((k,i)=>[k, "Card · " + d.cardTitles[i], cards[i]])];
+                 ...d.cardKeys.map((k,i)=>[k, "Card · " + d.cardTitles[i], cards[+k.slice(5)-1]])];
     const usable = all.filter(([k,,x]) => x && (x.text||"").trim() && blk(k).trim() !== x.text.trim());
-    body = `<span class="lbl">From the page</span><h2>Suggested</h2>
-      <p class="rule">Each one is a shortening of the page. Use it, or write your own in the email. The mechanical checks have already run on them.</p>
+    body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>Suggested</h2>
+      <p class="rule">Each one is a shortening of the page${n>1?"s":""}. Use it, or write your own in the email. The mechanical checks have already run on them.</p>
       ${usable.length ? `<button class="act" id="useall">Use all ${usable.length}</button>` : `<button class="act" id="goemail">Go to the email</button>`}
-      <section><h3>Fragments</h3>${all.map(([k,n,x])=>frag(k,n,x)).join("")}</section>
-      ${(r.notes||[]).length ? `<section><h3>Claude noted</h3>${r.notes.map(n=>`<div class="chk" data-k="warn"><s></s><span>${esc(n)}</span></div>`).join("")}</section>` : ""}`;
+      <section><h3>Fragments</h3>${all.map(([k,nm,x])=>frag(k,nm,x)).join("")}</section>
+      ${(r.notes||[]).length ? `<section><h3>Claude noted</h3>${r.notes.map(x=>`<div class="chk" data-k="warn"><s></s><span>${esc(x)}</span></div>`).join("")}</section>` : ""}`;
   }
   $("#aside").innerHTML = `<div class="panel">${body}</div>`;
   const use = key => {
@@ -1001,51 +1039,55 @@ function renderPageAside(){
     S.blocks[key] = r.text.trim(); S.from[key] = "page"; S.ai[key] = undefined;
   };
   $("#aside").querySelectorAll("[data-use]").forEach(b => b.onclick = () => { use(b.dataset.use); renderPageAside(); });
-  const ua = $("#useall"); if (ua) ua.onclick = () => {
-    ["hook","making","qualifier",...D().cardKeys].forEach(use); renderPageAside();
-  };
+  const ua = $("#useall"); if (ua) ua.onclick = () => { ["hook","making","qualifier",...D().cardKeys].forEach(use); renderPageAside(); };
   const go = $("#goemail"); if (go) go.onclick = () => { S.view = "write"; S.focus = "hook"; render(); };
+}
+// the prompt is built apart from the call, so it can be read without calling
+function suggestPrompt(){
+  const f = S.facts, d = D(), all = pages(), n = d.artworks;
+  const bald = !SPEC.openerCarries().length && !d.support;
+  const mediums = new Set(all.map(x => (x.page.medium || "").trim()).filter(Boolean));
+  const pageBlock = all.map(x => {
+    const same = x.i > 0 && paras(x.page.description).join("\n\n") === paras(pageOf(0).description).join("\n\n");
+    const rel = x.i === 0 ? "" : same ? " (its page is identical to artwork 1's)" : !(x.page.description||"").trim() ? " (no page written yet)" : ` (${pageDiff(x.i).replace(/\.$/, "").toLowerCase()})`;
+    return `── Artwork ${x.i+1}: ${x.title}${rel}\n${same ? "(as artwork 1)" : (x.page.description || "").trim() || "(blank)"}\n   SEO line: ${x.page.seo || "(blank)"}\n   medium: ${x.page.medium || "(blank)"}`;
+  }).join("\n\n");
+  return `You are drafting fragments of campaign copy for Avant Arte, a publisher of limited edition artworks, from product page${n>1?"s":""} a person has already written and approved. Every fragment must be a shortening or re-voicing of what is on the page${n>1?"s":""} or in the fields. Add no fact of any kind that is not there: no date, number, place, name, material, exhibition or claim. If a fragment cannot be written from the page${n>1?"s":""}, return null for its text and say why in "from".
+
+THE PRODUCT PAGE${n>1?"S, one per artwork. The first is the release's page; the others are siblings of it, and what differs between them is what distinguishes each work":""}:
+
+${pageBlock}
+
+Authentication${n>1?" (all)":""}: ${S.page.authentication || "(blank)"}
+
+THE RELEASE:
+- artist: ${f.artist}; the collaboration is with ${f.collab_with}
+- ${n === 1 ? "one artwork: " + d.cardTitles[0] : n + " artworks: " + all.map(x=>x.title).join("; ")}
+- edition phrase: ${f.edition_phrase}
+- mechanic: ${d.draw ? "allocated by draw" : "timed, " + f.window}${f.beneficiary ? "\n- released in support of " + f.beneficiary : ""}
+
+WRITE, in British English, plain prose, no markdown, no quotation marks around the text:
+1. hook: ${SPEC.hook.rule} One hook for the whole release. Do not open with a rhetorical question or a lede that assumes it is read first.
+2. making: ${SPEC.making.rule} One line for the whole release. Write "printmakers at Make-Ready" exactly if the pages say Make-Ready; the system adds "our". If neither the pages nor the medium descriptions say how the work was physically made, return null.${mediums.size > 1 ? ` The mediums differ between artworks (${[...mediums].map(m => '"' + m + '"').join("; ")}), so do not state one technique as if it applied to all: say only what is true of every artwork, or return null and say why.` : ""}
+3. cards: one line per artwork, in the order given, each drawn from that artwork's own page and SEO line. ${SPEC.card.rule}${n > 1 ? " Where an artwork's page is identical to artwork 1's, return null for its text: nothing on the page distinguishes it, and say so in \"from\"." : ""}
+4. qualifier: ${bald ? "the opener reads “… – " + f.edition_phrase + "” with nothing after it, so add a few words about the work (at most ten, a phrase not a sentence, no full stop, no artist name)." : "return null: the opener already names the work or what it supports."}
+
+HOUSE RULES: British spelling. The house dash is a spaced en dash, never an em dash and never a hyphen; use one at most in a sentence, and never set an aside between a pair of them, which reads as machine-written. Refer to the artist by surname alone (single-name artists as they are): the full name has already been used by the frame before any fragment lands. No exclamation marks and no rhetorical questions. Sentences under 35 words. Never say "we" or "our" inside a fragment. Never write "limited-edition" with a hyphen.
+
+For each, "from" is a short phrase saying where it came from, e.g. "artwork 2, paragraph 2" or "the medium description", or, when text is null, why nothing could be written.
+
+Reply with JSON only:
+{"hook":{"text":string|null,"from":string},"making":{"text":string|null,"from":string},"qualifier":{"text":string|null,"from":string},"cards":[{"title":string,"text":string|null,"from":string}],"notes":[string]}`;
 }
 async function suggest(){
   S.suggest = {busy:true}; renderPage(); renderPageAside();
   try{
     const sample = (typeof claude !== "undefined") ? await claude.use("sample") : null;
     if (!sample) throw new Error("unavailable");
-    const f = S.facts, d = D(), pg = S.page;
-    const bald = !SPEC.openerCarries().length && !d.support;
-    const res = await sample.json(
-`You are drafting fragments of campaign copy for Avant Arte, a publisher of limited edition artworks, from a product page a person has already written and approved. Every fragment must be a shortening or re-voicing of what is on the page or in its fields. Add no fact of any kind that is not there: no date, number, place, name, material, exhibition or claim. If a fragment cannot be written from the page, return null for its text and say why in "from".
-
-THE PRODUCT PAGE:
-${pg.description.trim()}
-
-ITS FIELDS:
-- medium description: ${pg.medium || "(blank)"}
-- authentication: ${pg.authentication || "(blank)"}
-- SEO line: ${pg.seo || "(blank)"}
-
-THE RELEASE:
-- artist: ${f.artist}; the collaboration is with ${f.collab_with}
-- ${d.cardTitles.length === 1 ? "one artwork: " + d.cardTitles[0] : d.cardTitles.length + " artworks: " + d.cardTitles.join("; ")}
-- edition phrase: ${f.edition_phrase}
-- mechanic: ${d.draw ? "allocated by draw" : "timed, " + f.window}${f.beneficiary ? "\n- released in support of " + f.beneficiary : ""}
-
-WRITE, in British English, plain prose, no markdown, no quotation marks around the text:
-1. hook: ${SPEC.hook.rule} Do not open with a rhetorical question or a lede that assumes it is read first.
-2. making: ${SPEC.making.rule} Write "printmakers at Make-Ready" exactly if the page says Make-Ready; the system adds "our". If neither the page nor the medium description says how the work was physically made, return null.
-3. cards: one line per artwork, in the order given. ${SPEC.card.rule} The SEO line, if present, is written in this register.
-4. qualifier: ${bald ? "the opener reads “… – " + f.edition_phrase + "” with nothing after it, so add a few words about the work (at most ten, a phrase not a sentence, no full stop, no artist name)." : "return null: the opener already names the work or what it supports."}
-
-HOUSE RULES: British spelling. The house dash is a spaced en dash, never an em dash and never a hyphen; use one at most in a sentence, and never set an aside between a pair of them, which reads as machine-written. Refer to the artist by surname alone (single-name artists as they are): the full name has already been used by the frame before any fragment lands. No exclamation marks and no rhetorical questions. Sentences under 35 words. Never say "we" or "our" inside a fragment. Never write "limited-edition" with a hyphen.
-
-For each, "from" is a short phrase saying where on the page it came from, e.g. "paragraph 2" or "the medium description", or, when text is null, why nothing could be written.
-
-Reply with JSON only:
-{"hook":{"text":string|null,"from":string},"making":{"text":string|null,"from":string},"qualifier":{"text":string|null,"from":string},"cards":[{"title":string,"text":string|null,"from":string}],"notes":[string]}`,
-      {modelTier:"default"});
+    const res = await sample.json(suggestPrompt(), {modelTier:"default"});
     S.suggest = {res};
   }catch(e){
-    S.suggest = {err: (e && e.code === "not_granted") ? "Claude was not allowed to run here." : "Could not reach Claude just now. The page is unchanged; try again in a moment."};
+    S.suggest = {err: (e && e.code === "not_granted") ? "Claude was not allowed to run here." : "Could not reach Claude just now. The pages are unchanged; try again in a moment."};
   }
   renderPage(); renderPageAside();
 }

@@ -117,7 +117,33 @@ It also fits what the tool already does. The write screen asks for the hook, the
 line per card. If the product page exists first, those three arrive as suggestions to accept or
 rewrite rather than as blank fields.
 
-## 4. One thing this export cannot tell us
+## 4. When a release has several artworks
+
+On Storyblok a page is per product, so a three-print release has three pages. Diffing the siblings
+paragraph by paragraph:
+
+| release | paragraph 1 | paragraph 2, the work | paragraph 3 | SEO line | medium |
+|---|---|---|---|---|---|
+| Ligon, two prints | identical | 79% similar: the title swapped | identical | identical | **differ** |
+| Dalí, three prints | identical | 8% similar: written per work | 45%: provenance per painting | per work | identical |
+| Crewdson, six prints | identical | identical | identical | identical | identical |
+
+So the siblings are edits of one page. The announcement and the authentication are the release's;
+the work paragraph, sometimes the provenance, the SEO line and even the medium are the artwork's.
+The tool keeps them that way: the first artwork's page is the release's page and the others start as
+copies of it, with a line saying what has been changed ("Differs from the first artwork's page in
+paragraph 2") or that nothing has ("Identical … so its card line would have to be written by hand").
+
+That last case is Crewdson: six prints, six identical pages, nothing to draw a per-card line from.
+The suggestion returns those cards empty and says why.
+
+**Ligon's mediums differ, and the email did not know.** *Untitled (White on White)* is a 26-layer
+silkscreen; *Untitled (Black on Black)* is printed in 5 layers. The making line that went out says
+"a 26-layer silkscreen" for the edition, which is true of one print. With the mediums held per
+artwork, the suggestion prompt is told when they differ and that the one making line must be true
+of every artwork, or come back empty.
+
+## 5. One thing this export cannot tell us
 
 The file is two disjoint halves. The 415 rows with copy have **no** `launchDate`, `price`,
 `editionSize` or `releaseType`; the 727 rows with those fields have no copy. There is no shared

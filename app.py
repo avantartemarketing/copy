@@ -44,7 +44,7 @@ PASSWORD = os.environ.get("APP_PASSWORD", "")
 
 @app.before_request
 def gate():
-    if not PASSWORD:
+    if not PASSWORD or request.path in ("/api/health", "/favicon.ico"):   # Render's health check has no password
         return None
     auth = request.authorization
     if auth and auth.password == PASSWORD:

@@ -1,4 +1,4 @@
-"""First Proof, served.
+"""Copy Generator, served.
 
 One small server so the page can run outside claude.ai: it serves the page, renders a
 release through the same templates and validator as the command line, calls Claude with a
@@ -49,12 +49,12 @@ def gate():
     auth = request.authorization
     if auth and auth.password == PASSWORD:
         return None
-    return Response("First Proof", 401, {"WWW-Authenticate": 'Basic realm="First Proof"'})
+    return Response("Copy Generator", 401, {"WWW-Authenticate": 'Basic realm="Copy Generator"'})
 
 
 @app.get("/")
 def page():
-    return send_from_directory(ROOT / "tool", "first-proof.html")
+    return send_from_directory(ROOT / "tool", "copy-generator.html")
 
 
 @app.get("/favicon.ico")

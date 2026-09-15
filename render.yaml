@@ -1,7 +1,7 @@
 # Render Blueprint: one web service. Set the secrets in the dashboard after the first deploy.
 services:
   - type: web
-    name: first-proof
+    name: copy-generator
     runtime: python
     plan: starter
     buildCommand: pip install -r requirements.txt

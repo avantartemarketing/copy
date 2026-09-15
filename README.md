@@ -149,8 +149,8 @@ learns the register from.
 
 ## 5. The tool
 
-**Prototype:** *First Proof* — https://claude.ai/code/artifact/d10df239-0479-479e-baa3-787074c504ae
-(private until shared from the page's share menu; source in `tool/first-proof.html`).
+**Prototype:** *Copy Generator* — https://claude.ai/code/artifact/d10df239-0479-479e-baa3-787074c504ae
+(private until shared from the page's share menu; source in `tool/copy-generator.html`).
 
 Three screens. **Write** is the announcement email as one document: the writer types three
 paragraphs, and the gutter names them opener, hook and making. Everything else in the email is
@@ -162,7 +162,7 @@ those places at once and say where it does not sit well, which is the check a wr
 eye. **Details** is the facts, with a live panel showing the lines they build. **Everything else**
 is the whole campaign, 7 posts, 5 tweets and 12 emails, assembled and ready to copy.
 
-The older single-page prototype is still in `tool/index.html`; *First Proof* supersedes it.
+The older single-page prototype is still in `tool/index.html`; *Copy Generator* supersedes it.
 
 It is the brief form on the left and the generated sequence on the right. Load the Robert
 Longo (draw) or Gregory Crewdson (timed) brief, or start blank. Every sentence in the output

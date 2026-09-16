@@ -64,7 +64,8 @@ def favicon():
 
 @app.get("/api/health")
 def health():
-    return jsonify(ok=True, claude=bool(os.environ.get("ANTHROPIC_API_KEY")), notion=notion.configured(), model=MODEL)
+    return jsonify(ok=True, claude=bool(os.environ.get("ANTHROPIC_API_KEY")), notion=notion.configured(), model=MODEL,
+                   commit=os.environ.get("RENDER_GIT_COMMIT", "")[:7])      # which push is live; Render sets it
 
 
 # ------------------------------------------------------------------ the templates, as the page sees them

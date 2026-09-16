@@ -218,6 +218,8 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .count.over{color:var(--warn)}
 .genact{display:flex;gap:8px;margin-top:12px}
 .genact .act{width:auto;padding:8px 14px}
+.rowbar{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.rowbar select{width:auto;min-width:22ch;padding:5px 30px 5px 10px;font-size:12.5px;background-position:calc(100% - 15px) 11px,calc(100% - 10px) 11px}
 .act.ghost{background:transparent}
 
 @media (max-width:1080px){
@@ -1368,12 +1370,12 @@ function asideFacts(){
 S.server = S.server || {};
 async function serverRender(){
   if (!SERVED || missing().length) return;
-  const stamp = JSON.stringify({f:S.facts, b:S.blocks, p:S.page, l:S.lead});
+  const stamp = JSON.stringify({f:S.facts, b:S.blocks, p:S.page, l:S.lead, d: planDates()});
   if (S.server.stamp === stamp && S.server.out) return S.server.out;
   S.server.busy = true;
   try {
     const r = await fetch("/api/render", {method:"POST", headers:{"content-type":"application/json"},
-      body: JSON.stringify({facts:S.facts, blocks:S.blocks, page:S.page, lead:S.lead, opener:openerText()})});
+      body: JSON.stringify({facts:S.facts, blocks:S.blocks, page:S.page, lead:S.lead, opener:openerText(), dates:planDates()})});
     const j = await r.json();
     if (!r.ok) throw new Error(j.error || r.statusText);
     S.server = {stamp, out: j, busy:false};
@@ -1452,16 +1454,17 @@ function xLen(t){
   for (const c of s) { const o = c.codePointAt(0); n += (o <= 4351 || (o >= 0x2000 && o <= 0x200D) || (o >= 0x2010 && o <= 0x201F) || (o >= 0x2032 && o <= 0x2037)) ? 1 : 2; }
   return n;
 }
-const genStamp = () => JSON.stringify({f:S.facts, b:S.blocks, p:S.page, l:S.lead});
+const genStamp = () => JSON.stringify({f:S.facts, b:S.blocks, p:S.page, l:S.lead, d: (typeof planDates === "function" ? planDates() : null)});
 const genReady = () => !!(S.gen && S.gen.done && S.gen.stamp === genStamp());
 const fmtTime = d => `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 // what Claude has to write: every tweet over the limit, rewritten whole as a tweet.
 // The fixed lines alone take 200 or more of the 280, so cutting the hook inside them leaves a
 // fragment; the archive's own announcement tweets were written as tweets, and so are these.
 function genJobs(sets){
-  const jobs = [];
+  const jobs = [], used = (SERVED && S.campaign && S.plan) ? planUsedKeys(sets) : null;
   [["tweets", "Twitter", sets.tweets], ["artistTweets", "The artist's X", sets.artistTweets]].forEach(([set, channel, list]) => (list || []).forEach(x => {
     if (x.t.startsWith("—")) return;
+    if (used && !used.has(set + ":" + nkey(x.sn || x.n))) return;
     const n = xLen(x.t); if (n <= X_LIMIT) return;
     jobs.push({set, channel, name: x.n, orig: x.t, len: n, text: x.t, ai: null, approved: false, err: null, busy: false});
   }));
@@ -1599,19 +1602,23 @@ function renderOut(){
   }
   const o = outputs(), used = l => l.filter(x => !x.t.startsWith("—")).length;
   const stale = S.gen && !S.gen.busy && S.gen.stamp !== genStamp();
+  const inPlan = SERVED && S.campaign;
   // 1. not generated yet, or the inputs have moved on since
   if (!S.gen || stale) {
     const over = genJobs({tweets: o.tweets, artistTweets: o.artistTweets}).length;
+    const pi = inPlan && S.plan ? planItems(o) : null;
+    const planLine = !inPlan ? "" : S.planBusy || !S.plan ? `Reading the plan's rows from Notion…` : S.planErr ? `The rows could not be read: ${esc(S.planErr)}`
+      : `The plan has ${pi.length} row${pi.length === 1 ? "" : "s"} ${planHasNeeds() && !S.showAll ? "ticked as needing copy" : "for this campaign"}: ${pi.filter(p => p.item).length} the tool can write, ${pi.filter(p => p.item && p.keep).length} already carrying copy it will keep, and ${pi.filter(p => !p.shape).length} it has no shape for, which are listed for writing by hand.`;
     $("#main").innerHTML = `
       <div class="head">
         <span class="lbl">Then</span>
-        <h1>Everything else</h1>
-        <p>Assembled from the details and the fragments when you ask: ${o.posts.length} posts, ${used(o.tweets)} tweets and ${used(o.emails)} emails for Avant Arte, and ${used(o.artistPosts)} posts and ${used(o.artistTweets)} tweets for the artist.</p>
+        <h1>${inPlan ? "The plan's copy" : "Everything else"}</h1>
+        <p>${inPlan ? planLine : `Assembled from the details and the fragments when you ask: ${o.posts.length} posts, ${used(o.tweets)} tweets and ${used(o.emails)} emails for Avant Arte, and ${used(o.artistPosts)} posts and ${used(o.artistTweets)} tweets for the artist.`}</p>
       </div>
       <div class="sheet" style="padding:18px 22px">
         ${stale ? `<p class="note" style="margin:0 0 12px">The details or the fragments have changed since the copy was generated at ${fmtTime(S.gen.at)}. Generate it again to bring it up to date.</p>` : ""}
         <p class="note" style="margin:0 0 12px">${over ? `${over === 1 ? "One tweet runs" : over + " tweets run"} over X's limit of ${X_LIMIT}, because ${over === 1 ? "it carries" : "they carry"} the hook whole. Claude writes ${over === 1 ? "it" : "each"} again as a tweet, keeping every fact, and you approve the rewrite before anything is filled in. Everything else is assembled, not written.` : "Every tweet fits, so nothing here needs Claude: it is all assembled from what you wrote."}</p>
-        <button class="act" id="gen" style="width:auto;padding:9px 16px">Generate comms plan copy</button>
+        <button class="act" id="gen" style="width:auto;padding:9px 16px"${inPlan && (S.planBusy || !S.plan) ? " disabled" : ""}>Generate comms plan copy</button>
       </div>`;
     $("#gen").onclick = generate;
     return;
@@ -1623,7 +1630,8 @@ function renderOut(){
   }
   // 3. the cuts, for approval
   if (!S.gen.done) { renderReview(); return; }
-  // 4. filled in
+  // 4. filled in: the plan's rows inside a campaign, the whole set otherwise
+  if (inPlan && S.plan) { renderPlan(); return; }
   const sets = finalSets(), srv = SERVED ? S.server.out : null, cuts = S.gen.items;
   const cutOK = cuts.every(j => xLen(jobText(j)) <= X_LIMIT);
   const genLine = `<p class="live">Generated at ${fmtTime(S.gen.at)}. ${cuts.length
@@ -1676,38 +1684,26 @@ S.notion = S.notion || {};
 async function notionPanel(){
   const h = await serverHealth(); if (!h || !h.notion || S.view !== "out" || !genReady()) return;
   const f = S.facts, N = S.notion;
-  N.campaign = S.campaign ? S.campaign.name : ""; N.campaign_id = S.campaign ? S.campaign.id : "";
-  if (S.campaign && N.rows === undefined && !N.busy) { N.rows = null; check(); return; }   // the rows, as soon as the copy is approved
-  const rows = N.rows || [], srv = S.server.out, camps = [...new Set(rows.map(r => r.campaign))];
-  const fs = finalSets(), live = l => l.filter(x => x.t.trim() && !x.t.startsWith("—"));
-  const items = !srv ? [] : [
-    ...live(fs.posts).map(x => ({channel:"ig", name:x.sn || x.n, text:x.t})),
-    ...live(fs.tweets).map(x => ({channel:"twitter", name:x.sn || x.n, text:x.t})),
-    ...live(fs.emails).map(x => ({channel:"email", name:x.sn || x.n, text:x.t})),
-    ...live(fs.artistPosts).map(x => ({channel:"artist-ig", name:x.sn || x.n, text:x.t})),
-    ...live(fs.artistTweets).map(x => ({channel:"artist-twitter", name:x.sn || x.n, text:x.t}))];
-  const picker = !S.campaign ? `<p class="note">Choose a campaign at the top of the page to write into its rows in the plan.</p>`
-    : `<p class="note">The plan's rows for <b>${esc(S.campaign.name)}</b>.</p>`;
+  if (!S.campaign) { const w = $("#notion"); if (w) w.remove(); return; }
+  const srv = S.server.out, pi = S.plan ? planItems(finalSets()) : [];
+  const toWrite = pi.filter(p => p.item && !p.keep).map(p => ({id: p.row.id, text: p.text, label: rowLabel(p.row)}));
   const html = `<section><h3>Notion</h3>
-    ${picker}
+    <p class="note">The rows of <b>${esc(S.campaign.name)}</b>${S.plan ? `, read ${esc((S.plan.at || "").slice(11, 16))}` : ""}. <button class="act ghost" id="nrefresh" style="width:auto;padding:2px 8px;font-size:11.5px"${S.planBusy ? " disabled" : ""}>Read again</button></p>
     ${N.err ? `<p class="note">${esc(N.err)}</p>` : ""}
-    ${N.busy && N.campaigns ? `<p class="note">Reading the plan…</p>` : ""}
-    ${N.rows ? `<p class="note">${rows.length} rows${camps.length === 1 ? ` in “${esc(camps[0])}”` : camps.length ? ` across <b>${camps.length} campaigns</b>: ${esc(camps.join(" / "))}. Narrow the name to one before writing` : ""}${rows.length ? `; ${rows.filter(r=>r.has_copy).length} already carry copy` : ""}.</p>
-      ${rows.length ? `<details class="out"><summary><b>Rows</b></summary><pre>${esc(rows.map(r=>`${r.channel} · ${r.name}${r.has_copy?"  (has copy)":""}`).join("\n"))}</pre></details>
-      <button class="act" id="npush"${(N.busy||!srv||camps.length !== 1)?" disabled":""}>Write ${items.length} items into Copy</button>
-      <p class="note">Writes the templates' text into each matching row's Copy field, overwriting what is there. Unmatched items are listed, not written.</p>` : ""}` : ""}
-    ${N.result ? `<p class="note">Written: ${N.result.written.length}. Unmatched: ${N.result.unmatched.length}.</p>
-      <details class="out"><summary><b>What happened</b></summary><pre>${esc([...N.result.written.map(w=>"wrote  "+w.channel+" · "+w.name), ...N.result.unmatched.map(u=>"no row  "+u.channel+" · "+u.name)].join("\n"))}</pre></details>` : ""}
+    ${S.plan ? `<button class="act" id="npush"${(N.busy || !srv || !toWrite.length) ? " disabled" : ""}>Write ${toWrite.length} row${toWrite.length === 1 ? "" : "s"} into Copy</button>
+      <p class="note">Each row gets the copy shown for it on the left. Rows keeping their own copy, and rows by hand, are not touched.</p>` : ""}
+    ${N.result ? `<p class="note">Written: ${N.result.written.length}.${N.result.failed.length ? ` Failed: ${N.result.failed.length}.` : ""}</p>
+      ${N.result.failed.length ? `<details class="out"><summary><b>What failed</b></summary><pre>${esc(N.result.failed.map(f => f.error).join("\n"))}</pre></details>` : ""}` : ""}
   </section>`;
   const panel = $("#aside .panel"); if (!panel) return;
   const old = $("#notion"); const wrap = old || document.createElement("div"); wrap.id = "notion"; wrap.innerHTML = html; if (!old) panel.appendChild(wrap);
-  const chk = $("#ncheck"); if (chk) chk.onclick = check;
+  const rf = $("#nrefresh"); if (rf) rf.onclick = async () => { await loadPlan(true); render(); };
   const push = $("#npush"); if (push) push.onclick = async () => {
     N.busy = true; N.err = null; notionPanel();
-    try { const r = await fetch("/api/notion/push", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({campaign:N.campaign, campaign_id:N.campaign_id || "", items})});
+    try { const r = await fetch("/api/notion/write", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({rows: toWrite.map(x => ({id: x.id, text: x.text}))})});
           const j = await r.json(); if (!r.ok) throw new Error(j.error); N.result = j; }
     catch (e) { N.err = String(e.message || e); }
-    N.busy = false; await check();                                          // the rows again, now marked as carrying copy
+    N.busy = false; await loadPlan(true); render();                          // the rows again, now carrying the copy
   };
   async function check(){
     N.busy = true; N.err = null; notionPanel();
@@ -1728,6 +1724,7 @@ S.camps = S.camps || null;                               // the list, once fetch
 const LS = {key: id => "cg:" + (id || "blank"), last: "cg:last"};
 function snapshot(){
   return {facts: S.facts, blocks: S.blocks, page: S.page, lead: S.lead, from: S.from || {}, campaign: S.campaign,
+          plan: S.plan || null, shapes: S.shapes || {}, keep: S.keep || {}, showAll: !!S.showAll,
           gen: S.gen ? {stamp: S.gen.stamp, at: S.gen.at, done: S.gen.done, fresh: genReady(),
                         items: S.gen.items.map(j => ({set: j.set, channel: j.channel, name: j.name, orig: j.orig, len: j.len, text: j.text, ai: j.ai, approved: j.approved}))} : null};
 }
@@ -1735,6 +1732,7 @@ function restore(snap){
   const b = blankRelease();
   Object.assign(S, {facts: Object.assign(b.facts, snap.facts || {}), blocks: Object.assign(b.blocks, snap.blocks || {}), page: snap.page || b.page,
                     lead: snap.lead || 0, from: snap.from || {}, server: {}, ai: {}, suggest: null, notion: {},
+                    plan: snap.plan || null, shapes: snap.shapes || {}, keep: snap.keep || {}, showAll: !!snap.showAll,
                     gen: snap.gen ? Object.assign({}, snap.gen, {at: new Date(snap.gen.at), busy: false, step: "", items: (snap.gen.items || []).map(j => Object.assign({err: null, busy: false}, j))}) : null});
   if (S.gen && snap.gen.fresh) S.gen.stamp = genStamp();  // the inputs came back with it, so it is still theirs
 }
@@ -1800,9 +1798,11 @@ async function openCampaign(c){                          // c: {id, name}, or nu
   if (snap) { restore(snap); if (snap.savedAt) S.saved = {status: "loaded", at: `${snap.savedAt.slice(0, 10)} ${snap.savedAt.slice(11, 16)}`}; }
   else {
     if (carry) restore(carry); else Object.assign(S, blankRelease(), {lead: 0, ai: {}, gen: null, server: {}, suggest: null, notion: {}, from: {}});
+    S.plan = null; S.shapes = {}; S.keep = {}; S.showAll = false;
     if (c) prefillFromName(c.name);
   }
   if (err) S.saved = {status: "error", err};
+  if (c) { S.plan = S.plan && S.plan.campaign === c.id ? S.plan : null; loadPlan(true).then(() => { if (S.campaign && S.campaign.id === c.id) render(); }); }
   S.view = missing().length ? "facts" : "write"; S.focus = "hook";
   saveLocal(); render();
   if (c && !snap && !err) persist();                     // a draft begun: the campaign is marked as having one
@@ -1834,6 +1834,148 @@ function renderCampaigns(){
     </div>`;
 }
 
+// ═══════════════════════════════════════════════════ the plan's rows, and the shape each is written from
+// Inside a campaign the plan decides what is written: each row that needs copy is given a shape,
+// the template item it is written from, guessed from its channel and name and open to change.
+// Rows the tool has no shape for are shown and left alone. Nothing is written the plan lacks.
+S.plan = S.plan || null;                                 // {rows, at} from Notion, cached with the draft
+S.shapes = S.shapes || {};                               // row id -> shape key chosen by hand ("" for by hand)
+S.keep = S.keep || {};                                   // row id -> keep the copy already in the row (default true)
+S.showAll = S.showAll || false;                          // rows without the Needs copy tick too
+const FAMILY = ch => { const c = (ch || "").toLowerCase().replace(/\s+/g, " ");
+  if (/^ig (main|ins) · post/.test(c)) return "ig"; if (c === "twitter") return "twitter"; if (c === "aa email") return "email";
+  if (c === "artist ig · post") return "artist-ig"; if (c === "artist twitter") return "artist-twitter"; return ""; };
+const SETOF = {ig: "posts", twitter: "tweets", email: "emails", "artist-ig": "artistPosts", "artist-twitter": "artistTweets"};
+const SOCIAL = [["coming soon", "Coming soon", ["coming soon"]], ["announce", "Announcement", ["announce"]], ["sustain", "Sustain: the making", ["sustain"]],
+                ["sustain 2", "Sustain: the artist's words", ["sustain, the artist's words"]], ["live", "Now live", ["live"]], ["still time", "Still time", ["still time"]], ["last chance", "Last chance", ["last chance"]]];
+const SHAPES = [
+  ...SOCIAL.map(([k, l, n]) => ({key: "ig:" + k, family: "ig", label: l, names: n})),
+  ...SOCIAL.filter(([k]) => !k.startsWith("sustain")).map(([k, l, n]) => ({key: "twitter:" + k, family: "twitter", label: l, names: n})),
+  ...SOCIAL.filter(([k]) => k !== "sustain 2").map(([k, l, n]) => ({key: "artist-ig:" + k, family: "artist-ig", label: l, names: n})),
+  ...SOCIAL.filter(([k]) => !k.startsWith("sustain")).map(([k, l, n]) => ({key: "artist-twitter:" + k, family: "artist-twitter", label: l, names: n})),
+  {key: "email:announce", family: "email", label: "Announcement", names: ["Announcement (TL Non-flow)", "Announcement (LE)"]},
+  {key: "email:welcome", family: "email", label: "Welcome", names: ["Welcome (TL Flow)"]},
+  {key: "email:insiders", family: "email", label: "Early access for Insiders", names: ["Early Access (TL Insiders), signed by the advisor", "Early Access (LE Insiders), signed by the advisor"]},
+  {key: "email:early_tl", family: "email", label: "Early access (TL Flow)", names: ["Early Access (TL Flow)"]},
+  {key: "email:early_pp", family: "email", label: "Early access for past collectors", names: ["Early access (TL Artist PP Non Flow)"]},
+  {key: "email:early_le", family: "email", label: "Early or exclusive access (LE)", names: ["Early/Exclusive access (LE)"]},
+  {key: "email:live", family: "email", label: "Now live", names: ["Now Live (TL Flow and Non-flow)"]},
+  {key: "email:halfway", family: "email", label: "Halfway (48 hours)", names: ["Halfway (TL Flow)"]},
+  {key: "email:five_days", family: "email", label: "5 days to go", names: ["5 days to go (TL Flow)"]},
+  {key: "email:three_days", family: "email", label: "3 days to go", names: ["3 days to go (TL Flow)"]},
+  {key: "email:last_chance", family: "email", label: "Last chance", names: ["Last chance (TL Flow)", "Last chance (LE)"]},
+  {key: "email:survey_first", family: "email", label: "First-time collector survey", names: ["First-time collector survey (LE)"]},
+  {key: "email:survey_non", family: "email", label: "Non-purchaser survey", names: ["Non-purchaser survey (LE)"]},
+  {key: "email:preview", family: "email", label: "Monthly Preview paragraph", names: ["Monthly Preview, this release's paragraph"]},
+];
+const shapeByKey = k => SHAPES.find(s => s.key === k) || null;
+// what a row's name says it is, in the tool's terms
+const SOCIAL_GUESS = [[/^(announcement|announce)\b/, "announce"], [/available now|launch post|launch \(collab\)|^launch$|^now live|^live$/, "live"],
+  [/teaser|^tease|coming soon/, "coming soon"], [/draw reminder|halfway|still time|days to go|^reminder/, "still time"],
+  [/^sustain( post| 1)?$/, "sustain"], [/^sustain 2$/, "sustain 2"], [/last chance/, "last chance"]];
+const EMAIL_GUESS = [[/^welcome/, "welcome"], [/insiders/, "insiders"], [/artist pp/, "early_pp"], [/early\/exclusive|^early access$/, "early_le"],
+  [/^early access \(tl flow\)/, "early_tl"], [/^now live/, "live"], [/^halfway/, "halfway"], [/^5 days/, "five_days"], [/^3 days/, "three_days"],
+  [/^last chance/, "last_chance"], [/first[- ]time collector|first time collectors/, "survey_first"], [/non-purchaser/, "survey_non"],
+  [/monthly preview/, "preview"], [/^announcement( \((tl non-flow|le|artist & editions)\))?$/, "announce"]];
+function guessShape(row, siblings){
+  const fam = FAMILY(row.channel); if (!fam) return "";
+  const n = (row.name || "").trim().toLowerCase().replace(/\s+/g, " ");
+  const table = fam === "email" ? EMAIL_GUESS : SOCIAL_GUESS;
+  const hit = table.find(([rx]) => rx.test(n)); if (!hit) return "";
+  let key = fam + ":" + hit[1];
+  if (!shapeByKey(key)) return "";
+  // a second Sustain on the same channel is the artist's words, where there are any
+  if (hit[1] === "sustain" && siblings && shapeByKey(fam + ":sustain 2") && (S.facts.quote || "").trim()) {
+    const earlier = siblings.filter(r => r !== row && FAMILY(r.channel) === fam && /^sustain( post| 1)?$/.test((r.name || "").trim().toLowerCase()));
+    if (earlier.length && siblings.indexOf(earlier[0]) < siblings.indexOf(row)) key = fam + ":sustain 2";
+  }
+  return key;
+}
+const rowShape = (row, rows) => (row.id in S.shapes) ? S.shapes[row.id] : guessShape(row, rows);
+const planHasNeeds = () => !!(S.plan && S.plan.rows.some(r => r.needs_copy !== null));
+function visibleRows(){
+  if (!S.plan) return [];
+  const rows = S.plan.rows.filter(r => !/scheduling/i.test(r.channel || ""));
+  if (!planHasNeeds() || S.showAll) return rows;
+  return rows.filter(r => r.needs_copy);
+}
+// the rendered item a shape stands for, in the sets as they will go out
+function itemFor(key, sets){
+  const sh = shapeByKey(key); if (!sh) return null;
+  const list = sets[SETOF[sh.family]] || [], want = sh.names.map(nkey);
+  const x = list.find(x => nkeys(x.sn || x.n).some(k => want.includes(k)) || (x.sn && want.includes(nkey(x.sn))));
+  return x && !x.t.startsWith("—") ? x : null;
+}
+const itemKey = (fam, x) => SETOF[fam] + ":" + nkey(x.sn || x.n);
+// every visible row with its shape and text: what will be generated, shown and written
+function planItems(sets){
+  const rows = visibleRows();
+  return rows.map(row => { const key = rowShape(row, rows), item = key ? itemFor(key, sets) : null;
+    return {row, key, shape: shapeByKey(key), item, text: item ? item.t : "", keep: row.has_copy ? (S.keep[row.id] !== false) : false}; });
+}
+// the items the plan uses, so generation touches only those
+function planUsedKeys(sets){ const out = new Set(); planItems(sets).forEach(p => { if (p.item && p.shape) out.add(itemKey(p.shape.family, p.item)); }); return out; }
+// the plan's Live Date per phase, per channel kind, for the templates' schedule
+function planDates(){
+  if (!S.plan) return null;
+  const rows = visibleRows(), social = {}, email = {};
+  const SOC = {"coming soon": "coming_soon_at", "announce": "announce_at", "sustain": "sustain_at", "sustain 2": "sustain2_at", "still time": "halfway_at", "last chance": "last_chance_at"};
+  const EM = {announce: "announce_at", preview: "preview_at", insiders: "early_access_at", early_tl: "early_access_at", early_le: "early_access_at", halfway: "halfway_at", five_days: "five_days_at", three_days: "three_days_at", last_chance: "last_chance_at"};
+  const pick = (fam, map, into, prefer) => rows.filter(r => FAMILY(r.channel) === fam && r.live_date).sort((a, b) => (prefer.test(a.channel) ? 0 : 1) - (prefer.test(b.channel) ? 0 : 1))
+    .forEach(r => { const k = rowShape(r, rows).split(":")[1], f = map[k]; if (f && !into[f]) into[f] = r.live_date; });
+  pick("ig", SOC, social, /main/i); pick("twitter", SOC, social, /./); pick("email", EM, email, /./);
+  return {social, email};
+}
+async function loadPlan(force){
+  if (!SERVED || !S.campaign) return;
+  if (S.plan && !force && S.plan.campaign === S.campaign.id) return;
+  S.planBusy = true; S.planErr = null;
+  try { const r = await fetch("/api/notion/rows", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({campaign_id: S.campaign.id, campaign: S.campaign.name})});
+        const j = await r.json(); if (!r.ok) throw new Error(j.error); S.plan = {rows: j.rows, at: new Date().toISOString(), campaign: S.campaign.id}; }
+  catch (e) { S.planErr = String(e.message || e); }
+  S.planBusy = false; afterShapeChange(); saveLocal();     // dates that moved show up as a stale generation; a new tweet asks for one
+}
+// a shape changed: the approved copy stands unless a tweet the plan now uses still needs rewriting
+function afterShapeChange(){
+  if (!S.gen || !S.gen.done) { S.gen = null; return; }
+  const need = genJobs(baseSets()).map(j => j.set + ":" + j.name), have = new Set(S.gen.items.map(j => j.set + ":" + j.name));
+  if (need.some(k => !have.has(k))) S.gen = null;
+}
+function rowLabel(r){ return `${r.channel} · ${r.name}${r.live_date ? " · " + r.live_date.slice(0, 10) : ""}`; }
+// the plan as the screen: each row, its shape, and the copy for it
+function renderPlan(){
+  const sets = finalSets(), items = planItems(sets), rows = visibleRows();
+  const written = items.filter(p => p.item && !p.keep).length, byHand = items.filter(p => !p.shape).length, kept = items.filter(p => p.keep).length;
+  const cuts = S.gen.items;
+  const genLine = `<p class="live">Generated at ${fmtTime(S.gen.at)}. ${cuts.length ? cuts.map(j => `${esc(j.channel)} · ${esc(j.name)}: rewritten${j.ai && j.text === j.ai ? " by Claude" : j.ai ? " by Claude, then edited" : " by hand"}, ${j.len} to ${xLen(jobText(j))} characters, approved.`).join(" ") : "Nothing needed Claude."}
+    ${items.length} rows ${planHasNeeds() && !S.showAll ? "need copy" : "in the plan"}: ${written} to write, ${kept} keeping the copy already there, ${byHand} by hand. <button class="act ghost" id="regen" style="width:auto;padding:3px 10px;margin-left:6px;font-size:12px">Generate again</button></p>`;
+  const groups = []; items.forEach(p => { const g = groups.find(g => g.channel === p.row.channel); if (g) g.items.push(p); else groups.push({channel: p.row.channel, items: [p]}); });
+  const opts = p => { const fam = FAMILY(p.row.channel); const list = SHAPES.filter(s => !fam || s.family === fam);
+    return `<select class="shape" data-row="${esc(p.row.id)}"><option value="">By hand</option>${(fam ? [list] : [SHAPES]).flat().map(s => `<option value="${esc(s.key)}"${p.key === s.key ? " selected" : ""}>${esc(fam ? s.label : s.family + " · " + s.label)}</option>`).join("")}</select>`; };
+  const body = p => !p.shape ? `<p class="note" style="margin:0">${FAMILY(p.row.channel) ? "Nothing in the templates matches this name. Choose a shape, or write it in Notion." : "The tool has no shape for this channel. Choose one to start from, or write it in Notion."}${p.row.copy ? `</p><pre>${esc(p.row.copy)}</pre><p class="note">The copy already in the row, kept.` : ""}</p>`
+    : !p.item ? `<p class="note" style="margin:0">This shape is not used for a ${S.facts.mechanic === "draw" ? "draw" : "timed release"}.</p>`
+    : p.row.copy ? `<div class="gencols"><div><span class="lbl">In the row now${p.keep ? ", kept" : ""}</span><pre>${esc(p.row.copy)}</pre></div><div><span class="lbl">The tool's${p.keep ? "" : ", to be written"}</span><pre>${esc(p.text)}</pre></div></div>
+        <div class="genact"><button class="act ghost keep" data-row="${esc(p.row.id)}">${p.keep ? "Use the tool's version instead" : "Keep the plan's copy"}</button></div>`
+    : `<pre>${esc(p.text)}</pre>`;
+  $("#main").innerHTML = `
+    <div class="head">
+      <span class="lbl">Then</span>
+      <h1>The plan's copy</h1>
+      <p>The rows of ${esc(S.campaign.name)} in Notion${planHasNeeds() ? ", those ticked as needing copy" : ""}, each written from the shape beside it. Change a shape and the row is rewritten; choose “By hand” and the row is left alone.</p>
+    </div>
+    ${genLine}
+    ${S.planErr ? `<p class="live">The rows could not be read: ${esc(S.planErr)}</p>` : ""}
+    ${planHasNeeds() && !rows.length ? `<p class="live">No row in this campaign is ticked as needing copy. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Show every row</button></p>` : ""}
+    ${groups.map(g => `<div class="groupline"><span class="lbl">${esc(g.channel)}</span></div>
+      ${g.items.map(p => `<details class="out"${p.row.copy && p.shape && p.item ? "" : ""}><summary><b>${esc(p.row.name)}</b>${p.row.live_date ? `<span class="note">${esc(p.row.live_date.slice(0, 10))}</span>` : ""}${p.row.copy ? `<span class="note">${p.keep ? "keeps its copy" : "will be replaced"}</span>` : ""}<i>${p.item ? (SETOF[p.shape.family] === "tweets" || SETOF[p.shape.family] === "artistTweets" ? xLen(p.text) + " on X" : p.text.length + " chars") : ""}</i></summary>
+        <div class="rowbar"><span class="lbl">Shape</span>${opts(p)}</div>${body(p)}</details>`).join("")}`).join("")}
+    ${planHasNeeds() && rows.length ? `<p class="note" style="margin-top:18px">${S.showAll ? `Showing every row. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Only rows that need copy</button>` : `Rows without the Needs copy tick are hidden. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Show every row</button>`}</p>` : ""}`;
+  $("#regen").onclick = () => { S.gen = null; generate(); };
+  const sa = $("#showall"); if (sa) sa.onclick = () => { S.showAll = !S.showAll; afterShapeChange(); persist(); render(); };
+  $("#main").querySelectorAll("select.shape").forEach(el => el.onchange = e => { S.shapes[el.dataset.row] = e.target.value; afterShapeChange(); persist(); render(); });
+  $("#main").querySelectorAll("button.keep").forEach(el => el.onclick = () => { S.keep[el.dataset.row] = !(S.keep[el.dataset.row] !== false); persist(); render(); });
+}
+
 // ═══════════════════════════════════════════════════ boot
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => { S.view = b.dataset.view; render(); });
 $("#new").onclick = () => {
@@ -1846,7 +1988,7 @@ $("#new").onclick = () => {
   }
   clearTimeout(b._t); b.dataset.arm = ""; b.textContent = "New release"; b.classList.remove("arm");
   S.campaign = null; S.saved = {};                     // the campaign's saved draft is left as it is
-  Object.assign(S, blankRelease(), {view:"facts", focus:"hook", lead:0, ai:{}, gen:null, server:{}, suggest:null, notion:{}, from:{}});
+  Object.assign(S, blankRelease(), {view:"facts", focus:"hook", lead:0, ai:{}, gen:null, server:{}, suggest:null, notion:{}, from:{}, plan:null, shapes:{}, keep:{}, showAll:false});
   saveLocal(); render();
 };
 $("#camp").onclick = () => { S.view = "campaigns"; render(); };

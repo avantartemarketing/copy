@@ -62,6 +62,8 @@ def brief_from_state(state):
             "fundraiser": g("beneficiary"),
             "beneficiary_handle": g("beneficiary_handle"),
             "advisor": g("advisor", "Sam"),
+            "social_dates": {k: _dt(v) for k, v in ((state.get("dates") or {}).get("social") or {}).items() if v},
+            "email_dates": {k: _dt(v) for k, v in ((state.get("dates") or {}).get("email") or {}).items() if v},
         },
         "artist": {
             "name": g("artist"),

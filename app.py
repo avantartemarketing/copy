@@ -178,6 +178,18 @@ def api_notion_rows():
     return jsonify(rows=rows)
 
 
+@app.post("/api/notion/write")
+def api_notion_write():
+    """rows: [{id, text}], written by row id: the page decided which row gets what."""
+    if not notion.configured():
+        return jsonify(error="Notion is not configured on this server: set NOTION_TOKEN and NOTION_DATABASE_ID."), 503
+    body = request.get_json(force=True) or {}
+    try:
+        return jsonify(notion.write_rows(body.get("rows") or []))
+    except notion.NotionError as e:
+        return jsonify(error=str(e)), 502
+
+
 @app.post("/api/notion/push")
 def api_notion_push():
     if not notion.configured():

@@ -88,7 +88,8 @@ def email_phases(release, artist):
     launch, close = dt(release["launch_at"]), dt(release["closes_at"])
     draw = release.get("mechanic") == "draw"
     day = datetime.timedelta(days=1)
-    when = lambda key, default: dt(release[key]) if release.get(key) else default
+    given = release.get("email_dates") or {}                     # the plan's Live Date per row, when the release comes from a campaign
+    when = lambda key, default: dt(given[key]) if given.get(key) else (dt(release[key]) if release.get(key) else default)
     preview = ("monthly_preview", "Monthly Preview, this release's paragraph", when("preview_at", launch - 14 * day))
     if draw:
         ea = when("early_access_at", launch - 4 * day)
@@ -110,8 +111,8 @@ def email_phases(release, artist):
     if release.get("window") == "48 hours":
         seq.append(("halfway", "Halfway (TL Flow)", when("halfway_at", launch + day)))
     else:
-        seq += [("five_days", "5 days to go (TL Flow)", launch + 2 * day),
-                ("three_days", "3 days to go (TL Flow)", close - 3 * day)]
+        seq += [("five_days", "5 days to go (TL Flow)", when("five_days_at", launch + 2 * day)),
+                ("three_days", "3 days to go (TL Flow)", when("three_days_at", close - 3 * day))]
     return seq + [("last_chance", "Last chance (TL Flow)", when("last_chance_at", close))]
 
 
@@ -219,7 +220,8 @@ def phases(release, artist):
     launch, close = dt(release["launch_at"]), dt(release["closes_at"])
     draw = release.get("mechanic") == "draw"
     day = datetime.timedelta(days=1)
-    when = lambda key, default: dt(release[key]) if release.get(key) else default
+    given = release.get("social_dates") or {}                    # the plan's Live Date per row, when the release comes from a campaign
+    when = lambda key, default: dt(given[key]) if given.get(key) else (dt(release[key]) if release.get(key) else default)
     announce = when("announce_at", launch if draw else launch - 21 * day)
     out = [("coming soon", when("coming_soon_at", announce - 14 * day)), ("announce", announce)]
     mid = announce + (close - announce) / 2

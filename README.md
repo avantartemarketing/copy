@@ -311,6 +311,21 @@ first, with the one that names this release's artist and title preselected. Choo
 the plan's rows for it, shows which already carry copy, and a button writes each item's text
 into its row's Copy field.
 
+**The plan decides what is written.** Inside a campaign, Everything else is the plan itself: the
+campaign's rows in Notion, those ticked "Needs copy", in phase order. Each row is given a shape,
+the template item it is written from, guessed from its channel and name: "Available Now" on
+Twitter is the live tweet, a second "Sustain" on Instagram is the artist's words, "Early Access
+(LE Insiders) (Sam)" and "(Curtis)" are the same Insiders email. The shape is a menu on the row,
+so an uncertain guess is a click to correct, and "By hand" leaves the row alone. Rows the tool has
+no shape for, the stories, the partner's posts, a deep dive, are listed and left alone so the writer
+sees them. Rows that already carry copy keep it unless the writer swaps in the tool's version. The
+templates take each phase's date from the rows' "Live Date", so "3 days to go" goes out when the
+plan says. Generate only rewrites the tweets the plan has, and Write puts each row's copy into
+that row, by its id, never by its name. Nothing is written the plan lacks. Outside a campaign the
+page falls back to the whole set. Three more property names can be set if the plan's differ:
+`NOTION_PROP_NEEDS` ("Needs copy"), `NOTION_PROP_DATE` ("Live Date") and `NOTION_PROP_PHASE`
+("Campaign Phase").
+
 **Campaigns and drafts.** Served, the page opens on the plan's campaigns, read from the campaigns
 database the plan's Campaign column points to, most recently edited first. Choose one and the
 release is worked on inside it; a draft of the whole release, details, page, fragments and the

@@ -219,6 +219,10 @@ def plain(prop):
         return (prop.get("status") or {}).get("name", "") or ""
     if t == "multi_select":
         return ", ".join(x.get("name", "") for x in prop.get("multi_select") or [])
+    if t == "checkbox":
+        return "Yes" if prop.get("checkbox") else "No"
+    if t == "date":
+        return ((prop.get("date") or {}).get("start") or "")[:16]
     return ""
 
 
@@ -241,6 +245,7 @@ def rows_for_campaign(campaign="", campaign_id=""):
         raise NotionError("No campaign chosen.")
     types = schema()
     p_camp, p_chan, p_copy = _prop("NOTION_PROP_CAMPAIGN", "Campaign text"), _prop("NOTION_PROP_CHANNEL", "Channel Name"), _prop("NOTION_PROP_COPY", "Copy")
+    p_needs, p_date, p_phase = _prop("NOTION_PROP_NEEDS", "Needs copy"), _prop("NOTION_PROP_DATE", "Live Date"), _prop("NOTION_PROP_PHASE", "Campaign Phase")
     for p in (p_camp, p_chan, p_copy):
         if p not in types:
             raise NotionError(f"The database has no property called “{p}”. It has: {', '.join(sorted(types))}.")
@@ -279,11 +284,17 @@ def rows_for_campaign(campaign="", campaign_id=""):
         camp = plain(pr.get(p_camp, {}))
         if not flt and not campaign_id and campaign.lower() not in camp.lower():
             continue
+        copy = plain(pr.get(p_copy, {})).strip()
+        needs = plain(pr[p_needs]).strip().lower() if p_needs in pr else ""
         rows.append({
             "id": pg["id"], "name": plain(pr.get(title, {})), "channel": plain(pr.get(p_chan, {})),
             "campaign": camp, "status": plain(pr.get("Status", {})) if "Status" in pr else "",
-            "has_copy": bool(plain(pr.get(p_copy, {})).strip()), "url": pg.get("url", ""),
+            "has_copy": bool(copy), "copy": copy, "url": pg.get("url", ""),
+            "needs_copy": None if p_needs not in pr else needs in ("yes", "true", "✓", "checked", "1"),   # None: the plan has no such column
+            "live_date": plain(pr[p_date]) if p_date in pr else "",
+            "phase": plain(pr[p_phase]) if p_phase in pr else "",
         })
+    rows.sort(key=lambda r: (r["phase"], r["live_date"], r["channel"], r["name"]))
     return rows
 
 
@@ -292,8 +303,26 @@ def _key(channel, name):
     return (channel or "").strip().lower(), CANON.get(n, n)
 
 
+def write_rows(rows):
+    """rows: [{id, text}]. Writes each text into that row's Copy, in chunks of 2000 characters."""
+    p_copy = _prop("NOTION_PROP_COPY", "Copy")
+    types = schema()
+    if types.get(p_copy) != "rich_text":
+        raise NotionError(f"“{p_copy}” is a {types.get(p_copy)} property; Copy must be rich text to be written.")
+    written, failed = [], []
+    for r in rows:
+        text = (r.get("text") or "").strip()
+        chunks = [text[i:i + CHUNK] for i in range(0, len(text), CHUNK)] or [""]
+        try:
+            _call("PATCH", f"/pages/{r['id']}", json={"properties": {p_copy: {"rich_text": [{"type": "text", "text": {"content": c}} for c in chunks]}}})
+            written.append(r["id"])
+        except NotionError as e:
+            failed.append({"id": r["id"], "error": str(e)})
+    return {"written": written, "failed": failed}
+
+
 def push(campaign, items, campaign_id=""):
-    """items: [{channel: ig|ig-insiders|twitter|email, name, text}]. Writes Copy on the matching row."""
+    """items: [{channel: ig|ig-insiders|twitter|email, name, text}]. Writes Copy on the matching row, by name."""
     p_copy = _prop("NOTION_PROP_COPY", "Copy")
     types = schema()
     if types.get(p_copy) != "rich_text":

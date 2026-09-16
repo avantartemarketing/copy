@@ -83,6 +83,12 @@ def facts(brief):
     return nums, words
 
 
+def x_len(tweet):
+    """A tweet's length as X counts it: any link is 23, most characters 1, emoji and most non-Latin 2."""
+    t = re.sub(r"https?://\S+|\b[\w.-]+\.(?:co|com|uk|art|io|net|org)\b\S*", "x" * 23, tweet.strip())
+    return sum(1 if (ord(c) <= 4351 or 0x2000 <= ord(c) <= 0x200D or 0x2010 <= ord(c) <= 0x201F or 0x2032 <= ord(c) <= 0x2037) else 2 for c in t)
+
+
 def sentences(text):
     for para in text.split("\n"):
         for s in re.split(r"(?<=[.!?])\s+", para.strip()):
@@ -166,13 +172,14 @@ def check_email(text):
             warnings.append(f"“{w}” used {n}× across the email (cap {cap})")
     if re.search(r"(?<![\w'’])(?!a\b)[a-z] [a-z]{1,2}\b|\b[a-z]{1,2} (?!a\b)[a-z](?![\w'’])", body):
         warnings.append("possible split word (“o f”, “an d”): a known HubSpot editor artefact")
-    if "[TWEET" in text:                                             # tweet rules: the link is in the tweet
-        for chunk in text.split("[TWEET")[1:]:
+    for marker in ("[TWEET", "[ARTIST TWEET"):                      # tweet rules: the link is in the tweet
+        for chunk in text.split(marker)[1:]:
             tweet = chunk.split("]", 1)[1].strip()
+            tweet = re.split(r"^\[ARTIST POST ", tweet, maxsplit=1, flags=re.M)[0].strip()
             if re.search(r"link in (our |my |the )?bio", tweet, re.I):
                 errors.append("tweet says “link in bio”: a tweet carries the link")
-            if len(tweet) > 280:
-                warnings.append(f"tweet of {len(tweet)} characters (over 280 needs X Premium; house median 183)")
+            if x_len(tweet) > 280:
+                warnings.append(f"tweet of {x_len(tweet)} characters as X counts them (over 280 needs X Premium; house median 183)")
     if "[CAPTION]" in text:                                          # Instagram caption rules
         cap = text.split("[CAPTION]", 1)[1].strip()
         if len(cap) > 650:

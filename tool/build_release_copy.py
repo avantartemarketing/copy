@@ -113,7 +113,7 @@ for k, v, note in frags:
     ws.row_dimensions[row].height = 16 * max(2, math.ceil(len(v) / 80) + v.count("\n")); R[k] = row; row += 1
 row += 1; ws[f"A{row}"] = "Derived (formulas, do not edit)"; ws[f"A{row}"].font = BOLD; row += 1
 B = lambda k: f"$B${R[k]}"
-derived = ["named", "named_x", "collab_x", "a_unit", "work", "Work", "work_email", "Work_email", "work_intro", "support", "beneficiary_tagged", "bio_tagged", "hook_names_beneficiary",
+derived = ["named", "named_x", "collab_x", "a_unit", "work", "Work", "work_email", "Work_email", "work_intro", "support", "tweet_beneficiary", "beneficiary_tagged", "bio_tagged", "hook_names_beneficiary",
            "features", "features_list", "features_list_support", "making_ours", "making_ours_tagged",
            "launch_date", "launch_time", "launch_weekday", "launch_date_dd", "close_date", "close_time", "close_weekday", "close_date_dd",
            "collect_phrase", "edition_phrase_cap", "window_cap", "card", "quote_line", "each_artwork", "work_word", "add_what"]
@@ -130,6 +130,7 @@ F = {
  "Work_email": f'=UPPER(LEFT({B("work_email")},1))&MID({B("work_email")},2,999)',
  "work_intro": f'=IF({B("works")}=1,{B("title_1")}&", ","")&{B("edition_phrase")}&IF(OR({B("qualifier")}="",{B("support")}<>""),"",IF(LEFT({B("qualifier")},1)=",",""," ")&{B("qualifier")})',
  "support": f'=IF(OR({B("beneficiary")}="",{B("hook_names_beneficiary")}),"",", released in support of "&{B("beneficiary")})',
+ "tweet_beneficiary": f'=IF(OR({B("beneficiary")}="",{B("hook_names_beneficiary")}),"",", in support of "&{B("beneficiary")})',
  "beneficiary_tagged": f'=IF({B("beneficiary")}="","",{B("beneficiary")}&IF({B("beneficiary_handle")}="",""," (@"&{B("beneficiary_handle")}&")"))',
  "bio_tagged": f'=IF({B("handle")}="",{B("bio")},SUBSTITUTE({B("bio")},{B("artist")},{B("named")},1))',
  "hook_names_beneficiary": f'=IF({B("beneficiary")}="",FALSE,ISNUMBER(SEARCH({B("beneficiary")},{B("hook")})))',
@@ -182,8 +183,9 @@ lines = [
  ("TWEETS", None),
  ("tweet · coming soon · status", "Our {ordinal} collaboration with {collab_x} is on the horizon."),
  ("tweet · coming soon · action", "Sign up for updates: {link}"),
- ("tweet · beneficiary line", "Released in support of {beneficiary}."),
- ("tweet · action before launch, timed", "Available for {window} from {launch_time} on {launch_date}. Sign up for updates: {link}"),
+ ("tweet · announce · status", "Announcing {work}, {edition_phrase} by {named_x}{tweet_beneficiary}."),
+ ("tweet · announce · status, series", "Announcing {edition_phrase} by {named_x}, from {work}{tweet_beneficiary}."),
+ ("tweet · action before launch, timed", "Launches {launch_date} at {launch_time} for {window}. Sign up for updates: {link}"),
  ("tweet · action, draw", "Closes {close_date} at {close_time}. Enter the draw: {link}"),
  ("tweet · action while open, timed", "Closes {close_date} at {close_time}. Buy {a_unit}: {link}"),
  ("EMAILS · shared", None),
@@ -249,7 +251,7 @@ lines = [
  ("email · monthly preview · when, draw", "The edition will be allocated by a randomised draw, which closes at {close_time} on {close_date}."),
  ("email · monthly preview · when, timed", "The edition will be available to collect for {window} only, from {launch_time} on {launch_weekday}, {launch_date_dd}."),
 ]
-ph = {f"{{{k}}}": k for k in ["artist", "collab_with", "collab_x", "named", "named_x", "link", "beneficiary", "a_unit", "work", "Work", "work_email", "Work_email", "work_intro", "support",
+ph = {f"{{{k}}}": k for k in ["artist", "collab_with", "collab_x", "named", "named_x", "link", "beneficiary", "a_unit", "work", "Work", "work_email", "Work_email", "work_intro", "support", "tweet_beneficiary",
                              "edition_phrase", "edition_phrase_cap", "collect_phrase", "ordinal", "window",
                              "launch_date", "launch_time", "launch_weekday", "launch_date_dd", "close_date", "close_time", "close_weekday", "close_date_dd",
                              "beneficiary_tagged", "quote", "hashtag", "features", "advisor", "early_access_code", "framing_code", "framing_percent", "each_artwork", "work_word", "add_what"]}
@@ -310,17 +312,17 @@ ps.freeze_panes = "E4"
 # ================================================================= Tweets
 ts = wb.create_sheet("Tweets")
 ts["A1"] = "The tweets, assembled"; ts["A1"].font = TITLE
-ts["A2"] = "The post's status line with the X handle, the hook on the announcement only, the beneficiary named once, and an action line that ends with the link. No features line, no hashtag, no bio."; ts["A2"].font = NOTE
+ts["A2"] = "The post's status line with the X handle, the hook on the announcement only, the beneficiary named once, and an action line that ends with the link. No features line, no hashtag, no bio. The announcement runs over X's limit until the tool cuts its hook."; ts["A2"].font = NOTE
 for i, h in enumerate(["#", "Tweet", "Made of", "Status line", "Substance", "Beneficiary line", "Action line", "Tweet", "Characters"], 1):
     c = ts.cell(row=3, column=i, value=h); c.font = BOLD; c.fill = GREY
 X = lambda expr: f'SUBSTITUTE({expr},{IB("named")},{IB("named_x")})'          # the same status line, with the X handle instead of the Instagram one
 pre_t = f'IF({draw},{LC("tweet · action, draw")},{LC("tweet · action before launch, timed")})'
 opn_t = f'IF({draw},{LC("tweet · action, draw")},{LC("tweet · action while open, timed")})'
-ben_t = f'IF(OR({IB("beneficiary")}="",{IB("hook_names_beneficiary")}),"",{LC("tweet · beneficiary line")})'
 announce_status = f'IF({IB("series_name")}<>"",{LC("post · announce · status, series")},{LC("post · announce · status")})'
 tweets = [
  ("coming soon", "status · action", f'={LC("tweet · coming soon · status")}', '=""', '=""', f'={LC("tweet · coming soon · action")}', join(["D{r}", "G{r}"])),
- ("announce", "status · hook · beneficiary · action", f'={X(announce_status)}', f'={IB("hook")}', f'={ben_t}', f'={pre_t}', join(["D{r}", "E{r}", "F{r}", "G{r}"])),
+ # the announcement carries the hook, which the tool cuts to fit X; its own lines stay short, the beneficiary a clause on the status line
+ ("announce", "status, with the beneficiary · hook · action", f'=IF({IB("series_name")}<>"",{LC("tweet · announce · status, series")},{LC("tweet · announce · status")})', f'={IB("hook")}', '=""', f'={pre_t}', join(["D{r}", "E{r}", "G{r}"])),
  ("live (timed only)", "status · action", f'=IF({draw},"{NA_DRAW}",{X(LC("post · live · status"))})', '=""', '=""', f'=IF({draw},"",{opn_t})', join(["D{r}", "G{r}"], draw, NA_DRAW)),
  ("still time (timed only)", "status · action", f'=IF({draw},"{NA_DRAW}",{X(LC("post · still time · status"))})', '=""', '=""', f'=IF({draw},"",{opn_t})', join(["D{r}", "G{r}"], draw, NA_DRAW)),
  ("last chance", "status · action", f'=IF({draw},{X(LC("post · last chance · status, draw"))},{X(LC("post · last chance · status"))})', '=""', '=""', f'={opn_t}', join(["D{r}", "G{r}"])),

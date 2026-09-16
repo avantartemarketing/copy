@@ -17,10 +17,15 @@ import requests
 API = "https://api.notion.com/v1"
 VERSION = "2022-06-28"
 
-# the templates' names for items, against the plan's own
-ALIAS = {"announce": "announcement", "live": "now live", "still time": "halfway through",
-         "sustain, the artist's words": "sustain", "sustain, the making": "sustain"}
-CHANNELS = {"ig": "IG Main · Post", "ig-insiders": "IG Ins · Post", "twitter": "Twitter", "email": "AA Email"}
+# the plan's several names for one phase, and the templates' own, all read as one key
+CANON = {"announcement": "announce", "announcement post": "announce",
+         "now live": "live", "launch": "live", "launch (collab)": "live",
+         "halfway through": "still time", "halfway": "still time",
+         "sustain post": "sustain", "sustain 1": "sustain", "sustain, the making": "sustain", "sustain, the artist's words": "sustain",
+         "tease": "coming soon"}
+ALIAS = {}
+CHANNELS = {"ig": "IG Main · Post", "ig-insiders": "IG Ins · Post", "twitter": "Twitter", "email": "AA Email",
+            "artist-ig": "Artist IG · Post", "artist-twitter": "Artist Twitter"}
 
 
 def plan_names(name):
@@ -34,8 +39,7 @@ def plan_names(name):
         return [n.replace("(TL Flow and Non-flow)", "(TL Flow)"), n.replace("(TL Flow and Non-flow)", "(TL Non-flow)")]
     if " · " in n:
         return [x.strip() for x in n.split(" · ")]
-    low = n.lower()
-    return [ALIAS.get(low, n)]
+    return [n]
 
 
 class NotionError(Exception):
@@ -209,7 +213,7 @@ def rows_for_campaign(campaign="", campaign_id=""):
 
 def _key(channel, name):
     n = (name or "").strip().lower()
-    return (channel or "").strip().lower(), ALIAS.get(n, n)
+    return (channel or "").strip().lower(), CANON.get(n, n)
 
 
 def push(campaign, items, campaign_id=""):

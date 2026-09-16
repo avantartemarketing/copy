@@ -44,7 +44,7 @@ def brief_from_state(state):
     features = [g(k) for k in ("f1", "f2", "f3", "f4", "f5") if g(k)]
     page_facts = page_text(state.get("page") or {})
     return {
-        "outputs": ["ig-set", "twitter-set", "email-set"],
+        "outputs": ["ig-set", "twitter-set", "email-set", "artist-set"],
         "release": {
             "campaign_code": f"{surname}_{'LE' if draw else 'TL'}_{year}",
             "link": g("link"),
@@ -71,6 +71,7 @@ def brief_from_state(state):
             "hashtag": g("hashtag"),
             "collaboration_ordinal": g("ordinal", "latest"),
             "quote": g("quote"),
+            "voice": "third" if str(g("artist_voice")).startswith("third") else "first",
             "facts": [],
         },
         "edition": {
@@ -98,6 +99,7 @@ _HEAD = {
     "ig-set": re.compile(r"^\[POST \d+ · (?P<name>[^·\]]+?) · (?P<send>\d{6})(?: · [^\]]*)?\]\s*$", re.M),
     "twitter-set": re.compile(r"^\[TWEET \d+ · (?P<name>[^·\]]+?) · (?P<send>\d{6})(?: · [^\]]*)?\]\s*$", re.M),
     "email-set": re.compile(r"^\[EMAIL \d+ · (?P<name>[^\]]+?) · (?P<send>\d{6})\]\s*$", re.M),
+    "artist-set": re.compile(r"^\[ARTIST (?P<kind>POST|TWEET) \d+ · (?P<name>[^·\]]+?) · (?P<send>\d{6})(?: · [^\]]*)?\]\s*$", re.M),
 }
 
 
@@ -109,5 +111,8 @@ def split_set(name, text):
         end = heads[i + 1].start() if i + 1 < len(heads) else len(text)
         body = text[m.end():end].strip()
         body = re.sub(r"\n═+\s*$", "", body).strip()          # the rule between emails
-        items.append({"name": m.group("name").strip(), "send": m.group("send"), "text": body})
+        item = {"name": m.group("name").strip(), "send": m.group("send"), "text": body}
+        if "kind" in m.groupdict():
+            item["kind"] = m.group("kind").lower()
+        items.append(item)
     return items

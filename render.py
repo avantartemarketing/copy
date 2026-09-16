@@ -120,7 +120,7 @@ def voice(text, who="ours", tag=False):
     text = text or ""
     if who == "ours":
         return text.replace("printmakers at Make-Ready", "our printmakers at Make-Ready" + (" (@make__ready)" if tag else ""))
-    return text.replace("printmakers at Make-Ready", "Avant Arte's printmakers at Make-Ready")
+    return text.replace("printmakers at Make-Ready", "Avant Arte's printmakers at Make-Ready" + (" (@make__ready)" if tag else ""))
 
 
 def cap_first(text):

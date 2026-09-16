@@ -82,7 +82,12 @@ def api_render():
         e, w = validate(text, brief)
         errors += e
         warnings += w
-        out[name] = split_set(name, text)
+        if name == "artist-set":                     # one template, two channels
+            items = split_set(name, text)
+            out["artist-posts"] = [i for i in items if i["kind"] == "post"]
+            out["artist-tweets"] = [i for i in items if i["kind"] == "tweet"]
+        else:
+            out[name] = split_set(name, text)
     return jsonify(outputs=out, errors=errors, warnings=warnings, brief=brief)
 
 

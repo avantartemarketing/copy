@@ -241,6 +241,28 @@ hook on the announcement only, the beneficiary named once, and an action line th
 release's link. No features line, no hashtag, no bio. The workbook and the templates carry the
 same lines.
 
+**The announcement tweet never fits.** The hook is two or three sentences and X allows 280
+characters, a link counting as 23, so every announcement tweet in every brief runs over, by 140
+to 300 characters. The archive's own announcement tweets carried one hook sentence at most, and
+the artist's usually none. So the tool has a generate step, the one place it lets Claude write:
+Everything else stays blank until "Generate comms plan copy" is pressed; the templates render;
+any tweet over the limit is shown with its hook cut to the room left, which is between 40 and
+130 characters depending on the titles and the launch line; and each cut is approved, edited or
+replaced before anything is filled in. Under 40 characters of room the tweet goes without a hook.
+Without Claude the same screen asks for the cut by hand. Everything else on the screen is
+assembled, not written, and needs no approval.
+
+**The artist's own posts**, `templates/artist-set.txt`: the plan holds as many posts on the
+artist's channels as on ours, and the archive's are the same six phases in the artist's voice.
+Coming soon, announcement, sustain, now live, still time and last chance on the artist's
+Instagram, and the tweets to match; stories carry no copy in the plan and are not made. The same
+hook and making line, with @avant.arte tagged and Make-Ready tagged in the sustain post, and no
+bio or quote, which would be redundant on the artist's own account. A details field sets the
+voice: first person ("my latest collaboration with @avant.arte"), which is 63% of the archive,
+or third person for a studio or an estate ("Grayson Perry's latest collaboration"). In the first
+person a hook that names the artist reads as someone else speaking, and the checks say so. The
+workbook does not carry the artist set.
+
 Run it:
 
 ```
@@ -284,8 +306,9 @@ the copy; set `NOTION_PROP_CAMPAIGN`, `NOTION_PROP_CHANNEL` or `NOTION_PROP_COPY
 database names them differently. Copy has to be a rich text property to be written. Rows are
 found by the chosen campaign's id, so the spelling of its name never matters; if the campaigns
 database cannot be listed, a typed name is matched by containment instead, and a name that
-matches more than one campaign is refused rather than written into both. Items are matched to
-rows by channel and name: an Instagram caption goes to the Main and Insiders rows
+matches more than one campaign is refused rather than written into both. Nothing can be written
+until the generate step has run and every cut is approved. Items are matched to rows by channel
+and name, the artist's channels included: an Instagram caption goes to the Main and Insiders rows
 where the plan has both, an email that stands for two rows ("Now Live (TL Flow and Non-flow)")
 is written to both, and an item with no row is listed rather than written. Nothing is written
 until "Write … items into Copy" is pressed, and it overwrites what is there.

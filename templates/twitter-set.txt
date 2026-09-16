@@ -19,7 +19,8 @@
 {% set untitled = series %}
 {% set work = ("the " ~ series ~ " series") if untitled else artworks|titles_q %}
 {% set deadline = "Closes " ~ release.closes_at|ukdate ~ " at " ~ release.closes_at|uktime ~ "." %}
-{% set pre_launch = (deadline ~ " Enter the draw: " ~ link) if draw else ("Available for " ~ release.window ~ " from " ~ release.launch_at|uktime ~ " on " ~ release.launch_at|ukdate ~ ". Sign up for updates: " ~ link) %}
+{# the announcement carries the hook, cut to fit by the tool, so its own lines are kept short #}
+{% set pre_launch = (deadline ~ " Enter the draw: " ~ link) if draw else ("Launches " ~ release.launch_at|ukdate ~ " at " ~ release.launch_at|uktime ~ " for " ~ release.window ~ ". Sign up for updates: " ~ link) %}
 {% set open = (deadline ~ " Enter the draw: " ~ link) if draw else (deadline ~ " Buy " ~ a_unit ~ ": " ~ link) %}
 {% set ns = namespace(n=0) %}
 {% for phase, send in phases(release, artist) %}
@@ -34,13 +35,9 @@ Our {{ artist.collaboration_ordinal }} collaboration with {{ collab_x }} is on t
 
 Sign up for updates: {{ link }}
 {% elif phase == "announce" %}
-Announcing {% if untitled %}{{ edition|edition_phrase }} by {{ named }}, from {{ work }}{% else %}{{ work }}, {{ edition|edition_phrase }} by {{ named }}{% endif %}.
+Announcing {% if untitled %}{{ edition|edition_phrase }} by {{ named }}, from {{ work }}{% else %}{{ work }}, {{ edition|edition_phrase }} by {{ named }}{% endif %}{{ (", in support of " ~ fundraiser) if (fundraiser and fundraiser not in context.hook) else "" }}.
 
 {{ context.hook }}
-{% if fundraiser and fundraiser not in context.hook %}
-
-Released in support of {{ fundraiser }}.
-{% endif %}
 
 {{ pre_launch }}
 {% elif phase == "live" %}

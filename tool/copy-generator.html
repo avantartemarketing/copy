@@ -196,6 +196,17 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .na{color:var(--ink-faint);font-style:italic}
 .groupline{display:flex;align-items:center;gap:12px;margin:26px 0 12px;max-width:760px}
 .groupline::after{content:"";flex:1;height:1px;background:var(--line)}
+.gen{padding:16px 22px;margin-bottom:14px}
+.genhead{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:10px}
+.gencols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:900px){.gencols{grid-template-columns:1fr}}
+.gencols pre{white-space:pre-wrap;font:inherit;font-size:13px;color:var(--ink-soft);margin:6px 0 0;line-height:1.5}
+.gencols textarea{margin-top:6px;line-height:1.5;resize:vertical}
+.count{font-size:11.5px;margin:6px 0 0;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.count.over{color:var(--warn)}
+.genact{display:flex;gap:8px;margin-top:12px}
+.genact .act{width:auto;padding:8px 14px}
+.act.ghost{background:transparent}
 
 @media (max-width:1080px){
   .shell{grid-template-columns:1fr}
@@ -245,7 +256,7 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 function blankRelease(){
   return {
     facts: {
-      artist:"", collab_with:"", ordinal:"latest", handle:"", x_handle:"", hashtag:"", link:"",
+      artist:"", collab_with:"", ordinal:"latest", handle:"", x_handle:"", hashtag:"", link:"", artist_voice:"first person",
       title_1:"", is_series:"no", series_name:"", artworks:1,
       edition_phrase:"", unit:"print",
       mechanic:"timed", window:"one week", launch_at:"", closes_at:"",
@@ -277,7 +288,7 @@ const S = {
   lead: 0,
   facts: {
     artist:"Grayson Perry", collab_with:"Grayson Perry", ordinal:"latest",
-    handle:"alanmeasles", x_handle:"", hashtag:"GraysonPerry",
+    handle:"alanmeasles", x_handle:"", hashtag:"GraysonPerry", artist_voice:"first person",
     link:"https://avantarte.co/grayson-perry",
     title_1:"The Changeling", is_series:"no", series_name:"", artworks:1,
     edition_phrase:"a new limited edition print", unit:"print",
@@ -425,15 +436,40 @@ function outputs(){
   ];
 
   const X = s => s.replace(d.named, d.namedX);
-  const preT = d.draw ? `${deadline} Enter the draw: ${f.link}` : `Available for ${f.window} from ${d.launchTime} on ${d.launchDate}. Sign up for updates: ${f.link}`;
+  const preT = d.draw ? `${deadline} Enter the draw: ${f.link}` : `Launches ${d.launchDate} at ${d.launchTime} for ${f.window}. Sign up for updates: ${f.link}`;
   const openT = d.draw ? `${deadline} Enter the draw: ${f.link}` : `${deadline} Buy ${d.aUnit}: ${f.link}`;
-  const benT = (f.beneficiary && !d.hookNamesBen) ? `Released in support of ${f.beneficiary}.` : "";
+  const benT = (f.beneficiary && !d.hookNamesBen) ? `, in support of ${f.beneficiary}` : "";
   const tweets = [
     {n:"Coming soon", t:P(`Our ${f.ordinal} collaboration with ${d.collabX} is on the horizon.`, `Sign up for updates: ${f.link}`)},
-    {n:"Announcement", t:P(X(announceStatus), H, benT, preT)},
+    {n:"Announcement", t:P(X(announceStatus).replace(/\.$/, "") + benT + ".", H, preT)},
     {n:"Now live", t: d.draw?NA:P(X(`${d.Work} by ${d.named} is now available to collect, for ${f.window} only.`), openT)},
     {n:"Still time", t: d.draw?NA:P(X(`There's still time to collect ${d.work} by ${d.named}.`), openT)},
     {n:"Last chance", t:P(X(`Last chance to ${d.draw?"enter the draw for":"collect"} ${d.work} by ${d.named}.`), openT)}
+  ];
+
+  // the artist's own accounts: the same fragments in their voice, @avant.arte on Instagram, Avant Arte named on X
+  const first = !String(f.artist_voice || "").startsWith("third"), collab = f.collab_with || f.artist;
+  const mineIG = first ? `my ${f.ordinal} collaboration with @avant.arte` : `${collab}'s ${f.ordinal} collaboration with @avant.arte`;
+  const mineX = first ? `my ${f.ordinal} collaboration with Avant Arte` : `${collab}'s ${f.ordinal} collaboration with Avant Arte`;
+  const benIG = f.beneficiary ? `, in support of ${d.benTagged}` : "", benX = f.beneficiary ? `, in support of ${f.beneficiary}` : "";
+  const bio = first ? "my bio" : "bio";
+  const preA = d.draw ? `Enter the draw via the link in ${bio}. ${deadline}` : `Available for ${f.window} from ${d.launchTime} on ${d.launchDate}. Link in ${bio} to get updates.`;
+  const openA = d.draw ? `Enter the draw via the link in ${bio}. ${deadline}` : `Link in ${bio} to buy ${d.aUnit}. ${deadline}`;
+  const makingTheirs = M.replace("printmakers at Make-Ready", "Avant Arte's printmakers at Make-Ready (@make__ready)");
+  const artistPosts = [
+    {n:"Coming soon", t:P(`${cap(mineIG)} is on the horizon: ${f.edition_phrase}${benIG}, launching on ${d.launchDate}.`, `Link in ${bio} to get updates.`)},
+    {n:"Announcement", t:P(`Announcing ${mineIG} – ${d.work}, ${f.edition_phrase}${d.hookNamesBen ? "" : benIG}.`, H, feat, preA)},
+    {n:"Sustain", t:P(`A closer look at ${d.work}, ${f.edition_phrase} and ${mineIG}.`, makingTheirs, feat, preA)},
+    {n:"Now live", t: d.draw ? NA : P(`${d.Work}, ${mineIG}, is now available to collect for ${f.window} only.`, feat, openA)},
+    {n:"Still time", t: d.draw ? NA : P(`There's still time to collect ${d.work}, ${mineIG}.`, feat, openA)},
+    {n:"Last chance", t:P(`Last chance to ${d.draw ? "enter the draw for" : "collect"} ${d.work}, ${mineIG}.`, feat, openA)}
+  ];
+  const artistTweets = [
+    {n:"Coming soon", t:P(`${cap(mineX)} is on the horizon: ${f.edition_phrase}${benX}, launching on ${d.launchDate}.`, `Sign up for updates: ${f.link}`)},
+    {n:"Announcement", t:P(`Announcing ${mineX} – ${d.work}, ${f.edition_phrase}${d.hookNamesBen ? "" : benX}.`, H, preT)},
+    {n:"Now live", t: d.draw ? NA : P(`${d.Work}, ${mineX}, is now available to collect, for ${f.window} only.`, openT)},
+    {n:"Still time", t: d.draw ? NA : P(`There's still time to collect ${d.work}, ${mineX}.`, openT)},
+    {n:"Last chance", t:P(`Last chance to ${d.draw ? "enter the draw for" : "collect"} ${d.work}, ${mineX}.`, openT)}
   ];
 
   const greet = "Hi {{ personalization_token('contact.firstname', 'there') }},";
@@ -495,7 +531,7 @@ function outputs(){
       d.draw ? `The edition will be allocated by a randomised draw, which closes at ${d.closeTime} on ${d.closeDate}.`
              : `The edition will be available to collect for ${f.window} only, from ${d.launchTime} on ${d.launchDay}, ${d.launchDateDd}.`))
   ];
-  return {posts, tweets, emails};
+  return {posts, tweets, emails, artistPosts, artistTweets};
 }
 
 // where does a block land, and what sits either side of it there?
@@ -522,7 +558,7 @@ function placements(key){
     });
     return hits;
   }
-  scan(o.posts,"Instagram"); scan(o.tweets,"Twitter"); scan(o.emails,"Email");
+  scan(o.posts,"Instagram"); scan(o.tweets,"Twitter"); scan(o.emails,"Email"); scan(o.artistPosts,"The artist's Instagram"); scan(o.artistTweets,"The artist's X");
   return hits;
 }
 
@@ -592,6 +628,8 @@ function checks(key, text){
   if (artist.split(/\s+/).length > 1 && t.includes(artist))
     out.push({k:"warn", t:`“${artist}” in full. The frame has already named them: surname only.`});
   if (/(?<!\d)\s-\s(?!\d)/.test(t)) out.push({k:"warn", t:"A hyphen as a dash. The house dash is a spaced en dash ( – )."});
+  if (key === "hook" && artist && !String(f.artist_voice || "").startsWith("third") && new RegExp("\\b" + artist.split(/\s+/).pop().replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b").test(t))
+    out.push({k:"warn", t:`Names ${artist.split(/\s+/).pop()}. The artist's own posts carry the hook in the first person, where that reads as someone else speaking. Write it without the name, or set their posts to the third person in the details.`});
   t.split(/(?<=[.!?])\s+/).forEach(sn => {
     if ((sn.match(/\s[–—-]\s/g) || []).length >= 2)
       out.push({k:"warn", t:"An aside between two dashes reads as machine-written. Use commas or a new sentence."});
@@ -643,7 +681,7 @@ const crumb = () => { const f=S.facts;
 function render(){
   crumb();
   const o = outputs();
-  $("#nout").textContent = o.posts.length + o.tweets.length + o.emails.length;
+  $("#nout").textContent = o.posts.length + o.tweets.length + o.emails.length + o.artistPosts.length + o.artistTweets.length;
   $("#nfacts").textContent = shownFields();
   const pw = pageStats().total; $("#npage").textContent = pw ? pw + " words" : "";
   $("#nwrite").textContent = (3 + D().cardTitles.length) + " fields";
@@ -651,7 +689,7 @@ function render(){
   if (S.view === "write") { renderWrite(); renderAside(); }
   else if (S.view === "facts") { renderFacts(); $("#aside").innerHTML = asideFacts(); }
   else if (S.view === "page") { renderPage(); renderPageAside(); }
-  else { renderOut(); $("#aside").innerHTML = missing().length ? asideFacts() : asideOut(); if (!missing().length) notionPanel(); }
+  else { renderOut(); $("#aside").innerHTML = missing().length ? asideFacts() : asideOut(); if (!missing().length && genReady()) notionPanel(); }
 }
 
 // ---------- write: nothing to write against until the frame stands up ----------
@@ -1146,6 +1184,7 @@ const FORM = [
     ["ordinal","Which collaboration","select","debut|latest|second"],
     ["handle","Instagram handle","text","Without the @"],
     ["x_handle","X handle","text","Leave blank if none"],
+    ["artist_voice","Their own posts","select","first person|third person"],
     ["hashtag","Hashtag","text","Announcement post only"],
     ["link","Release link","text","Used in tweets"],
     ["advisor","Advisor","select","Sam|Curtis|Sofiya"]
@@ -1299,7 +1338,7 @@ function emailParas(text, page){
   return t.split("\n").map(norm).filter(l => l && !MARK.test(l) && l !== "[BODY]" && l !== "[FEATURES]" && l !== "No body: this one is image-led.");
 }
 function parity(out){
-  const o = outputs(), sets = [["ig-set", o.posts], ["twitter-set", o.tweets], ["email-set", o.emails]];
+  const o = outputs(), sets = [["ig-set", o.posts], ["twitter-set", o.tweets], ["email-set", o.emails], ["artist-posts", o.artistPosts], ["artist-tweets", o.artistTweets]];
   const diffs = [];
   let n = 0, extra = 0;                              // extra: items only the templates make, shown as theirs
   sets.forEach(([set, mine]) => {
@@ -1316,6 +1355,140 @@ function parity(out){
   });
   return {n, diffs, extra};
 }
+// the server's text stands in for the page's, paired by name; items only the templates make are appended
+function withServer(mine, set, srv){
+  if (!srv) return mine;
+  const {pairs, extra} = pairUp(mine.filter(x => !x.t.startsWith("—")), srv.outputs[set] || []);
+  const by = new Map(pairs.filter(p => p.a).map(p => [p.x, p.a]));
+  return mine.map(x => by.has(x) ? Object.assign({}, x, {t: by.get(x).text, sn: by.get(x).name}) : x)
+    .concat(extra.filter(a => a.text.trim()).map(a => ({n: a.name, sn: a.name, use: "from the templates", t: a.text})));
+}
+// the copy the templates make, by set: the server's when served, the page's own assembly otherwise
+function baseSets(){
+  const o = outputs(), srv = SERVED ? S.server.out : null;
+  const take = (mine, set) => withServer(mine, set, srv);
+  return {posts: take(o.posts, "ig-set"), tweets: take(o.tweets, "twitter-set"), emails: take(o.emails, "email-set"),
+          artistPosts: take(o.artistPosts, "artist-posts"), artistTweets: take(o.artistTweets, "artist-tweets")};
+}
+
+// ---------- the generate step ----------
+// Everything else is assembled once the writer asks for it. Nearly all of it is the templates'
+// work; the one thing Claude writes is a cut of the hook where a tweet carries it whole and runs
+// over X's limit, and each cut is approved before anything is filled in.
+const X_LIMIT = 280;
+// a tweet's length as X counts it: any link is 23, most characters 1, emoji and most non-Latin 2
+function xLen(t){
+  const s = (t || "").trim().replace(/https?:\/\/\S+|\b[\w.-]+\.(?:co|com|uk|art|io|net|org)\b\S*/g, "x".repeat(23));
+  let n = 0;
+  for (const c of s) { const o = c.codePointAt(0); n += (o <= 4351 || (o >= 0x2000 && o <= 0x200D) || (o >= 0x2010 && o <= 0x201F) || (o >= 0x2032 && o <= 0x2037)) ? 1 : 2; }
+  return n;
+}
+const genStamp = () => JSON.stringify({f:S.facts, b:S.blocks, p:S.page, l:S.lead});
+const genReady = () => !!(S.gen && S.gen.done && S.gen.stamp === genStamp());
+const fmtTime = d => `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+// what Claude has to write: every tweet over the limit, cut in its hook where it carries one
+function genJobs(sets){
+  const H = S.blocks.hook.trim(), jobs = [];
+  [["tweets", "Twitter", sets.tweets], ["artistTweets", "The artist's X", sets.artistTweets]].forEach(([set, channel, list]) => (list || []).forEach(x => {
+    if (x.t.startsWith("—")) return;
+    const n = xLen(x.t); if (n <= X_LIMIT) return;
+    const hook = H && x.t.includes(H) ? H : null;
+    jobs.push({set, channel, name: x.n, orig: x.t, len: n, hook, text: hook || x.t, ai: null, approved: false, err: null, busy: false});
+  }));
+  return jobs;
+}
+const jobText = j => (j.hook ? j.orig.replace(j.hook, j.text.trim()) : j.text.trim()).replace(/\n{3,}/g, "\n\n").trim();     // the whole tweet with the cut in place
+const jobRoom = j => j.hook ? X_LIMIT - (xLen(j.orig) - xLen(j.hook)) : X_LIMIT;        // what the hook may take
+const SCHEMA_CUT = {type:"object", additionalProperties:false, required:["hook"], properties:{hook:{type:"string"}}};
+function cutPrompt(j){
+  return `You are cutting one tweet for Avant Arte, a publisher of limited edition artworks, to fit X's limit. Everything in it except the hook is house copy and stays exactly as it is; only the hook changes.
+
+THE TWEET AS IT STANDS, ${j.len} characters as X counts them against a limit of ${X_LIMIT}, a link counting as 23:
+${j.orig}
+
+THE HOOK, the part to cut:
+${j.hook}
+
+THE HOOK MAY BE AT MOST ${jobRoom(j)} CHARACTERS. Cut it to fit: drop whole sentences before rewording, keep the artist's own words where they are quoted, and keep the one idea that makes someone want to look. Never add a fact, a name, a number or a claim that is not in the hook as it stands.
+
+HOUSE RULES: British spelling. The house dash is a spaced en dash, never an em dash and never a hyphen; use one at most in a sentence, and never set an aside between a pair of them, which reads as machine-written. Refer to the artist by surname alone. No exclamation marks and no rhetorical questions. Never say "we" or "our". Never write "limited-edition" with a hyphen.
+
+Reply with JSON only, no other text:
+{"hook":"the cut hook"}`;
+}
+const MIN_ROOM = 40;                                   // under this, a hook is a fragment: the tweet goes without one
+async function cutJob(j){
+  j.busy = true; j.err = null; j.approved = false; render();
+  try {
+    if (!j.hook) throw {code:"nothing_to_cut"};
+    if (jobRoom(j) < MIN_ROOM) {                       // the titles and the launch line have taken the room
+      j.ai = ""; j.text = ""; j.busy = false;
+      j.err = `Only ${jobRoom(j)} characters are left for a hook once the titles and the launch line are in, so it goes without one, as the archive's announcement tweets often did. Add a few words if they fit.`;
+      render(); return;
+    }
+    const r = await aiJSON(cutPrompt(j), SCHEMA_CUT);
+    j.ai = (r.hook || "").trim(); j.text = j.ai;
+    if (xLen(jobText(j)) > X_LIMIT) j.err = "Claude's cut still runs over. Trim it below.";
+  } catch (e) {
+    j.err = (e && e.code === "nothing_to_cut") ? "Over the limit with no hook in it to cut. Shorten it by hand below." : AI_ERR(e) + " Cut it by hand below.";
+  }
+  j.busy = false; render();
+}
+async function generate(){
+  S.gen = {stamp: genStamp(), busy: true, at: new Date(), items: [], done: false, step: SERVED ? "Rendering the templates…" : "Assembling…"};
+  render();
+  if (SERVED) await serverRender();
+  const jobs = genJobs(baseSets());
+  S.gen.items = jobs;
+  if (!jobs.length) { S.gen.busy = false; S.gen.done = true; render(); return; }
+  await Promise.all(jobs.map(cutJob));
+  S.gen.busy = false; render();
+}
+// the sets as they will go out: the templates' text with each approved cut in place
+function finalSets(){
+  const b = baseSets();
+  const apply = (list, set) => list.map(x => { const j = genReady() ? S.gen.items.find(j => j.set === set && j.name === x.n) : null; return j ? Object.assign({}, x, {t: jobText(j)}) : x; });
+  return {posts: b.posts, tweets: apply(b.tweets, "tweets"), emails: b.emails, artistPosts: b.artistPosts, artistTweets: apply(b.artistTweets, "artistTweets")};
+}
+
+function renderReview(){
+  const jobs = S.gen.items;
+  const rows = jobs.map((j, i) => {
+    const n = xLen(jobText(j)), over = n > X_LIMIT;
+    const ck = j.hook && !j.busy ? checks("hook", j.text).filter(c => c.k === "warn") : [];
+    return `<div class="sheet gen">
+      <div class="genhead"><b>${esc(j.channel)} · ${esc(j.name)}</b><span class="note" style="margin:0">${j.len} characters as X counts them, against ${X_LIMIT}.${j.hook ? ` The hook may take ${jobRoom(j)}.` : ""}</span></div>
+      <div class="gencols">
+        <div><span class="lbl">As written</span><pre>${esc(j.orig)}</pre></div>
+        <div><span class="lbl">${j.hook ? (j.ai === "" && j.text === "" ? "The hook, dropped" : "The hook, cut") : "The tweet, cut"}${j.ai && j.text === j.ai ? " by Claude" : j.ai ? ", then edited" : ""}</span>
+          ${j.busy ? `<p class="note">Claude is cutting it…</p>` : `<textarea id="cut_${i}" rows="6">${esc(j.text)}</textarea>
+          <p class="count${over ? " over" : ""}" id="count_${i}">${n} of ${X_LIMIT} for the whole tweet${over ? ", still over" : ""}</p>
+          ${ck.map(c => `<div class="chk" data-k="warn"><s></s><span>${esc(c.t)}</span></div>`).join("")}
+          ${j.err ? `<p class="note">${esc(j.err)}</p>` : ""}`}
+        </div>
+      </div>
+      <div class="genact"><button class="act" id="ok_${i}"${(over || j.busy) ? " disabled" : ""}>${j.approved ? "Approved" : "Approve"}</button><button class="act ghost" id="again_${i}"${(j.busy || !j.hook) ? " disabled" : ""}>Ask Claude again</button></div>
+    </div>`;
+  }).join("");
+  $("#main").innerHTML = `
+    <div class="head">
+      <span class="lbl">Then</span>
+      <h1>Approve what Claude wrote</h1>
+      <p>${jobs.length === 1 ? "One tweet carries" : jobs.length + " tweets carry"} the hook whole and ${jobs.length === 1 ? "does" : "do"} not fit X's limit. The cut is Claude's and the words are yours to change here. Nothing is filled in until each is approved. Everything else is assembled from what you wrote and needs no approval.</p>
+    </div>
+    ${rows}`;
+  jobs.forEach((j, i) => {
+    const ta = $(`#cut_${i}`); if (ta) ta.oninput = e => {
+      j.text = e.target.value; j.approved = false;
+      const n = xLen(jobText(j)), c = $(`#count_${i}`), ok = $(`#ok_${i}`);
+      c.textContent = `${n} of ${X_LIMIT} for the whole tweet${n > X_LIMIT ? ", still over" : ""}`; c.classList.toggle("over", n > X_LIMIT);
+      ok.disabled = n > X_LIMIT; ok.textContent = "Approve";
+    };
+    const ok = $(`#ok_${i}`); if (ok) ok.onclick = () => { j.approved = true; if (S.gen.items.every(x => x.approved)) S.gen.done = true; render(); };
+    const again = $(`#again_${i}`); if (again) again.onclick = () => cutJob(j);
+  });
+}
+
 function renderOut(){
   if (missing().length) {
     $("#main").innerHTML = `
@@ -1329,31 +1502,62 @@ function renderOut(){
     $("#main").querySelectorAll("[data-goto]").forEach(b => b.onclick = () => { S.view = b.dataset.goto; render(); });
     return;
   }
-  const o = outputs();
-  if (SERVED && !S.server.out && !S.server.err) { serverRender().then(() => { if (S.view === "out") render(); }); }
-  const srv = S.server.out, band = !SERVED ? "" : srv
-    ? (() => { const pv = parity(srv); return `<p class="live" id="band">Rendered by the templates on the server${srv.errors.length ? `: <b>${srv.errors.length} validator error${srv.errors.length===1?"":"s"}</b>` : ", validator clean"}${srv.warnings.length ? `, ${srv.warnings.length} warning${srv.warnings.length===1?"":"s"}` : ""}. The page's own assembly ${pv.diffs.length ? `<b>differs in ${pv.diffs.length}</b> of ${pv.n} items.` : `matches all ${pv.n} items.`}${pv.extra ? ` ${pv.extra} more come from the templates only.` : ""}</p>`
-        + ((srv.errors.length || srv.warnings.length || pv.diffs.length) ? `<details class="out"><summary><b>Detail</b></summary><pre>${esc([...srv.errors.map(x=>"error: "+x), ...srv.warnings.map(x=>"warning: "+x), ...pv.diffs.map(x=>"assembly: "+x)].join("\n"))}</pre></details>` : ""); })()
+  const o = outputs(), used = l => l.filter(x => !x.t.startsWith("—")).length;
+  const stale = S.gen && !S.gen.busy && S.gen.stamp !== genStamp();
+  // 1. not generated yet, or the inputs have moved on since
+  if (!S.gen || stale) {
+    const over = genJobs({tweets: o.tweets, artistTweets: o.artistTweets}).length;
+    $("#main").innerHTML = `
+      <div class="head">
+        <span class="lbl">Then</span>
+        <h1>Everything else</h1>
+        <p>Assembled from the details and the fragments when you ask: ${o.posts.length} posts, ${used(o.tweets)} tweets and ${used(o.emails)} emails for Avant Arte, and ${used(o.artistPosts)} posts and ${used(o.artistTweets)} tweets for the artist.</p>
+      </div>
+      <div class="sheet" style="padding:18px 22px">
+        ${stale ? `<p class="note" style="margin:0 0 12px">The details or the fragments have changed since the copy was generated at ${fmtTime(S.gen.at)}. Generate it again to bring it up to date.</p>` : ""}
+        <p class="note" style="margin:0 0 12px">${over ? `${over === 1 ? "One tweet runs" : over + " tweets run"} over X's limit of ${X_LIMIT}, because ${over === 1 ? "it carries" : "they carry"} the hook whole. Claude cuts the hook to fit, and you approve the cut before anything is filled in. Everything else is assembled, not written.` : "Every tweet fits, so nothing here needs Claude: it is all assembled from what you wrote."}</p>
+        <button class="act" id="gen" style="width:auto;padding:9px 16px">Generate comms plan copy</button>
+      </div>`;
+    $("#gen").onclick = generate;
+    return;
+  }
+  // 2. rendering, before there is anything to approve
+  if (S.gen.busy && !S.gen.items.length) {
+    $("#main").innerHTML = `<div class="head"><span class="lbl">Then</span><h1>Everything else</h1><p>${esc(S.gen.step || "Working…")}</p></div>`;
+    return;
+  }
+  // 3. the cuts, for approval
+  if (!S.gen.done) { renderReview(); return; }
+  // 4. filled in
+  const sets = finalSets(), srv = SERVED ? S.server.out : null, cuts = S.gen.items;
+  const cutOK = cuts.every(j => xLen(jobText(j)) <= X_LIMIT);
+  const genLine = `<p class="live">Generated at ${fmtTime(S.gen.at)}. ${cuts.length
+      ? cuts.map(j => `${esc(j.channel)} · ${esc(j.name)}: ${j.text.trim() === "" ? "the hook dropped for want of room" : "the hook cut" + (j.ai && j.text === j.ai ? " by Claude" : j.ai ? " by Claude, then edited" : " by hand")}, ${j.len} to ${xLen(jobText(j))} characters, approved.`).join(" ")
+      : "Nothing needed Claude: every tweet fits."} <button class="act ghost" id="regen" style="width:auto;padding:3px 10px;margin-left:6px;font-size:12px">Generate again</button></p>`;
+  const band = !SERVED ? "" : srv
+    ? (() => { const pv = parity(srv), warns = srv.warnings.filter(w => !(cutOK && /^tweet of \d+ characters/.test(w)));
+        return `<p class="live" id="band">Rendered by the templates on the server${srv.errors.length ? `: <b>${srv.errors.length} validator error${srv.errors.length===1?"":"s"}</b>` : ", validator clean"}${warns.length ? `, ${warns.length} warning${warns.length===1?"":"s"}` : ""}. The page's own assembly ${pv.diffs.length ? `<b>differs in ${pv.diffs.length}</b> of ${pv.n} items.` : `matches all ${pv.n} items.`}${pv.extra ? ` ${pv.extra} more come from the templates only.` : ""}</p>`
+        + ((srv.errors.length || warns.length || pv.diffs.length) ? `<details class="out"><summary><b>Detail</b></summary><pre>${esc([...srv.errors.map(x=>"error: "+x), ...warns.map(x=>"warning: "+x), ...pv.diffs.map(x=>"assembly: "+x)].join("\n"))}</pre></details>` : ""); })()
     : S.server.err ? `<p class="live">The server could not render this release: ${esc(S.server.err)}. Showing the page's own assembly.</p>`
-    : `<p class="live">Rendering on the server…</p>`;
-  // when the server has rendered, its text is the copy; the page's lists keep their names and channel tags
-  const withServer = (mine, set) => { if (!srv) return mine; const {pairs, extra} = pairUp(mine.filter(x => !x.t.startsWith("—")), srv.outputs[set] || []);
-    const by = new Map(pairs.filter(p => p.a).map(p => [p.x, p.a.text]));
-    return mine.map(x => by.has(x) ? Object.assign({}, x, {t: by.get(x)}) : x).concat(extra.filter(a => a.text.trim()).map(a => ({n: a.name, use: "from the templates", t: a.text}))); };
-  const posts = withServer(o.posts, "ig-set"), tweets = withServer(o.tweets, "twitter-set"), emails = withServer(o.emails, "email-set");
+    : "";
+  const first = !String(S.facts.artist_voice || "").startsWith("third");
   const block = (title, note, list, meta) => `<div class="groupline"><span class="lbl">${esc(title)}</span></div>
     <p class="note" style="max-width:60ch;margin:0 0 14px">${esc(note)}</p>
-    ${list.map(x=>`<details class="out"><summary><b>${esc(x.n)}</b>${x.ch?`<span class="note">${esc(x.ch)}</span>`:""}${x.use?`<span class="note">${esc(x.use)}</span>`:""}<i>${x.t.startsWith("—")?"not used":(meta?x.t.length+" chars":"")}</i></summary><pre>${x.t.startsWith("—")?`<span class="na">${esc(x.t)}</span>`:esc(x.t)}</pre></details>`).join("")}`;
+    ${list.map(x=>`<details class="out"><summary><b>${esc(x.n)}</b>${x.ch?`<span class="note">${esc(x.ch)}</span>`:""}${x.use?`<span class="note">${esc(x.use)}</span>`:""}<i>${x.t.startsWith("—")?"not used":(meta?(meta==="x"?xLen(x.t)+" on X":x.t.length+" chars"):"")}</i></summary><pre>${x.t.startsWith("—")?`<span class="na">${esc(x.t)}</span>`:esc(x.t)}</pre></details>`).join("")}`;
   $("#main").innerHTML = `
     <div class="head">
       <span class="lbl">Then</span>
       <h1>Everything else</h1>
-      <p>Built from the fragments and the details. If a line is wrong, fix the fragment or the fact it came from.</p>
+      <p>Built from the fragments and the details. If a line is wrong, fix the fragment or the fact it came from, and generate again.</p>
     </div>
+    ${genLine}
     ${band}
-    ${block("Instagram", "Insiders posts the same caption; the plan says which.", posts, true)}
-    ${block("Twitter", "Status line with the X handle, the hook on the announcement, an action line ending in the link.", tweets, true)}
-    ${block("Email", srv ? "Whole emails, with the HubSpot module markers." : "Body copy only. Subject, preview, kicker and headline are on the writing screen.", emails, false)}`;
+    ${block("Instagram", "Insiders posts the same caption; the plan says which.", sets.posts, true)}
+    ${block("Twitter", "Status line with the X handle, the hook on the announcement, an action line ending in the link.", sets.tweets, "x")}
+    ${block("Email", srv ? "Whole emails, with the HubSpot module markers." : "Body copy only. Subject, preview, kicker and headline are on the writing screen.", sets.emails, false)}
+    ${block("The artist's Instagram", `In the ${first ? "first person, as most artists post" : "third person, as a studio or an estate posts"}; the voice is set in the details. Avant Arte is tagged, and Make-Ready in the sustain post.`, sets.artistPosts, true)}
+    ${block("The artist's X", "Avant Arte named rather than tagged. The announcement carries the hook, cut to fit.", sets.artistTweets, "x")}`;
+  $("#regen").onclick = () => { S.gen = null; generate(); };
 }
 function asideOut(){
   const o = outputs(), live = o.emails.filter(e=>!e.t.startsWith("—")).length;
@@ -1364,7 +1568,7 @@ function asideOut(){
     <div class="chk" data-k="good"><s></s><span><b>Hook</b> · ${placements("hook").length} places</span></div>
     <div class="chk" data-k="good"><s></s><span><b>Making</b> · ${placements("making").length} places</span></div>
     <div class="chk" data-k="good"><s></s><span><b>Opener</b> · ${placements("qualifier").length} emails</span></div>
-    <div class="chk" data-k="good"><s></s><span>${o.posts.length} posts, ${o.tweets.length} tweets, ${live} emails</span></div>
+    <div class="chk" data-k="good"><s></s><span>${o.posts.length} posts, ${o.tweets.length} tweets, ${live} emails, and ${o.artistPosts.length + o.artistTweets.length} for the artist</span></div>
     <div class="chk" data-k="good"><s></s><span>${hand} words written by hand</span></div>
   </section>
   <section><h3>Still by hand</h3>
@@ -1383,7 +1587,7 @@ function guessCampaign(list){
   return byTitle.length === 1 ? byTitle[0].id : "";
 }
 async function notionPanel(){
-  const h = await serverHealth(); if (!h || !h.notion || S.view !== "out") return;
+  const h = await serverHealth(); if (!h || !h.notion || S.view !== "out" || !genReady()) return;
   const f = S.facts, N = S.notion;
   N.campaign ??= `${f.artist} - ${f.title_1 || ""}`.trim();
   if (N.campaigns === undefined && !N.loading) {                       // the list, once per page load
@@ -1395,11 +1599,13 @@ async function notionPanel(){
     if (S.view !== "out") return;
   }
   const rows = N.rows || [], srv = S.server.out, camps = [...new Set(rows.map(r => r.campaign))];
-  const chosen = N.campaigns ? N.campaigns.find(c => c.id === N.campaign_id) : null;
+  const fs = finalSets(), live = l => l.filter(x => x.t.trim() && !x.t.startsWith("—"));
   const items = !srv ? [] : [
-    ...(srv.outputs["ig-set"]||[]).map(x => ({channel:"ig", name:x.name, text:x.text})),
-    ...(srv.outputs["twitter-set"]||[]).map(x => ({channel:"twitter", name:x.name, text:x.text})),
-    ...(srv.outputs["email-set"]||[]).filter(x => x.text.trim()).map(x => ({channel:"email", name:x.name, text:x.text}))];
+    ...live(fs.posts).map(x => ({channel:"ig", name:x.sn || x.n, text:x.t})),
+    ...live(fs.tweets).map(x => ({channel:"twitter", name:x.sn || x.n, text:x.t})),
+    ...live(fs.emails).map(x => ({channel:"email", name:x.sn || x.n, text:x.t})),
+    ...live(fs.artistPosts).map(x => ({channel:"artist-ig", name:x.sn || x.n, text:x.t})),
+    ...live(fs.artistTweets).map(x => ({channel:"artist-twitter", name:x.sn || x.n, text:x.t}))];
   const picker = N.loading ? `<p class="note">Reading the plan's campaigns…</p>`
     : N.campaigns ? `<label><span>Campaign</span><select id="ncampsel"><option value="">Choose the campaign…</option>${N.campaigns.map(c => `<option value="${esc(c.id)}"${c.id === N.campaign_id ? " selected" : ""}>${esc(c.name)}</option>`).join("")}</select></label>
         <p class="note">${N.campaigns.length} campaigns, the most recently edited first.</p>`

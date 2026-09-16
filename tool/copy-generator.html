@@ -863,8 +863,10 @@ function syncFrame(){
     return;
   }
   if (own) {                                              // another shape chosen: the field takes its text
-    const el = p.querySelector('.fld[data-k="opener"]');
-    if (el && el.textContent !== ownOpener()) el.textContent = ownOpener();
+    // but never while the writer is typing in it: the model holds the sentence with its spaces
+    // collapsed, so a space just typed would differ, and resetting the text throws the caret to the start
+    const el = p.querySelector('.fld[data-k="opener"]'), same = x => (x || "").replace(/[\s\u00a0]+/g, " ").trim();
+    if (el && same(el.textContent) !== same(ownOpener())) el.textContent = ownOpener();
     return;
   }
   const fr = openerFrame();

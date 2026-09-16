@@ -104,6 +104,22 @@ def campaign_relation():
 
 STATE_PROP = "NOTION_PROP_STATE"                      # the campaigns database's text property that holds a draft
 CHUNK = 2000                                            # Notion's cap on one rich text item
+
+
+def chunks_of(text):
+    """Splits text for Notion's rich text items, each at most 2000 characters as Notion counts
+    them, which is as JavaScript does: an emoji or any other character beyond the basic plane
+    counts as two. Python counts it as one, so a plain slice of 2000 can come to 2001. No
+    character is ever split, and joining the chunks gives the text back."""
+    out, cur, n = [], [], 0
+    for ch in text or "":
+        w = 2 if ord(ch) > 0xFFFF else 1
+        if n + w > CHUNK:
+            out.append("".join(cur)); cur, n = [], 0
+        cur.append(ch); n += w
+    if cur or not out:
+        out.append("".join(cur))
+    return out
 _CDB = {"at": 0.0, "id": None, "db": None}
 
 
@@ -232,12 +248,12 @@ def draft(campaign_id):
 
 
 def save_draft(campaign_id, state, who=""):
-    """Writes the draft onto the campaign's page, in chunks of 2000 characters, its timestamp first."""
+    """Writes the draft onto the campaign's page, in chunks Notion accepts, its timestamp first."""
     name, _ = state_property()
     body = {"savedAt": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "savedBy": who}
     body.update({k: v for k, v in (state or {}).items() if k not in ("savedAt", "savedBy")})
     text = json.dumps(body, ensure_ascii=False, separators=(",", ":"))
-    chunks = [text[i:i + CHUNK] for i in range(0, len(text), CHUNK)]
+    chunks = chunks_of(text)
     if len(chunks) > 100:
         raise NotionError("The draft is too large to save on the campaign page.")
     _call("PATCH", f"/pages/{campaign_id}", json={"properties": {name: {"rich_text": [{"type": "text", "text": {"content": c}} for c in chunks]}}})
@@ -349,7 +365,7 @@ def _key(channel, name):
 
 
 def write_rows(rows):
-    """rows: [{id, text}]. Writes each text into that row's Copy, in chunks of 2000 characters."""
+    """rows: [{id, text}]. Writes each text into that row's Copy, in chunks Notion accepts."""
     p_copy = _prop("NOTION_PROP_COPY", "Copy")
     types = schema()
     if types.get(p_copy) != "rich_text":
@@ -357,7 +373,7 @@ def write_rows(rows):
     written, failed = [], []
     for r in rows:
         text = (r.get("text") or "").strip()
-        chunks = [text[i:i + CHUNK] for i in range(0, len(text), CHUNK)] or [""]
+        chunks = chunks_of(text)
         try:
             _call("PATCH", f"/pages/{r['id']}", json={"properties": {p_copy: {"rich_text": [{"type": "text", "text": {"content": c}} for c in chunks]}}})
             written.append(r["id"])
@@ -384,7 +400,7 @@ def push(campaign, items, campaign_id=""):
         # an Instagram caption goes to the main feed and, where the plan has a row for it, to Insiders
         channels = ["IG Main · Post", "IG Ins · Post"] if it.get("channel") == "ig" else [CHANNELS.get(it.get("channel", ""), it.get("channel", ""))]
         text = (it.get("text") or "").strip()
-        chunks = [text[i:i + 2000] for i in range(0, len(text), 2000)] or [""]   # Notion's per-block cap
+        chunks = chunks_of(text)
         hits = []
         for channel in channels:
             for c in plan_names(it.get("name", "")):

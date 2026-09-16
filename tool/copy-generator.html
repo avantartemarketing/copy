@@ -1840,7 +1840,7 @@ async function notionPanel(){
     N.busy = true; N.err = null; notionPanel();
     try { const r = await fetch("/api/notion/write", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({rows: toWrite.map(x => ({id: x.id, text: x.text}))})});
           const j = await r.json(); if (!r.ok) throw new Error(j.error); N.result = j;
-          S.wrote = S.wrote || {}; toWrite.forEach(x => { if ((j.written || []).includes(x.id)) S.wrote[x.id] = normText(x.text); }); }
+          S.wrote = S.wrote || {}; toWrite.forEach(x => { if ((j.written || []).includes(x.id)) S.wrote[x.id] = hashText(x.text); }); }
     catch (e) { N.err = String(e.message || e); }
     N.busy = false; persist(); await loadPlan(true); render();                          // the rows again, now carrying the copy
   };
@@ -2004,7 +2004,7 @@ function renderCampaigns(){
 S.plan = S.plan || null;                                 // {rows, at} from Notion, cached with the draft
 S.shapes = S.shapes || {};                               // row id -> shape key chosen by hand ("" for by hand)
 S.keep = S.keep || {};                                   // row id -> keep the copy already in the row, where the writer has said
-S.wrote = S.wrote || {};                                 // row id -> the copy the tool last wrote there, so its own copy is replaced and a person's kept
+S.wrote = S.wrote || {};                                 // row id -> a mark of the copy the tool last wrote there, so its own copy is replaced and a person's kept
 S.showAll = S.showAll || false;                          // rows without the Needs copy tick too
 const FAMILY = ch => { const c = (ch || "").toLowerCase().replace(/\s+/g, " ");
   if (/^ig (main|ins) · post/.test(c)) return "ig"; if (c === "twitter") return "twitter"; if (c === "aa email") return "email";
@@ -2078,7 +2078,8 @@ const itemKey = (fam, x) => SETOF[fam] + ":" + nkey(x.sn || x.n);
 // a row carrying copy keeps it unless the tool wrote that copy itself, or the writer says otherwise;
 // and a row already carrying the copy the tool would write is left alone
 const normText = t => (t || "").replace(/\r\n/g, "\n").split("\n").map(l => l.replace(/\s+$/, "")).join("\n").trim();
-const toolWrote = row => !!(S.wrote && S.wrote[row.id] && normText(row.copy) === S.wrote[row.id]);
+const hashText = t => { let h = 2166136261; for (const c of normText(t)) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return "h" + h.toString(36); };   // a short mark of the text, so the draft stays small
+const toolWrote = row => { const w = S.wrote && S.wrote[row.id]; return !!w && (w === hashText(row.copy) || w === normText(row.copy)); };
 const keepOf = row => row.has_copy ? (typeof S.keep[row.id] === "boolean" ? S.keep[row.id] : !toolWrote(row)) : false;
 const rowSame = p => !!(p.item && p.row.copy && normText(p.row.copy) === normText(p.text));
 function planItems(sets){

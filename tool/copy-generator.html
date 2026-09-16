@@ -308,11 +308,11 @@ function blankRelease(){
 }
 // what the opener cannot be built without
 const NEEDS = [
-  ["artist", "The artist", "everything is “by” this name"],
-  ["collab_with", "Who it is with", "the artist, or their estate"],
-  ["title_1", "The title", "or the series name, for untitled works"],
-  ["edition_phrase", "The edition phrase", "“a new limited edition print”"],
-  ["launch_at", "When it opens", "every deadline line comes from this"],
+  ["artist", "The artist", ""],
+  ["collab_with", "Who it is with", "or their estate"],
+  ["title_1", "The title", "or the series name"],
+  ["edition_phrase", "The edition phrase", "e.g. a new limited edition print"],
+  ["launch_at", "When it opens", ""],
   ["closes_at", "When it closes", ""]
 ];
 const missing = () => NEEDS.filter(([k]) => !String(S.facts[k] ?? "").trim());
@@ -639,10 +639,10 @@ const BANNED = ["don't miss out","miss out","hurry","act now","shop now","last c
 const US = {color:"colour",colors:"colours",realize:"realise",center:"centre",gray:"grey",favorite:"favourite",honor:"honour",catalog:"catalogue",program:"programme"};
 const SPEC = {
   qualifier:{ name:"Opener", sub:"a few words", max:10,
-    rule:"Pick how it opens. Add a few words only if the line reads bald without them: a phrase, not a sentence.",
-    full:"Pick how it opens. The line already gives $, so blank is usually right. Add words only for a fact that belongs nowhere else.",
-    taken:"Pick how it opens. “Released in support of…” fills the slot, so there is nothing to write. Name the beneficiary in the hook and the slot comes back.",
-    bald:"Pick how it opens. With several works the title drops out and the line ends on the edition phrase, so a few words earn their place: a phrase, not a sentence."},
+    rule:"Choose an opening. Add a few words only if the line needs them.",
+    full:"Choose an opening. The line already says $, so this can stay blank.",
+    taken:"Choose an opening. “Released in support of…” fills this space. Name the beneficiary in the hook instead and it frees up.",
+    bald:"Choose an opening. With several works the line ends on the edition phrase, so add a few words here."},
   // what the frame already says, and so whether the writer's words are wanted
   openerCarries(){
     const d = D(), f = S.facts, has = [];
@@ -651,13 +651,13 @@ const SPEC = {
     return has;
   },
   opener:{ name:"Opener", sub:"yours", max:35,
-    rule:"One sentence, written whole: the artist in full, what the edition is, and one idea that the hook then takes further. It lands in the announcement email only." },
+    rule:"One sentence: the artist's full name, what the edition is, and one idea the hook picks up. Used in the announcement email only." },
   hook:{ name:"Hook", sub:"yours",
-    rule:"Two or three sentences on the work, as editorial as you like. It must read as well mid-email as at the top of a post.", max:70 },
+    rule:"Two or three sentences on the work. Used in the email and at the top of posts.", max:70 },
   making:{ name:"Making", sub:"yours",
-    rule:"One sentence on how it was made. Write “printmakers at Make-Ready”; the system adds “our”.", max:45 },
+    rule:"One sentence on how it was made. Write “printmakers at Make-Ready”, not “our printmakers”.", max:45 },
   card:{ name:"Card", sub:"yours",
-    rule:"One sentence on this work, 15 to 30 words. With several works, say something different about each; no need to call each one a limited edition print.", max:30 }
+    rule:"One sentence on this work, 15 to 30 words. With several works, say something different about each.", max:30 }
 };
 // the cards share one rule; the gutter labels the row, the aside names the card
 function spec(k){
@@ -685,8 +685,8 @@ function checks(key, text){
     if (key !== "qualifier") return [{k:"warn", t:"Nothing written yet."}];
     const has = SPEC.openerCarries();
     return [has.length
-      ? {k:"good", t:`Blank, rightly: the opener already gives ${join(has)}.`}
-      : {k:"warn", t:"Blank, and with several works the opener ends on the edition phrase alone."}];
+      ? {k:"good", t:`Blank is fine: the line already gives ${join(has)}.`}
+      : {k:"warn", t:"Blank. With several works the line ends on the edition phrase, so add a few words."}];
   }
   const words = t.split(/\s+/).length;
   BANNED.forEach(b => { if (new RegExp("(?<![\\w-])"+b.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(?![\\w-])").test(low)) out.push({k:"warn", t:`Banned phrase: “${b}”`}); });
@@ -694,26 +694,26 @@ function checks(key, text){
   if (t.includes("—")) out.push({k:"warn", t:"Em dash. The house dash is a spaced en dash."});
   if (/\w[–—]\w/.test(t) && !/\d[–—]\d/.test(t)) out.push({k:"warn", t:"Unspaced dash."});
   if (t.includes("!")) out.push({k:"warn", t:"Exclamation mark."});
-  if (key !== "opener" && /\b(we|our|we're)\b/.test(low)) out.push({k:"warn", t:"“we” or “our”. The frame around this supplies those."});
-  if (/limited-edition/.test(low)) out.push({k:"warn", t:"“limited-edition”: the house form has no hyphen."});
+  if (key !== "opener" && /\b(we|our|we're)\b/.test(low)) out.push({k:"warn", t:"“we” or “our”. The lines around this already say who is speaking."});
+  if (/limited-edition/.test(low)) out.push({k:"warn", t:"“limited-edition”: no hyphen."});
   // the frame names the artist in full before any fragment lands, so inside one it is the surname
   const artist = (f.artist || "").trim();
   if (key === "opener") {                                 // the first mention: the full name belongs here
-    if (artist && !t.includes(artist)) out.push({k:"warn", t:`Does not name ${artist} in full. This is the first mention.`});
+    if (artist && !t.includes(artist)) out.push({k:"warn", t:`Does not give ${artist}'s full name.`});
     if (!/limited edition/.test(low)) out.push({k:"warn", t:"Does not say it is a limited edition."});
     if (!/[.]$/.test(t)) out.push({k:"warn", t:"Ends without a full stop."});
-    if (t.split(/(?<=[.!?])\s+/).length > 1) out.push({k:"warn", t:"More than one sentence. The hook takes it from here."});
-    if (words > 35) out.push({k:"warn", t:`${words} words. The archive's openers run 22 to 27.`});
-    if (/\[[^\]]*\]/.test(t)) out.push({k:"warn", t:"A blank in square brackets is still to be filled."});
+    if (t.split(/(?<=[.!?])\s+/).length > 1) out.push({k:"warn", t:"More than one sentence."});
+    if (words > 35) out.push({k:"warn", t:`${words} words. Past openers ran 22 to 27.`});
+    if (/\[[^\]]*\]/.test(t)) out.push({k:"warn", t:"Square brackets still to fill in."});
     if (f.beneficiary && !low.includes(f.beneficiary.toLowerCase())) out.push({k:"good", t: D().hookNamesBen ? `The hook names ${f.beneficiary}.` : `Does not name ${f.beneficiary}, so the features list will say “Released in support of ${f.beneficiary}”.`});
   } else if (artist.split(/\s+/).length > 1 && t.includes(artist))
-    out.push({k:"warn", t:`“${artist}” in full. The frame has already named them: surname only.`});
+    out.push({k:"warn", t:`“${artist}” in full. Use the surname here.`});
   if (/(?<!\d)\s-\s(?!\d)/.test(t)) out.push({k:"warn", t:"A hyphen as a dash. The house dash is a spaced en dash ( – )."});
   if (key === "hook" && artist && !String(f.artist_voice || "").startsWith("third") && namesArtist(t))
-    out.push({k:"good", t:`Names ${D().surname}. The artist's own posts will carry the hook in the first person: Claude rewrites it for them at the generate step, for your approval.`});
+    out.push({k:"good", t:`Names ${D().surname}. Claude will rewrite it in the first person for the artist's own posts, for your approval.`});
   t.split(/(?<=[.!?])\s+/).forEach(sn => {
     if ((sn.match(/\s[–—-]\s/g) || []).length >= 2)
-      out.push({k:"warn", t:"An aside between two dashes reads as machine-written. Use commas or a new sentence."});
+      out.push({k:"warn", t:"Two dashes around an aside. Use commas or a new sentence."});
   });
   if (pageText().trim()) {
     const known = new Set((pageText() + " " + pages().map(x => (x.page.medium||"")).join(" ") + " "
@@ -723,17 +723,17 @@ function checks(key, text){
     t.split(/(?<=[.!?])\s+/).forEach(sent => sent.split(/\s+/).slice(1).forEach(tok => {
       const c = tok.replace(/^[“”‘’"'(]+|[“”‘’"'),.;:]+$/g, "").replace(/['’]s$/, "");
       if (c.length > 1 && /^[A-Z][\w'’.-]*$/.test(c) && !HOUSE_PROPER.has(c) && !seen.has(c))
-        out.push({k:"warn", t:`“${c}” is on neither the product page nor the details. Where is it from?`});
+        out.push({k:"warn", t:`“${c}” is not on the product page or in the details.`});
     }));
   }
   if (key === "qualifier"){
-    if (words > 10) out.push({k:"warn", t:`${words} words. Ten is the cap: a phrase, not a sentence.`});
-    if (/[.!?]$/.test(t)) out.push({k:"warn", t:"No full stop. The frame closes the sentence."});
-    if (f.artist && low.includes(f.artist.toLowerCase())) out.push({k:"warn", t:"The artist is already named in the frame."});
-    if (f.beneficiary && low.includes(f.beneficiary.toLowerCase())) out.push({k:"warn", t:"The frame adds “released in support of” on its own."});
+    if (words > 10) out.push({k:"warn", t:`${words} words. Ten at most.`});
+    if (/[.!?]$/.test(t)) out.push({k:"warn", t:"No full stop here. The line goes on."});
+    if (f.artist && low.includes(f.artist.toLowerCase())) out.push({k:"warn", t:"The artist is already named in the line."});
+    if (f.beneficiary && low.includes(f.beneficiary.toLowerCase())) out.push({k:"warn", t:"The line adds “released in support of” by itself."});
     const n = openerText().split(/\s+/).length;
     if (f.beneficiary && !D().hookNamesBen)
-      out.push({k:"warn", t:`Two clauses after the dash: yours, then “released in support of ${f.beneficiary}”. ${n} words; house openers run 22 to 27.`});
+      out.push({k:"warn", t:`Two clauses after the dash: yours, then “released in support of ${f.beneficiary}”. ${n} words; past openers ran 22 to 27.`});
     else if (n > 28)
       out.push({k:"warn", t:`${n} words with these in. House openers run 22 to 27.`});
   } else {
@@ -796,10 +796,10 @@ function renderNotReady(need){
 
 // ---------- write: the email, with three fields in it and nothing else editable ----------
 const PH = {
-  opener:"The first sentence, whole: the artist in full, what the edition is, and one idea.",
+  opener:"One sentence: the artist's full name, what the edition is, one idea.",
   qualifier:" + a few words ",
   hook:"Two or three sentences on the work.",
-  making:"How was it made? One sentence.",
+  making:"One sentence on how it was made.",
   card:"A sentence on this work."
 };
 function fld(k){
@@ -847,7 +847,6 @@ function renderWrite(){
           <p class="sig">${esc(d.draw?`Collect ${d.collectPhrase}`:`Launching ${d.launchDate}`)}</p>
         </div>
       </div>
-      <div class="foot" id="foot">${o.posts.length} posts, ${o.tweets.length} tweets and ${live} more emails follow from these.</div>
     </div>
     <div style="margin-top:34px">${FORM.filter(s => s.write).map(factSectionHTML).join("")}</div>`;
 
@@ -911,9 +910,6 @@ function onField(el){
   if (!el.textContent.trim() && el.innerHTML !== "") { el.innerHTML = ""; caret(el); }
   S.ai[el.dataset.k] = undefined;
   syncFrame();
-  const o = outputs(), live = o.emails.filter(e=>!e.t.startsWith("—")).length;
-  const foot = $("#foot");
-  if (foot) foot.textContent = `${o.posts.length} posts, ${o.tweets.length} tweets and ${live} more emails follow from these.`;
   drawGutter(); renderAside();
 }
 // the opener's frame can move while you type: naming the beneficiary in the hook
@@ -968,12 +964,11 @@ function drawGutter(){
 function renderAside(){
   const need = missing();
   if (need.length) {
-    $("#aside").innerHTML = `<div class="panel"><span class="lbl">Order of work</span><h2>Details, the page, then write</h2>
-      <p class="rule">The fragments come last, once the frame and the page exist to draw on.</p>
-      <section><h3>Then</h3>
-        <div class="chk" data-k="good"><s></s><span>Write the product page; Claude suggests the fragments from it.</span></div>
-        <div class="chk" data-k="good"><s></s><span>Accept or rewrite them in the announcement.</span></div>
-        <div class="chk" data-k="good"><s></s><span>The posts, tweets and the other emails assemble themselves.</span></div>
+    $("#aside").innerHTML = `<div class="panel"><span class="lbl">Order of work</span><h2>Details, the page, then the email</h2>
+      <section>
+        <div class="chk" data-k="good"><s></s><span>Fill in the details.</span></div>
+        <div class="chk" data-k="good"><s></s><span>Write the product page. Claude suggests the email from it.</span></div>
+        <div class="chk" data-k="good"><s></s><span>Write or edit the email. Everything else is built from it.</span></div>
       </section></div>`;
     return;
   }
@@ -985,7 +980,7 @@ function renderAside(){
 
     ${(k === "qualifier" || k === "opener") ? `<section><h3>How it opens</h3>
       ${LEADS.map((L,i)=>`<button class="opt" data-lead="${i}" aria-pressed="${L.shape ? (k === "opener" && i === S.lead) : (k === "qualifier" && i === S.lead)}"><u>${esc(L.note)}</u>${esc(L.head ? L.head(D()) + "…" : L.shape(D()))}</button>`).join("")}
-      <p class="note">${k === "opener" ? "Written whole, it lands in the announcement only. The four other emails keep the framed line, built from the details. Clear it to go back to the frame." : "The rest of the sentence is built from the details and travels into four emails. The last three are written whole."}</p>
+      <p class="note">${k === "opener" ? "Used in the announcement email only. The other emails keep the standard line. Clear it to go back to the standard line." : "The rest of the line comes from the details. It is used in four emails."}</p>
     </section>` : ""}
 
     <section><h3>Checks</h3>
@@ -993,14 +988,13 @@ function renderAside(){
       <button class="act" id="proof"${(ai&&ai.busy)?" disabled":""}>${ai&&ai.busy?"Reading…":"Proofread in all "+hits.length+" places"}</button>
       ${ai&&ai.err?`<p class="note">${esc(ai.err)}</p>`:""}
       ${ai&&ai.res?renderAI(ai.res):""}
-      <p class="note">These run as you type. The button has Claude read the fragment in every place it lands.</p>
     </section>
 
     <section><h3>Where it lands · ${hits.length}</h3>
       ${hits.length?hits.map(h=>`<div class="use">
         <h4>${esc(h.kind)} · ${esc(h.name)}</h4>
         <div class="q">${h.before?esc(trim(h.before))+"\n\n":""}<mark>${esc(trim(h.line))}</mark>${h.after?"\n\n"+esc(trim(h.after)):""}</div>
-      </div>`).join(""):`<p class="note">Write the fragment and its uses appear here.</p>`}
+      </div>`).join(""):`<p class="note">Nothing yet.</p>`}
     </section>
   </div>`;
 
@@ -1124,7 +1118,7 @@ function pageDiff(i){
   if (i === 0) return "";
   const a = paras(pageOf(0).description), b = paras(pageOf(i).description);
   if (!b.length) return "Nothing yet.";
-  if (a.join("\n\n") === b.join("\n\n")) return "Identical to the first artwork's page, so nothing here distinguishes this work.";
+  if (a.join("\n\n") === b.join("\n\n")) return "The same as the first artwork's page.";
   const diff = b.map((x, j) => x !== (a[j] || "") ? j + 1 : 0).filter(Boolean);
   return diff.length ? `Differs from the first artwork's page in paragraph${diff.length > 1 ? "s" : ""} ${diff.join(", ")}.` : "";
 }
@@ -1137,13 +1131,12 @@ function pageStats(i){
 }
 function pageNote(i){
   const st = pageStats(i);
-  if (!st.words) return i ? pageDiff(i) : "Nothing yet. Pages that went out ran to about 127 words.";
-  const shape = `${st.words} words in ${st.paras} paragraph${st.paras===1?"":"s"}. ` + (i ? pageDiff(i) + " " : "");
-  return shape + (st.making ? "Says how it was made."
-                            : "Neither this nor the medium field says how it was made; write the making line by hand.");
+  if (!st.words) return i ? pageDiff(i) : "Nothing yet. Past pages ran to about 127 words.";
+  const shape = `${st.words} words, ${st.paras} paragraph${st.paras===1?"":"s"}. ` + (i ? pageDiff(i) + " " : "");
+  return shape + (st.making ? "Says how it was made." : "Does not say how it was made, so write the making line yourself.");
 }
 const PAGE_FIELDS = [
-  ["medium", "Medium description", "The technique in full; it can differ between artworks"]
+  ["medium", "Medium description", "The technique in full"]
 ];
 function renderPage(){
   const need = missing(), n = D().artworks, all = pages();
@@ -1157,7 +1150,7 @@ function renderPage(){
       <h1>The product page${n > 1 ? "s" : ""}</h1>
     </div>
     <fieldset><legend>The description</legend>
-      <p>Three or four paragraphs: what it is, the work and where it comes from, how it was made.</p>
+      <p>Three or four paragraphs: what it is, where it comes from, how it was made.</p>
       ${n > 1 ? `<div class="tabs">${all.map(x => `<button data-tab="${x.i}" aria-current="${x.i===S.pageTab}">${esc(x.title)}${(x.page.description||"").trim() ? "" : "<i>·</i>"}</button>`).join("")}</div>` : ""}
       <div class="grid wide"><label><span>Description${n > 1 ? " · " + esc(cur.title) : ""}</span>
         <textarea class="pagebox" data-p="description" spellcheck="true" placeholder="The work, the artist, where it comes from, how it was made.">${esc(cur.page.description || "")}</textarea></label></div>
@@ -1165,15 +1158,13 @@ function renderPage(){
       <p class="live" id="pagenote">${esc(pageNote(S.pageTab))}</p>
     </fieldset>
     <fieldset><legend>The page's medium</legend>
-      <p>${n > 1 ? "Per artwork: it can differ between them." : "It supplies the making line's technique when the prose doesn't."} What is signed and numbered comes from the features in the details.</p>
       <div class="grid">${PAGE_FIELDS.map(([k,lab,hint]) =>
         `<label><span>${esc(lab)}${n > 1 ? " · " + esc(cur.title) : ""}</span><input data-p="${k}" type="text" value="${esc(cur.page[k]||"")}"><small>${esc(hint)}</small></label>`).join("")}
       </div>
     </fieldset>
     <fieldset><legend>Then</legend>
-      <p>Claude drafts the hook, the making line and a line per card, each with where it came from. Accept or rewrite them in the email.</p>
       <button class="act" id="suggest" style="width:auto;padding:9px 16px"${can && !(S.suggest&&S.suggest.busy) ? "" : " disabled"}>${S.suggest&&S.suggest.busy ? "Reading…" : `Suggest the email from ${n > 1 ? "these pages" : "this page"}`}</button>
-      ${need.length ? `<p class="note">Needs the details first: ${esc(need.map(x=>x[1].toLowerCase()).join(", "))}.</p>` : (!pageStats(0).words ? `<p class="note">Write the description first.</p>` : "")}
+      ${need.length ? `<p class="note">Fill in the details first: ${esc(need.map(x=>x[1].toLowerCase()).join(", "))}.</p>` : (!pageStats(0).words ? `<p class="note">Write the description first.</p>` : "")}
     </fieldset>`;
   $("#main").querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { S.pageTab = +b.dataset.tab; renderPage(); renderPageAside(); });
   const cf = $("#copyfirst"); if (cf) cf.onclick = () => {
@@ -1200,24 +1191,18 @@ function renderPageAside(){
   const frag = (key, name, r) => {
     if (!r) return "";
     const text = (r.text || "").trim(), used = text && blk(key).trim() === text;
-    if (!text) return `<div class="sug none"><h4><span>${esc(name)}</span></h4><div class="chk" data-k="warn"><s></s><span>${esc(r.from || "Nothing on the page to draw this from.")} Write it by hand in the email.</span></div></div>`;
+    if (!text) return `<div class="sug none"><h4><span>${esc(name)}</span></h4><div class="chk" data-k="warn"><s></s><span>${esc(r.from || "Nothing on the page for this.")} Write it in the email.</span></div></div>`;
     const lift = (sg.lifts || []).find(([k]) => k === key);
     const warns = checks(key, text).filter(c => c.k === "warn");
     return `<div class="sug${used?" used":""}"><h4><span>${esc(name)}</span><button class="mini" data-use="${key}"${used?" disabled":""}>${used?"In the email":"Use"}</button></h4>
       <div class="q">${esc(text)}</div>
-      ${r.from ? `<div class="src">${esc(r.from)}</div>` : ""}${lift ? `<div class="chk" data-k="warn"><s></s><span>Lifts ${lift[1]} words in a row from the page. Ask again, or rewrite it in the email.</span></div>` : ""}
+      ${r.from ? `<div class="src">${esc(r.from)}</div>` : ""}${lift ? `<div class="chk" data-k="warn"><s></s><span>Copies ${lift[1]} words in a row from the page.</span></div>` : ""}
       ${warns.map(c=>`<div class="chk" data-k="warn"><s></s><span>${esc(c.t)}</span></div>`).join("")}</div>`;
   };
   let body;
-  if (!sg) body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>What Claude will draw from ${n>1?"them":"it"}</h2>
-    <p class="rule">Only what is on the page${n>1?"s":""}. Where the making isn't described, that line comes back empty.</p>
-    <section><h3>It will suggest</h3>
-      <div class="chk" data-k="good"><s></s><span><b>Hook</b> · two or three sentences, one for the release.</span></div>
-      <div class="chk" data-k="good"><s></s><span><b>Making</b> · one sentence${n>1?", true of every artwork":""}.</span></div>
-      <div class="chk" data-k="good"><s></s><span><b>Card line${n===1?"":"s"}</b> · ${n===1?"one sentence":"one per artwork, from its own page"}.</span></div>
-      <div class="chk" data-k="good"><s></s><span><b>Opener</b> · a few words, only where the line is bald.</span></div>
-    </section>`;
-  else if (sg.busy) body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>Reading…</h2><p class="rule">Reading the page${n>1?"s":""}.</p>`;
+  if (!sg) body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>Suggestions</h2>
+    <p class="rule">Claude suggests the opener, the hook, the making line and a line per card, from the page${n>1?"s":""} and nothing else.</p>`;
+  else if (sg.busy) body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>Reading…</h2>`;
   else if (sg.err) body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>Nothing came back</h2><p class="rule">${esc(sg.err)}</p>`;
   else {
     const r = sg.res || {}, cards = r.cards || [];
@@ -1225,7 +1210,6 @@ function renderPageAside(){
                  ...d.cardKeys.map((k,i)=>[k, "Card · " + d.cardTitles[i], cards[+k.slice(5)-1]])];
     const usable = all.filter(([k,,x]) => x && (x.text||"").trim() && blk(k).trim() !== x.text.trim());
     body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>Suggested</h2>
-      <p class="rule">Use it, or write your own in the email. The checks have already run.</p>
       ${usable.length ? `<button class="act" id="useall">Use all ${usable.length}</button>` : `<button class="act" id="goemail">Go to the email</button>`}
       <section><h3>Fragments</h3>${all.map(([k,nm,x])=>frag(k,nm,x)).join("")}</section>
       ${(r.notes||[]).length ? `<section><h3>Claude noted</h3>${r.notes.map(x=>`<div class="chk" data-k="warn"><s></s><span>${esc(x)}</span></div>`).join("")}</section>` : ""}`;
@@ -1319,59 +1303,56 @@ const blk = k => S.blocks[k] ?? "";       // cards are created as the release gr
 const rows = sec => typeof sec.f === "function" ? sec.f() : sec.f;
 // what the count produces downstream, said as it is typed
 function cardNote(){
-  const d = D(), n = d.artworks, card = k => k === 1 ? "1 card" : k + " cards";
-  const series = d.series ? ` Named as the ${S.facts.series_name || "…"} series in the prose.` : "";
-  const many = `${n} artwork${n===1?"":"s"}`;
-  if (d.untitled === n) return `${many}, so ${card(n)} once ${n===1?"it is":"they are"} titled.` + series;
-  if (d.untitled) return `${many}, so ${card(n)}, though ${d.untitled === 1 ? "one still needs" : d.untitled + " still need"} a title.` + series;
+  const d = D(), n = d.artworks, many = `${n} artwork${n===1?"":"s"}`;
+  const series = d.series ? ` Called the ${S.facts.series_name || "…"} series in the copy.` : "";
+  if (d.untitled === n) return `${many}. ${n===1?"Add its title.":"Add their titles."}` + series;
+  if (d.untitled) return `${many}. ${d.untitled === 1 ? "One still needs" : d.untitled + " still need"} a title.` + series;
   const head = d.workEmail.length;
-  return `${many}, so ${card(n)}.` + series + (head > 90
-    ? ` The headline names all ${n} (${head} characters); consider a collective title or the series.`
-    : "");
+  return `${many}.` + series + (head > 90 ? ` The headline names all ${n} and runs to ${head} characters. A series name or a collective title would shorten it.` : "");
 }
 const FORM = [
-  {g:"The collaboration", d:"The works are “by” the artist; the collaboration may be with an estate.", f:[
-    ["artist","Artist","text","The works are by this name"],
-    ["collab_with","Collaboration is with","text","Or “the Lucian Freud Estate”"],
+  {g:"The collaboration", d:"", f:[
+    ["artist","Artist","text",""],
+    ["collab_with","Collaboration is with","text","e.g. the Lucian Freud Estate"],
     ["ordinal","Which collaboration","select","debut|latest|second"],
     ["handle","Instagram handle","text","Without the @"],
     ["x_handle","X handle","text","Leave blank if none"],
     ["artist_voice","Their own posts","select","first person|third person"],
-    ["surname","Surname","text","Blank means the last word; Ai for Ai Weiwei"],
-    ["link","Release link","text","Used in tweets"],
+    ["surname","Surname","text","Blank for the last word of the name. Ai Weiwei's is Ai"],
+    ["link","Release link","text",""],
     ["advisor","Advisor","select","Sam|Curtis|Sofiya"]
   ]},
-  {g:"The artworks", d:"One title and one card per artwork. For untitled works from a named series, the series stands in for the titles in the prose.", live:cardNote, f: () => {
+  {g:"The artworks", d:"", live:cardNote, f: () => {
     const n = D().artworks, series = S.facts.is_series === "yes";
     return [
-      ["artworks","How many artworks","number","One card each"],
+      ["artworks","How many artworks","number",""],
       ["is_series","Name them by their series","select","no|yes"],
-      ["series_name","The series name","text","Used in place of the titles", () => S.facts.is_series === "yes"],
+      ["series_name","The series name","text","", () => S.facts.is_series === "yes"],
       ...Array.from({length: n}, (_, i) =>
           ["title_" + (i+1), n === 1 ? "Title" : `Artwork ${i+1}`, "text",
-           i === 0 ? (series ? "Still headed by its own title on the card" : "Exactly as it is titled") : ""])
+           ""])
     ];
   }},
-  {g:"The edition", d:"The edition phrase appears in the opener, the status lines and the footers.", f:[
+  {g:"The edition", d:"", f:[
     ["edition_phrase","Edition phrase","text","e.g. a quartet of new limited edition embroideries"],
     ["unit","One of them is called a","text","print, embroidery, sculpture"],
     ["f1","Feature 1","text",""],["f2","Feature 2","text",""],["f3","Feature 3","text",""],
-    ["f4","Feature 4","text","Bespoke to this release"],["f5","Feature 5","text",""]
+    ["f4","Feature 4","text",""],["f5","Feature 5","text",""]
   ]},
-  {g:"The release", d:"Every deadline line comes from these two dates.", f:[
+  {g:"The release", d:"", f:[
     ["mechanic","Mechanic","select","timed|draw"],
     ["window","Window","select","48 hours|one week", timed],
     ["launch_at","Opens","datetime-local","UK time"],
     ["closes_at","Closes","datetime-local","UK time"],
     ["beneficiary","Released in support of","text","Blank if none"],
     ["beneficiary_handle","Their Instagram handle","text",""],
-    ["early_access_code","Early access code","text","Unlocks the two early access emails", draw],
-    ["framing_code","Framing offer code","text","Blank for no offer", timed],
+    ["early_access_code","Early access code","text","", draw],
+    ["framing_code","Framing offer code","text","Blank if none", timed],
     ["framing_percent","Framing offer %","number","", timed]
   ]},
-  {g:"Written elsewhere", write:true, d:"The quote verbatim. The bio opens the Coming Soon post only.", f:[
-    ["quote","Artist quote","textarea","Verbatim, or blank"],
-    ["bio","Artist bio","textarea","Two or three sentences, third person"]
+  {g:"Written elsewhere", write:true, d:"", f:[
+    ["quote","Artist quote","textarea",""],
+    ["bio","Artist bio","textarea","Two or three sentences, in the third person"]
   ]}
 ];
 function renderFacts(){
@@ -1385,7 +1366,7 @@ function renderFacts(){
 }
 // one section of the details form; the "Written elsewhere" section is shown on the writing screen instead
 function factSectionHTML(sec){
-  return `<fieldset><legend>${esc(sec.g)}</legend><p>${esc(sec.d)}</p>
+  return `<fieldset><legend>${esc(sec.g)}</legend>${sec.d ? `<p>${esc(sec.d)}</p>` : ""}
       <div class="grid${rows(sec)[0][2]==="textarea"?" wide":""}">
       ${rows(sec).map(r=>{
         const [k,lab,type,hint] = r;
@@ -1434,8 +1415,7 @@ function syncFields(){
 const shownFields = () => FORM.filter(s => !s.write).reduce((n,s)=>n+rows(s).filter(r=>!r[4]||r[4]()).length,0);
 function asideFacts(){
   const need = missing();
-  if (need.length) return `<div class="panel"><span class="lbl">From these facts</span><h2>What the frame needs</h2>
-    <p class="rule">The sentences around what you write are built from these.</p>
+  if (need.length) return `<div class="panel"><span class="lbl">From these facts</span><h2>Still needed</h2>
     <section>${todoHTML()}</section></div>`;
   const d = D(), f = S.facts;
   const rows = [
@@ -1444,9 +1424,8 @@ function asideFacts(){
     ["Deadline", d.draw?`Closes ${d.closeDate} at ${d.closeTime}.`:`Available for ${f.window} from ${d.launchTime} on ${d.launchDate}.`],
     ["Footer", d.draw?`Collect ${d.collectPhrase}`:`Launching ${d.launchDate}`]
   ];
-  return `<div class="panel"><span class="lbl">From these facts</span><h2>What changes</h2>
-    <p class="rule">Lines built from these fields. Edit one and watch them move.</p>
-    <section><h3>Live</h3>
+  return `<div class="panel"><span class="lbl">From these facts</span><h2>Built from the details</h2>
+    <section>
     ${rows.map(([k,v])=>`<div class="use"><h4>${esc(k)}</h4><div class="q">${esc(v)}</div></div>`).join("")}
     </section></div>`;
 }
@@ -1597,7 +1576,7 @@ function voiceFacts(j){
 }
 async function voiceJob(j){
   j.busy = true; j.err = null; j.approved = false; render();
-  try { const r = await aiJSON(voicePrompt(j), SCHEMA_VOICE); j.ai = fixDashes((r.hook || "").trim()); j.text = j.ai; if (!jobOK(j)) j.err = "The rewrite falls short on a point below. Fix it by hand or ask again."; }
+  try { const r = await aiJSON(voicePrompt(j), SCHEMA_VOICE); j.ai = fixDashes((r.hook || "").trim()); j.text = j.ai; if (!jobOK(j)) j.err = "The rewrite fails a check below. Edit it or ask again."; }
   catch (e) { j.err = AI_ERR(e) + " Rewrite it by hand below."; }
   j.busy = false; render();
 }
@@ -1612,20 +1591,20 @@ function tweetLead(orig){
 function tweetFacts(j){
   const f = S.facts, d = D(), t = jobText(j), low = t.toLowerCase(), has = s => !!s && low.includes(String(s).toLowerCase());
   const titles = d.series ? [f.series_name] : d.cardTitles, lead = tweetLead(j.orig);
-  const out = lead ? [{need:true, ok:t.startsWith(lead), t:`Begins “${lead}”, as the tweet as written does`}] : [];
+  const out = lead ? [{need:true, ok:t.startsWith(lead), t:`Begins “${lead}”`}] : [];
   titles.forEach(x => out.push({need:true, ok:has(x), t:`Names ‘${x}’`}));
   if (j.set === "artistTweets" && !String(f.artist_voice || "").startsWith("third")) out.push({need:false, ok:/\b(my|I)\b/.test(t), t:"In the artist's first person"});
   else out.push({need:true, ok:has(f.artist), t:`Names ${f.artist}`});
-  out.push({need:true, ok:/limited edition/.test(low), t:"Says it is a limited edition"});
+  out.push({need:true, ok:/limited edition/.test(low), t:"Says limited edition"});
   const date = d.draw ? d.closeDate : d.launchDate, time = (d.draw ? d.closeTime : d.launchTime).replace(" UK time", "");
   out.push({need:true, ok:has(date), t:`Gives the ${d.draw ? "closing" : "launch"} date, ${date}`});
   out.push({need:false, ok:has(time), t:`Gives the time, ${time} UK time`});
   if (f.beneficiary) out.push({need:true, ok:has(f.beneficiary), t:`Names ${f.beneficiary}`});
-  out.push({need:true, ok:has(f.link), t:"Carries the link"});
+  out.push({need:true, ok:has(f.link), t:"Has the link"});
   out.push({need:true, ok:!t.includes("—"), t:"No em dash"});
   const frag = t.split(/\n+/).flatMap(l => l.split(/(?<=[.!?])\s+/)).find(sn => /^[A-Z][a-z]+ing\b/.test(sn.trim()) && !/^(Announcing|Introducing|Presenting|Something|Nothing|Everything|Anything|Morning|Evening|Spring|King|Ring|Bring|Sing|Sting|Wing|Swing|Thing)\b/.test(sn.trim()));
-  out.push({need:true, ok:!frag, t: frag ? `A sentence that is only a participle phrase: “${frag.trim().slice(0, 40)}…”. Fold the idea into the first sentence instead` : "No sentence that is only a participle phrase"});
-  const n = xLen(t); out.push({need:true, ok:n <= X_LIMIT, t:`${n} of ${X_LIMIT} as X counts them, a link as 23`});
+  out.push({need:true, ok:!frag, t: frag ? `A sentence that is only a participle phrase: “${frag.trim().slice(0, 40)}…”. Fold it into the first sentence` : "No participle-only sentence"});
+  const n = xLen(t); out.push({need:true, ok:n <= X_LIMIT, t:`${n} of ${X_LIMIT} characters`});
   return out;
 }
 function tweetStyle(t){
@@ -1634,7 +1613,7 @@ function tweetStyle(t){
   Object.entries(US).forEach(([us,uk]) => { if (new RegExp("\\b"+us+"\\b").test(low)) out.push(`US spelling “${us}”: use “${uk}”`); });
   if (t.includes("—")) out.push("Em dash. The house dash is a spaced en dash.");
   if (/(?<!\d)\s-\s(?!\d)/.test(t)) out.push("A hyphen as a dash. The house dash is a spaced en dash ( – ).");
-  if (t.split(/(?<=[.!?])\s+/).some(sn => (sn.match(/\s[–—-]\s/g) || []).length >= 2)) out.push("An aside between two dashes reads as machine-written.");
+  if (t.split(/(?<=[.!?])\s+/).some(sn => (sn.match(/\s[–—-]\s/g) || []).length >= 2)) out.push("Two dashes around an aside. Use commas.");
   if (t.includes("!")) out.push("Exclamation mark.");
   if (t.includes("?")) out.push("Question mark: no rhetorical questions.");
   return out;
@@ -1672,7 +1651,7 @@ async function rewriteJob(j){
   try {
     const r = await aiJSON(rewritePrompt(j), SCHEMA_TWEET);
     j.ai = fixDashes((r.tweet || "").trim()); j.text = j.ai;
-    if (!jobOK(j)) j.err = "Claude's rewrite falls short on a point below. Fix it by hand or ask again.";
+    if (!jobOK(j)) j.err = "Claude's rewrite fails a check below. Edit it or ask again.";
   } catch (e) {
     j.err = AI_ERR(e) + " Rewrite it by hand below.";
   }
@@ -1754,12 +1733,12 @@ function renderReview(){
   const rows = jobs.map((j, i) => {
     const facts = j.busy ? [] : (j.kind === "voice" ? voiceFacts(j) : tweetFacts(j)), style = j.busy ? [] : tweetStyle(jobText(j)), ok = !j.busy && jobOK(j);
     return `<div class="sheet gen">
-      <div class="genhead"><b>${esc(j.channel)} · ${esc(j.name)}</b><span class="note" style="margin:0">${j.kind === "voice" ? `Names ${esc(D().surname)}, so the artist's posts and tweets get it in the first person.${jobs.some(x => x.kind !== "voice") ? "" : " The tweets follow once this is approved."}` : `As written, ${j.len} characters as X counts them, against ${X_LIMIT}.`}${j.why ? ` Approved before, but that version now falls short: ${esc(j.why.join("; "))}.` : j.last && j.anchor && !j.approved ? " Written close to the version approved before." : ""}</span></div>
+      <div class="genhead"><b>${esc(j.channel)} · ${esc(j.name)}</b><span class="note" style="margin:0">${j.kind === "voice" ? `Names ${esc(D().surname)}. The artist's own posts need it in the first person.${jobs.some(x => x.kind !== "voice") ? "" : " The tweets follow once this is approved."}` : `${j.len} characters as written. X allows ${X_LIMIT}.`}${j.why ? ` The approved version needs a change: ${esc(j.why.join("; "))}.` : j.last && j.anchor && !j.approved ? " Written close to the version approved before." : ""}</span></div>
       <div class="gencols">
         <div><span class="lbl">As written</span><pre>${esc(j.orig)}</pre></div>
         <div><span class="lbl">${j.last && j.text === j.last ? "The version approved before" : j.ai && j.text === j.ai ? "Rewritten by Claude" : j.ai ? "Rewritten by Claude, then edited" : "Rewritten by hand"}</span>
           ${j.busy ? `<p class="note">Claude is rewriting it…</p>` : `<textarea id="cut_${i}" rows="7">${esc(j.text)}</textarea>
-          ${j.kind === "voice" ? "" : `<p class="count${xLen(jobText(j)) > X_LIMIT ? " over" : ""}" id="count_${i}">${xLen(jobText(j))} of ${X_LIMIT} as X counts them, a link as 23</p>`}
+          ${j.kind === "voice" ? "" : `<p class="count${xLen(jobText(j)) > X_LIMIT ? " over" : ""}" id="count_${i}">${xLen(jobText(j))} of ${X_LIMIT}. A link counts as 23</p>`}
           <div id="facts_${i}">${facts.map(c => `<div class="chk" data-k="${c.ok ? "good" : "warn"}"><s></s><span>${esc(c.t)}${c.ok || c.need ? "" : " (not required)"}</span></div>`).join("")}${style.map(w => `<div class="chk" data-k="warn"><s></s><span>${esc(w)}</span></div>`).join("")}</div>
           ${j.err ? `<p class="note">${esc(j.err)}</p>` : ""}`}
         </div>
@@ -1777,7 +1756,7 @@ function renderReview(){
     const ta = $(`#cut_${i}`); if (ta) ta.oninput = e => {
       j.text = e.target.value; j.approved = false;
       const facts = j.kind === "voice" ? voiceFacts(j) : tweetFacts(j), style = tweetStyle(jobText(j)), ok = $(`#ok_${i}`);
-      const cnt = $(`#count_${i}`); if (cnt) { const n = xLen(j.text); cnt.textContent = `${n} of ${X_LIMIT} as X counts them, a link as 23`; cnt.classList.toggle("over", n > X_LIMIT); }
+      const cnt = $(`#count_${i}`); if (cnt) { const n = xLen(j.text); cnt.textContent = `${n} of ${X_LIMIT}. A link counts as 23`; cnt.classList.toggle("over", n > X_LIMIT); }
       $(`#facts_${i}`).innerHTML = facts.map(c => `<div class="chk" data-k="${c.ok ? "good" : "warn"}"><s></s><span>${esc(c.t)}${c.ok || c.need ? "" : " (not required)"}</span></div>`).join("") + style.map(w => `<div class="chk" data-k="warn"><s></s><span>${esc(w)}</span></div>`).join("");
       ok.disabled = !jobOK(j); ok.textContent = "Approve";
     };
@@ -1809,9 +1788,8 @@ function renderOut(){
     const dis = inPlan && (S.planBusy || !S.plan) ? " disabled" : "";
     let staleNote = "";
     if (stale) {
-      staleNote = `The details or the fragments have changed since the copy was generated at ${fmtTime(S.gen.at)}.`;
-      if (heldT) staleNote += ` Generate again keeping the approved ${heldT === 1 ? "tweet" : "tweets"}, and only the rest is written afresh: ${heldT === 1 ? "it comes" : "a tweet comes"} back for approval only if a fact it must carry has changed${heldV ? ", and the hook in the artist's first person is written again if the hook has changed" : ""}. Or redo the tweets: Claude writes each again, close to the approved version, and each comes back for approval.`;
-      else if (heldV) staleNote += ` Generate again and the hook in the artist's first person is kept, or written again if the hook has changed.`;
+      staleNote = `The details or the email have changed since ${fmtTime(S.gen.at)}.`;
+      if (heldT) staleNote += ` Generate again to keep the approved ${heldT === 1 ? "tweet" : "tweets"}: ${heldT === 1 ? "it comes" : "one comes"} back for approval only if a fact in it has changed. Or have Claude write ${heldT === 1 ? "it" : "them all"} again.`;
     }
     const pi = inPlan && S.plan ? planItems(o) : null;
     const planLine = !inPlan ? "" : S.planBusy || !S.plan ? `Reading the plan's rows from Notion…` : S.planErr ? `The rows could not be read: ${esc(S.planErr)}` : "";
@@ -1823,7 +1801,7 @@ function renderOut(){
       <div class="sheet" style="padding:18px 22px">
         ${inPlan && (S.planBusy || !S.plan || S.planErr) ? `<p class="note" style="margin:0 0 12px">${planLine}</p>` : ""}
         ${stale ? `<p class="note" style="margin:0 0 12px">${staleNote}</p>` : ""}
-        ${held.length ? "" : `<p class="note" style="margin:0 0 12px">${over ? `${over === 1 ? "One tweet runs" : over + " tweets run"} over X's limit of ${X_LIMIT}, because ${over === 1 ? "it carries" : "they carry"} the hook whole. Claude writes ${over === 1 ? "it" : "each"} again as a tweet, keeping every fact, and you approve the rewrite before anything is filled in. Everything else is assembled, not written.` : "Every tweet fits, so nothing here needs Claude: it is all assembled from what you wrote."}</p>`}
+        ${held.length ? "" : `<p class="note" style="margin:0 0 12px">${over ? `${over === 1 ? "One tweet is" : over + " tweets are"} over ${X_LIMIT} characters. Claude will rewrite ${over === 1 ? "it" : "them"} for you to approve.` : "Every tweet fits. Nothing needs Claude."}</p>`}
         <button class="act" id="gen" style="width:auto;padding:9px 16px"${dis}>${heldT ? `Generate again, keeping the approved ${heldT === 1 ? "tweet" : "tweets"}` : held.length ? "Generate again, keeping what was approved" : stale ? "Generate again" : "Generate comms plan copy"}</button>
         ${heldT ? `<button class="act ghost" id="redo" style="width:auto;padding:9px 16px;margin-left:8px"${dis}>Generate again and redo the tweets</button>` : ""}
       </div>`;
@@ -1845,13 +1823,12 @@ function renderOut(){
   const cutOK = cuts.every(j => xLen(jobText(j)) <= X_LIMIT);
   const band = !SERVED ? "" : srv
     ? (() => { const pv = parity(srv), warns = srv.warnings.filter(w => !(cutOK && /^tweet of \d+ characters/.test(w)));
-        return `<p class="live" id="band">Rendered by the templates on the server${srv.errors.length ? `: <b>${srv.errors.length} validator error${srv.errors.length===1?"":"s"}</b>` : ", validator clean"}${warns.length ? `, ${warns.length} warning${warns.length===1?"":"s"}` : ""}. The page's own assembly ${pv.diffs.length ? `<b>differs in ${pv.diffs.length}</b> of ${pv.n} items.` : `matches all ${pv.n} items.`}${pv.extra ? ` ${pv.extra} more come from the templates only.` : ""}</p>`
+        return `<p class="live" id="band">Rendered on the server${srv.errors.length ? `: <b>${srv.errors.length} validator error${srv.errors.length===1?"":"s"}</b>` : ""}${warns.length ? `${srv.errors.length ? "," : ":"} ${warns.length} warning${warns.length===1?"":"s"}` : ""}.${pv.diffs.length ? ` The page's own version <b>differs in ${pv.diffs.length}</b> of ${pv.n} items.` : ""}</p>`
         + ((srv.errors.length || warns.length || pv.diffs.length) ? `<details class="out"><summary><b>Detail</b></summary><pre>${esc([...srv.errors.map(x=>"error: "+x), ...warns.map(x=>"warning: "+x), ...pv.diffs.map(x=>"assembly: "+x)].join("\n"))}</pre></details>` : ""); })()
     : S.server.err ? `<p class="live">The server could not render this release: ${esc(S.server.err)}. Showing the page's own assembly.</p>`
     : "";
   const first = !String(S.facts.artist_voice || "").startsWith("third");
-  const block = (title, note, list, meta, set) => `<div class="groupline"><span class="lbl">${esc(title)}</span></div>
-    <p class="note" style="max-width:60ch;margin:0 0 14px">${esc(note)}</p>
+  const block = (title, list, meta, set) => `<div class="groupline"><span class="lbl">${esc(title)}</span></div>
     ${list.map(x=>`<details class="out"><summary><b>${esc(x.n)}</b>${x.ch?`<span class="note">${esc(x.ch)}</span>`:""}${x.use?`<span class="note">${esc(x.use)}</span>`:""}<i>${x.t.startsWith("—")?"not used":(meta?(meta==="x"?xLen(x.t)+" on X":x.t.length+" chars"):"")}</i></summary><pre>${x.t.startsWith("—")?`<span class="na">${esc(x.t)}</span>`:esc(x.t)}</pre>${x.t.startsWith("—") ? "" : (b => b ? `<div class="genact">${b}</div>` : "")(redoBtn(set, x))}</details>`).join("")}`;
   $("#main").innerHTML = `
     <div class="head">
@@ -1859,28 +1836,24 @@ function renderOut(){
       <h1>Everything else</h1>
     </div>
     ${band}
-    ${block("Instagram", "Insiders posts the same caption; the plan says which.", sets.posts, true, "posts")}
-    ${block("Twitter", "Status line with the X handle, the hook on the announcement, an action line ending in the link.", sets.tweets, "x", "tweets")}
-    ${block("Email", srv ? "Whole emails, with the HubSpot module markers." : "Body copy only. Subject, preview, kicker and headline are on the writing screen.", sets.emails, false)}
-    ${block("The artist's Instagram", `In the ${first ? "first person, as most artists post" : "third person, as a studio or an estate posts"}; the voice is set in the details. Avant Arte is tagged, Make-Ready in the sustain and last chance posts, and the edition is one sentence rather than a features list.`, sets.artistPosts, true, "artistPosts")}
-    ${block("The artist's X", "Avant Arte named rather than tagged. The announcement carries the hook, cut to fit.", sets.artistTweets, "x", "artistTweets")}
-    ${block("Broadcast channel", "The announcement, now-live and last-chance emails as messages: features as sentences, link in bio where the email has a button.", sets.broadcast, true, "broadcast")}`;
+    ${block("Instagram", sets.posts, true, "posts")}
+    ${block("Twitter", sets.tweets, "x", "tweets")}
+    ${block("Email", sets.emails, false)}
+    ${block("The artist's Instagram", sets.artistPosts, true, "artistPosts")}
+    ${block("The artist's X", sets.artistTweets, "x", "artistTweets")}
+    ${block("Broadcast channel", sets.broadcast, true, "broadcast")}`;
   wireRedo();
 }
 function asideOut(){
   const o = outputs(), live = o.emails.filter(e=>!e.t.startsWith("—")).length;
   const hand = (S.blocks.qualifier+" "+S.blocks.hook+" "+S.blocks.making).split(/\s+/).filter(Boolean).length;
   return `<div class="panel"><span class="lbl">This campaign</span><h2>What you wrote</h2>
-  <p class="rule">Their reach.</p>
-  <section><h3>Reach</h3>
+  <section>
     <div class="chk" data-k="good"><s></s><span><b>Hook</b> · ${placements("hook").length} places</span></div>
     <div class="chk" data-k="good"><s></s><span><b>Making</b> · ${placements("making").length} places</span></div>
     <div class="chk" data-k="good"><s></s><span><b>Opener</b> · ${placements("qualifier").length} emails</span></div>
     <div class="chk" data-k="good"><s></s><span>${o.posts.length} posts, ${o.tweets.length} tweets, ${live} emails, and ${o.artistPosts.length + o.artistTweets.length} for the artist</span></div>
     <div class="chk" data-k="good"><s></s><span>${hand} words written by hand</span></div>
-  </section>
-  <section><h3>Still by hand</h3>
-  <p class="note">Deep dives, sustain posts, the rest of the Monthly Preview, past-works carousels, games, exhibition news and the artist's own email.</p>
   </section></div>`;
 }
 
@@ -1896,10 +1869,9 @@ async function notionPanel(){
   const html = `<section><h3>Notion</h3>
     <p class="note">The rows of <b>${esc(S.campaign.name)}</b>${S.plan ? `, read ${esc((S.plan.at || "").slice(11, 16))}` : ""}. <button class="act ghost" id="nrefresh" style="width:auto;padding:2px 8px;font-size:11.5px"${S.planBusy ? " disabled" : ""}>Read again</button></p>
     ${N.err ? `<p class="note">${esc(N.err)}</p>` : ""}
-    ${S.plan && !srv ? `<p class="note">${S.server.err ? `The server could not render this release, so nothing can be written: ${esc(S.server.err)}` : "Rendering the templates on the server first…"}</p>` : ""}
+    ${S.plan && !srv ? `<p class="note">${S.server.err ? `The server could not render this release: ${esc(S.server.err)}` : "Rendering the templates on the server first…"}</p>` : ""}
     ${S.plan ? `<button class="act" id="npush"${(N.busy || !srv || !toWrite.length) ? " disabled" : ""}>${toWrite.length ? `Write ${toWrite.length} row${toWrite.length === 1 ? "" : "s"} into Copy` : "Nothing to write"}</button>
-      <p class="note">${toWrite.length ? `Each row gets the copy shown for it on the left.${already ? ` ${already === 1 ? "One row already carries" : already + " rows already carry"} the same copy and ${already === 1 ? "is" : "are"} left alone.` : ""} Rows keeping their own copy, and rows by hand, are not touched.` : "Every row the tool writes already carries the copy shown for it."}</p>
-      ${kept.length ? `<p class="note">${kept.length === 1 ? "One row keeps" : kept.length + " rows keep"} the copy already in Notion, the tool's version shown beside it; Replace on the row swaps one. <button class="act ghost" id="nreplace" style="width:auto;padding:2px 8px;font-size:11.5px">Replace ${kept.length === 1 ? "it" : "them all"} with the tool's</button></p>` : ""}` : ""}
+      ${kept.length ? `<p class="note">${kept.length === 1 ? "One row keeps its Notion copy." : kept.length + " rows keep their Notion copy."} <button class="act ghost" id="nreplace" style="width:auto;padding:2px 8px;font-size:11.5px">Replace ${kept.length === 1 ? "it" : "them all"}</button></p>` : ""}` : ""}
     ${N.result ? `<p class="note">Written: ${N.result.written.length}.${N.result.failed.length ? ` Failed: ${N.result.failed.length}.` : ""}</p>
       ${N.result.failed.length ? `<details class="out"><summary><b>What failed</b></summary><pre>${esc(N.result.failed.map(f => f.error).join("\n"))}</pre></details>` : ""}` : ""}
   </section>`;
@@ -2077,7 +2049,7 @@ async function route(){
   if (id) {
     if (S.campaign && S.campaign.id === id) { S.view = view || (missing().length ? "facts" : "write"); render(); return; }
     const c = await campaignByID(id);
-    if (!c) { S.routeErr = "Nothing is at that address: no campaign in the plan has that id. Here is the list."; S.view = "campaigns"; render(); return; }
+    if (!c) { S.routeErr = "No campaign has that address."; S.view = "campaigns"; render(); return; }
     await openCampaign(c, "replace");
     if (view && view !== S.view) { S.view = view; render(); }
     return;
@@ -2102,21 +2074,19 @@ function renderCampaigns(){
       <h1>Which campaign are you writing for?</h1>
     </div>
     <div class="sheet camps">
-      <div class="row head2"><input id="campq" type="search" placeholder="Search by artist or title" value="${esc(S.campQ || "")}"><span>${cs.loading ? "reading Notion…" : cs.took ? `read in ${cs.took}s` : cs.cached ? "last time's list" : ""}</span><button class="act ghost" id="campreload" style="width:auto;padding:3px 10px;font-size:12px"${cs.loading ? " disabled" : ""}>Read again</button></div>
+      <div class="row head2"><input id="campq" type="search" placeholder="Search by artist or title" value="${esc(S.campQ || "")}"><span>${cs.loading ? "reading Notion…" : ""}</span><button class="act ghost" id="campreload" style="width:auto;padding:3px 10px;font-size:12px"${cs.loading ? " disabled" : ""}>Read again</button></div>
       ${S.routeErr ? `<div class="row"><span class="note" style="margin:0;white-space:normal">${esc(S.routeErr)}</span></div>` : ""}
       <div class="row" data-open=""><b>A release outside any campaign</b><span>kept in this browser only</span></div>
       ${!cs.list ? `<div class="row"><span>Reading the campaigns…</span></div>`
         : cs.err ? `<div class="row"><span class="note" style="margin:0;white-space:normal">${esc(cs.err)}</span></div>`
         : list.length ? list.map(c => `<div class="row" data-open="${esc(c.id)}"${S.campaign && S.campaign.id === c.id ? ' aria-current="true"' : ""}><b>${esc(c.name)}</b><span>${c.found ? "found by search · " : ""}${when(c)}</span></div>`).join("")
-        : `<div class="row"><span>${q.length >= 3 ? (hits ? "Nothing matches, in the recent hundred or by search." : "Nothing in the recent hundred; searching every campaign…") : "Nothing matches."}</span></div>`}
+        : `<div class="row"><span>${q.length >= 3 ? (hits ? "Nothing matches." : "Searching every campaign…") : "Nothing matches."}</span></div>`}
     </div>`;
   const qi = $("#campq"); if (qi) { qi.oninput = e => { S.campQ = e.target.value; const at = qi.selectionStart; searchCampaigns(S.campQ.trim().toLowerCase()); renderCampaigns(); const q2 = $("#campq"); q2.focus(); q2.setSelectionRange(at, at); }; }
   const rl = $("#campreload"); if (rl) rl.onclick = () => loadCampaigns(true).then(() => { if (S.view === "campaigns") renderCampaigns(); });
   $("#main").querySelectorAll("[data-open]").forEach(el => el.onclick = () => { const id = el.dataset.open; openCampaign(id ? list.find(c => c.id === id) || (cs.list || []).find(c => c.id === id) : null); });
-  $("#aside").innerHTML = `<div class="panel"><span class="lbl">Where drafts live</span><h2>On the campaign's page</h2>
-    <p class="rule">Each campaign in Notion carries its own draft.</p>
-    <section><h3>Now open</h3><p class="note">${S.campaign ? esc(S.campaign.name) : "A release outside any campaign, kept in this browser only."}</p></section>
-    <section><h3>How it saves</h3><p class="note">Four seconds after your last change, the whole release, details, page, fragments and approved copy, is written to a text property called “Copy generator” on the campaign's page. Hide that property from your Notion views; it is not for reading. Two people editing the same campaign overwrite each other: the later save wins.</p></section>
+  $("#aside").innerHTML = `<div class="panel"><span class="lbl">Drafts</span><h2>Saved on the campaign's Notion page</h2>
+    <section><p class="note">Your work is saved to the campaign's page a few seconds after each change, in a property called “Copy generator”. If two people edit the same campaign, the later save wins.</p></section>
     </div>`;
 }
 
@@ -2247,11 +2217,10 @@ function renderPlan(){
   const groups = []; items.forEach(p => { const g = groups.find(g => g.channel === p.row.channel); if (g) g.items.push(p); else groups.push({channel: p.row.channel, items: [p]}); });
   const opts = p => { const fam = FAMILY(p.row.channel); const list = SHAPES.filter(s => !fam || s.family === fam);
     return `<select class="shape" data-row="${esc(p.row.id)}"><option value="">By hand</option>${(fam ? [list] : [SHAPES]).flat().map(s => `<option value="${esc(s.key)}"${p.key === s.key ? " selected" : ""}>${esc(fam ? s.label : s.family + " · " + s.label)}</option>`).join("")}</select>`; };
-  const body = p => !p.shape ? `<p class="note" style="margin:0">${FAMILY(p.row.channel) ? "Nothing in the templates matches this name. Choose a shape, or write it in Notion." : "The tool has no shape for this channel. Choose one to start from, or write it in Notion."}${p.row.copy ? `</p><pre>${esc(p.row.copy)}</pre><p class="note">The copy already in the row, kept.` : ""}</p>`
+  const body = p => !p.shape ? `<p class="note" style="margin:0">${FAMILY(p.row.channel) ? "No shape matches this name. Choose one, or write it in Notion." : "No shape for this channel. Choose one, or write it in Notion."}${p.row.copy ? `</p><pre>${esc(p.row.copy)}</pre><p class="note">Already in the row.` : ""}</p>`
     : !p.item ? `<p class="note" style="margin:0">This shape is not used for a ${S.facts.mechanic === "draw" ? "draw" : "timed release"}.</p>`
-    : rowSame(p) ? `<pre>${esc(p.text)}</pre><p class="note">Already in the row, as it is here.</p>`
-    : p.row.copy ? `<div class="gencols"><div><span class="lbl">In the row now${p.keep ? ", kept" : ""}</span><pre>${esc(p.row.copy)}</pre></div><div><span class="lbl">The tool's${p.keep ? "" : ", to be written"}</span><pre>${esc(p.text)}</pre></div></div>
-        <div class="genact"><button class="act ghost keep" data-row="${esc(p.row.id)}">${p.keep ? "Use the tool's version instead" : "Keep the plan's copy"}</button></div>`
+    : rowSame(p) ? `<pre>${esc(p.text)}</pre><p class="note">Already in the row.</p>`
+    : p.row.copy ? `<div class="gencols"><div><span class="lbl">In Notion now</span><pre>${esc(p.row.copy)}</pre></div><div><span class="lbl">New</span><pre>${esc(p.text)}</pre></div></div>`
     : `<pre>${esc(p.text)}</pre>`;
   const open = new Set([...document.querySelectorAll("#main details[data-row][open]")].map(d => d.dataset.row));
   $("#main").innerHTML = `
@@ -2264,7 +2233,7 @@ function renderPlan(){
     ${groups.map(g => `<div class="groupline"><span class="lbl">${esc(g.channel)}</span></div>
       ${g.items.map(p => `<details class="out" data-row="${esc(p.row.id)}"><summary><b>${esc(p.row.name)}</b>${p.row.live_date ? `<span class="note">${esc(p.row.live_date.slice(0, 10))}</span>` : ""}${p.row.copy ? `<span class="note">${rowSame(p) ? "already in the row" : p.keep ? "keeps its copy" : "will be replaced"}</span>${p.item && !rowSame(p) ? `<button class="act ghost keep" data-row="${esc(p.row.id)}" style="width:auto;padding:1px 8px;margin:0 0 0 4px;font-size:11.5px">${p.keep ? "Replace" : "Keep"}</button>` : ""}` : ""}<i>${p.item ? (SETOF[p.shape.family] === "tweets" || SETOF[p.shape.family] === "artistTweets" ? xLen(p.text) + " on X" : p.text.length + " chars") : ""}</i></summary>
         <div class="rowbar"><span class="lbl">Shape</span>${opts(p)}${p.item && p.shape ? redoBtn(SETOF[p.shape.family], {n: p.item.n, t: p.text}, "margin-left:auto") : ""}</div>${body(p)}</details>`).join("")}`).join("")}
-    ${planHasNeeds() && rows.length ? `<p class="note" style="margin-top:18px">${S.showAll ? `Showing every row. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Only rows that need copy</button>` : `Rows without the Needs copy tick are hidden. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Show every row</button>`}</p>` : ""}`;
+    ${planHasNeeds() && rows.length ? `<p class="note" style="margin-top:18px">${S.showAll ? `Showing every row. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Only rows that need copy</button>` : `Only rows ticked Needs copy. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Show every row</button>`}</p>` : ""}`;
   open.forEach(id => { const d = $("#main").querySelector(`details[data-row="${CSS.escape(id)}"]`); if (d) d.open = true; });
   wireRedo();
   const sa = $("#showall"); if (sa) sa.onclick = () => { S.showAll = !S.showAll; afterShapeChange(); persist(); render(); };

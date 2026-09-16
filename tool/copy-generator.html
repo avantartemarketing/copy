@@ -1430,51 +1430,79 @@ function xLen(t){
 const genStamp = () => JSON.stringify({f:S.facts, b:S.blocks, p:S.page, l:S.lead});
 const genReady = () => !!(S.gen && S.gen.done && S.gen.stamp === genStamp());
 const fmtTime = d => `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-// what Claude has to write: every tweet over the limit, cut in its hook where it carries one
+// what Claude has to write: every tweet over the limit, rewritten whole as a tweet.
+// The fixed lines alone take 200 or more of the 280, so cutting the hook inside them leaves a
+// fragment; the archive's own announcement tweets were written as tweets, and so are these.
 function genJobs(sets){
-  const H = S.blocks.hook.trim(), jobs = [];
+  const jobs = [];
   [["tweets", "Twitter", sets.tweets], ["artistTweets", "The artist's X", sets.artistTweets]].forEach(([set, channel, list]) => (list || []).forEach(x => {
     if (x.t.startsWith("—")) return;
     const n = xLen(x.t); if (n <= X_LIMIT) return;
-    const hook = H && x.t.includes(H) ? H : null;
-    jobs.push({set, channel, name: x.n, orig: x.t, len: n, hook, text: hook || x.t, ai: null, approved: false, err: null, busy: false});
+    jobs.push({set, channel, name: x.n, orig: x.t, len: n, text: x.t, ai: null, approved: false, err: null, busy: false});
   }));
   return jobs;
 }
-const jobText = j => (j.hook ? j.orig.replace(j.hook, j.text.trim()) : j.text.trim()).replace(/\n{3,}/g, "\n\n").trim();     // the whole tweet with the cut in place
-const jobRoom = j => j.hook ? X_LIMIT - (xLen(j.orig) - xLen(j.hook)) : X_LIMIT;        // what the hook may take
-const SCHEMA_CUT = {type:"object", additionalProperties:false, required:["hook"], properties:{hook:{type:"string"}}};
-function cutPrompt(j){
-  return `You are cutting one tweet for Avant Arte, a publisher of limited edition artworks, to fit X's limit. Everything in it except the hook is house copy and stays exactly as it is; only the hook changes.
+const jobText = j => j.text.trim();
+// the facts a tweet must still carry once rewritten, and how it reads
+function tweetFacts(j){
+  const f = S.facts, d = D(), t = jobText(j), low = t.toLowerCase(), has = s => !!s && low.includes(String(s).toLowerCase());
+  const titles = d.series ? [f.series_name] : d.cardTitles;
+  const out = titles.map(x => ({need:true, ok:has(x), t:`Names ‘${x}’`}));
+  if (j.set === "artistTweets" && !String(f.artist_voice || "").startsWith("third")) out.push({need:false, ok:/\b(my|I)\b/.test(t), t:"In the artist's first person"});
+  else out.push({need:true, ok:has(f.artist), t:`Names ${f.artist}`});
+  out.push({need:true, ok:/limited edition/.test(low), t:"Says it is a limited edition"});
+  const date = d.draw ? d.closeDate : d.launchDate, time = (d.draw ? d.closeTime : d.launchTime).replace(" UK time", "");
+  out.push({need:true, ok:has(date), t:`Gives the ${d.draw ? "closing" : "launch"} date, ${date}`});
+  out.push({need:false, ok:has(time), t:`Gives the time, ${time} UK time`});
+  if (f.beneficiary) out.push({need:true, ok:has(f.beneficiary), t:`Names ${f.beneficiary}`});
+  out.push({need:true, ok:has(f.link), t:"Carries the link"});
+  const n = xLen(t); out.push({need:true, ok:n <= X_LIMIT, t:`${n} of ${X_LIMIT} as X counts them, a link as 23`});
+  return out;
+}
+function tweetStyle(t){
+  const low = t.toLowerCase(), out = [];
+  BANNED.forEach(b => { if (new RegExp("(?<![\\w-])"+b.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(?![\\w-])").test(low)) out.push(`Banned phrase: “${b}”`); });
+  Object.entries(US).forEach(([us,uk]) => { if (new RegExp("\\b"+us+"\\b").test(low)) out.push(`US spelling “${us}”: use “${uk}”`); });
+  if (t.includes("—")) out.push("Em dash. The house dash is a spaced en dash.");
+  if (/(?<!\d)\s-\s(?!\d)/.test(t)) out.push("A hyphen as a dash. The house dash is a spaced en dash ( – ).");
+  if (t.split(/(?<=[.!?])\s+/).some(sn => (sn.match(/\s[–—-]\s/g) || []).length >= 2)) out.push("An aside between two dashes reads as machine-written.");
+  if (t.includes("!")) out.push("Exclamation mark.");
+  if (t.includes("?")) out.push("Question mark: no rhetorical questions.");
+  return out;
+}
+const jobOK = j => tweetFacts(j).every(c => c.ok || !c.need);
+const SCHEMA_TWEET = {type:"object", additionalProperties:false, required:["tweet"], properties:{tweet:{type:"string"}}};
+function rewritePrompt(j){
+  const f = S.facts, d = D(), first = !String(f.artist_voice || "").startsWith("third");
+  const artistX = f.x_handle ? `${f.artist} (@${f.x_handle})` : f.artist;
+  const titles = d.series ? `the ${f.series_name} series` : d.cardTitles.map(t => `‘${t}’`).join(", ");
+  const act = d.draw ? `that it is a draw closing on ${d.closeDate} at ${d.closeTime}` : `that it launches on ${d.launchDate} at ${d.launchTime} for ${f.window}`;
+  const who = j.set === "artistTweets"
+    ? (first ? `It is the artist's own tweet, in the first person ("my collaboration with Avant Arte"), Avant Arte named and not tagged.` : `It is posted by the artist's studio or estate, in the third person, Avant Arte named and not tagged.`)
+    : `It is Avant Arte's own tweet.`;
+  return `You are rewriting one tweet for Avant Arte, a publisher of limited edition artworks, so that it fits X's limit of ${X_LIMIT} characters, a link counting as 23. As it stands it runs to ${j.len}. Write it whole, as a tweet reads, not as the longer text with pieces cut out. ${who}
 
-THE TWEET AS IT STANDS, ${j.len} characters as X counts them against a limit of ${X_LIMIT}, a link counting as 23:
+THE TWEET AS IT STANDS:
 ${j.orig}
 
-THE HOOK, the part to cut:
-${j.hook}
+IT MUST STILL SAY, in this order, in two or three short lines with a blank line between:
+1. What is announced: ${titles}, ${f.edition_phrase}, by ${artistX}${f.beneficiary ? `, in support of ${f.beneficiary}` : ""}.
+2. One idea from the hook: a clause or one short sentence, in the hook's own words where they fit.
+3. How to act: ${act}, ending with this link exactly as given: ${f.link}
 
-THE HOOK MAY BE AT MOST ${jobRoom(j)} CHARACTERS. Cut it to fit: drop whole sentences before rewording, keep the artist's own words where they are quoted, and keep the one idea that makes someone want to look. Never add a fact, a name, a number or a claim that is not in the hook as it stands.
-
-HOUSE RULES: British spelling. The house dash is a spaced en dash, never an em dash and never a hyphen; use one at most in a sentence, and never set an aside between a pair of them, which reads as machine-written. Refer to the artist by surname alone. No exclamation marks and no rhetorical questions. Never say "we" or "our". Never write "limited-edition" with a hyphen.
+RULES: every fact as given, none added and none dropped. British spelling. The house dash is a spaced en dash, one at most; never a hyphen as a dash and never a pair of dashes round an aside. No exclamation marks and no rhetorical questions. Never "thrilled", "excited", "don't miss out" or "drop". Under ${X_LIMIT} characters with the link counted as 23.
 
 Reply with JSON only, no other text:
-{"hook":"the cut hook"}`;
+{"tweet":"the whole tweet, its lines separated by blank lines"}`;
 }
-const MIN_ROOM = 40;                                   // under this, a hook is a fragment: the tweet goes without one
-async function cutJob(j){
+async function rewriteJob(j){
   j.busy = true; j.err = null; j.approved = false; render();
   try {
-    if (!j.hook) throw {code:"nothing_to_cut"};
-    if (jobRoom(j) < MIN_ROOM) {                       // the titles and the launch line have taken the room
-      j.ai = ""; j.text = ""; j.busy = false;
-      j.err = `Only ${jobRoom(j)} characters are left for a hook once the titles and the launch line are in, so it goes without one, as the archive's announcement tweets often did. Add a few words if they fit.`;
-      render(); return;
-    }
-    const r = await aiJSON(cutPrompt(j), SCHEMA_CUT);
-    j.ai = (r.hook || "").trim(); j.text = j.ai;
-    if (xLen(jobText(j)) > X_LIMIT) j.err = "Claude's cut still runs over. Trim it below.";
+    const r = await aiJSON(rewritePrompt(j), SCHEMA_TWEET);
+    j.ai = (r.tweet || "").trim(); j.text = j.ai;
+    if (!jobOK(j)) j.err = "Claude's rewrite falls short on a point below. Fix it by hand or ask again.";
   } catch (e) {
-    j.err = (e && e.code === "nothing_to_cut") ? "Over the limit with no hook in it to cut. Shorten it by hand below." : AI_ERR(e) + " Cut it by hand below.";
+    j.err = AI_ERR(e) + " Rewrite it by hand below.";
   }
   j.busy = false; render();
 }
@@ -1485,10 +1513,10 @@ async function generate(){
   const jobs = genJobs(baseSets());
   S.gen.items = jobs;
   if (!jobs.length) { S.gen.busy = false; S.gen.done = true; render(); return; }
-  await Promise.all(jobs.map(cutJob));
+  await Promise.all(jobs.map(rewriteJob));
   S.gen.busy = false; render();
 }
-// the sets as they will go out: the templates' text with each approved cut in place
+// the sets as they will go out: the templates' text with each approved rewrite in place
 function finalSets(){
   const b = baseSets();
   const apply = (list, set) => list.map(x => { const j = genReady() ? S.gen.items.find(j => j.set === set && j.name === x.n) : null; return j ? Object.assign({}, x, {t: jobText(j)}) : x; });
@@ -1498,38 +1526,36 @@ function finalSets(){
 function renderReview(){
   const jobs = S.gen.items;
   const rows = jobs.map((j, i) => {
-    const n = xLen(jobText(j)), over = n > X_LIMIT;
-    const ck = j.hook && !j.busy ? checks("hook", j.text).filter(c => c.k === "warn") : [];
+    const facts = j.busy ? [] : tweetFacts(j), style = j.busy ? [] : tweetStyle(jobText(j)), ok = !j.busy && jobOK(j);
     return `<div class="sheet gen">
-      <div class="genhead"><b>${esc(j.channel)} · ${esc(j.name)}</b><span class="note" style="margin:0">${j.len} characters as X counts them, against ${X_LIMIT}.${j.hook ? ` The hook may take ${jobRoom(j)}.` : ""}</span></div>
+      <div class="genhead"><b>${esc(j.channel)} · ${esc(j.name)}</b><span class="note" style="margin:0">${j.len} characters as X counts them, against ${X_LIMIT}.</span></div>
       <div class="gencols">
         <div><span class="lbl">As written</span><pre>${esc(j.orig)}</pre></div>
-        <div><span class="lbl">${j.hook ? (j.ai === "" && j.text === "" ? "The hook, dropped" : "The hook, cut") : "The tweet, cut"}${j.ai && j.text === j.ai ? " by Claude" : j.ai ? ", then edited" : ""}</span>
-          ${j.busy ? `<p class="note">Claude is cutting it…</p>` : `<textarea id="cut_${i}" rows="6">${esc(j.text)}</textarea>
-          <p class="count${over ? " over" : ""}" id="count_${i}">${n} of ${X_LIMIT} for the whole tweet${over ? ", still over" : ""}</p>
-          ${ck.map(c => `<div class="chk" data-k="warn"><s></s><span>${esc(c.t)}</span></div>`).join("")}
+        <div><span class="lbl">${j.ai && j.text === j.ai ? "Rewritten by Claude" : j.ai ? "Rewritten by Claude, then edited" : "Rewritten by hand"}</span>
+          ${j.busy ? `<p class="note">Claude is rewriting it…</p>` : `<textarea id="cut_${i}" rows="7">${esc(j.text)}</textarea>
+          <div id="facts_${i}">${facts.map(c => `<div class="chk" data-k="${c.ok ? "good" : "warn"}"><s></s><span>${esc(c.t)}${c.ok || c.need ? "" : " (not required)"}</span></div>`).join("")}${style.map(w => `<div class="chk" data-k="warn"><s></s><span>${esc(w)}</span></div>`).join("")}</div>
           ${j.err ? `<p class="note">${esc(j.err)}</p>` : ""}`}
         </div>
       </div>
-      <div class="genact"><button class="act" id="ok_${i}"${(over || j.busy) ? " disabled" : ""}>${j.approved ? "Approved" : "Approve"}</button><button class="act ghost" id="again_${i}"${(j.busy || !j.hook) ? " disabled" : ""}>Ask Claude again</button></div>
+      <div class="genact"><button class="act" id="ok_${i}"${ok ? "" : " disabled"}>${j.approved ? "Approved" : "Approve"}</button><button class="act ghost" id="again_${i}"${j.busy ? " disabled" : ""}>Ask Claude again</button></div>
     </div>`;
   }).join("");
   $("#main").innerHTML = `
     <div class="head">
       <span class="lbl">Then</span>
       <h1>Approve what Claude wrote</h1>
-      <p>${jobs.length === 1 ? "One tweet carries" : jobs.length + " tweets carry"} the hook whole and ${jobs.length === 1 ? "does" : "do"} not fit X's limit. The cut is Claude's and the words are yours to change here. Nothing is filled in until each is approved. Everything else is assembled from what you wrote and needs no approval.</p>
+      <p>${jobs.length === 1 ? "One tweet carries" : jobs.length + " tweets carry"} the hook whole and ${jobs.length === 1 ? "does" : "do"} not fit X's limit. Claude has written ${jobs.length === 1 ? "it" : "each"} again as a tweet; the facts it must keep are checked below, and the words are yours to change. Nothing is filled in until each is approved. Everything else is assembled from what you wrote and needs no approval.</p>
     </div>
     ${rows}`;
   jobs.forEach((j, i) => {
     const ta = $(`#cut_${i}`); if (ta) ta.oninput = e => {
       j.text = e.target.value; j.approved = false;
-      const n = xLen(jobText(j)), c = $(`#count_${i}`), ok = $(`#ok_${i}`);
-      c.textContent = `${n} of ${X_LIMIT} for the whole tweet${n > X_LIMIT ? ", still over" : ""}`; c.classList.toggle("over", n > X_LIMIT);
-      ok.disabled = n > X_LIMIT; ok.textContent = "Approve";
+      const facts = tweetFacts(j), style = tweetStyle(jobText(j)), ok = $(`#ok_${i}`);
+      $(`#facts_${i}`).innerHTML = facts.map(c => `<div class="chk" data-k="${c.ok ? "good" : "warn"}"><s></s><span>${esc(c.t)}${c.ok || c.need ? "" : " (not required)"}</span></div>`).join("") + style.map(w => `<div class="chk" data-k="warn"><s></s><span>${esc(w)}</span></div>`).join("");
+      ok.disabled = !jobOK(j); ok.textContent = "Approve";
     };
     const ok = $(`#ok_${i}`); if (ok) ok.onclick = () => { j.approved = true; if (S.gen.items.every(x => x.approved)) S.gen.done = true; render(); };
-    const again = $(`#again_${i}`); if (again) again.onclick = () => cutJob(j);
+    const again = $(`#again_${i}`); if (again) again.onclick = () => rewriteJob(j);
   });
 }
 
@@ -1559,7 +1585,7 @@ function renderOut(){
       </div>
       <div class="sheet" style="padding:18px 22px">
         ${stale ? `<p class="note" style="margin:0 0 12px">The details or the fragments have changed since the copy was generated at ${fmtTime(S.gen.at)}. Generate it again to bring it up to date.</p>` : ""}
-        <p class="note" style="margin:0 0 12px">${over ? `${over === 1 ? "One tweet runs" : over + " tweets run"} over X's limit of ${X_LIMIT}, because ${over === 1 ? "it carries" : "they carry"} the hook whole. Claude cuts the hook to fit, and you approve the cut before anything is filled in. Everything else is assembled, not written.` : "Every tweet fits, so nothing here needs Claude: it is all assembled from what you wrote."}</p>
+        <p class="note" style="margin:0 0 12px">${over ? `${over === 1 ? "One tweet runs" : over + " tweets run"} over X's limit of ${X_LIMIT}, because ${over === 1 ? "it carries" : "they carry"} the hook whole. Claude writes ${over === 1 ? "it" : "each"} again as a tweet, keeping every fact, and you approve the rewrite before anything is filled in. Everything else is assembled, not written.` : "Every tweet fits, so nothing here needs Claude: it is all assembled from what you wrote."}</p>
         <button class="act" id="gen" style="width:auto;padding:9px 16px">Generate comms plan copy</button>
       </div>`;
     $("#gen").onclick = generate;
@@ -1576,7 +1602,7 @@ function renderOut(){
   const sets = finalSets(), srv = SERVED ? S.server.out : null, cuts = S.gen.items;
   const cutOK = cuts.every(j => xLen(jobText(j)) <= X_LIMIT);
   const genLine = `<p class="live">Generated at ${fmtTime(S.gen.at)}. ${cuts.length
-      ? cuts.map(j => `${esc(j.channel)} · ${esc(j.name)}: ${j.text.trim() === "" ? "the hook dropped for want of room" : "the hook cut" + (j.ai && j.text === j.ai ? " by Claude" : j.ai ? " by Claude, then edited" : " by hand")}, ${j.len} to ${xLen(jobText(j))} characters, approved.`).join(" ")
+      ? cuts.map(j => `${esc(j.channel)} · ${esc(j.name)}: rewritten${j.ai && j.text === j.ai ? " by Claude" : j.ai ? " by Claude, then edited" : " by hand"}, ${j.len} to ${xLen(jobText(j))} characters, approved.`).join(" ")
       : "Nothing needed Claude: every tweet fits."} <button class="act ghost" id="regen" style="width:auto;padding:3px 10px;margin-left:6px;font-size:12px">Generate again</button></p>`;
   const band = !SERVED ? "" : srv
     ? (() => { const pv = parity(srv), warns = srv.warnings.filter(w => !(cutOK && /^tweet of \d+ characters/.test(w)));

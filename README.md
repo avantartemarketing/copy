@@ -260,14 +260,17 @@ and the page sends the sentence it shows, framed or written, so the server rende
 
 **The announcement tweet never fits.** The hook is two or three sentences and X allows 280
 characters, a link counting as 23, so every announcement tweet in every brief runs over, by 140
-to 300 characters. The archive's own announcement tweets carried one hook sentence at most, and
-the artist's usually none. So the tool has a generate step, the one place it lets Claude write:
-Everything else stays blank until "Generate comms plan copy" is pressed; the templates render;
-any tweet over the limit is shown with its hook cut to the room left, which is between 40 and
-130 characters depending on the titles and the launch line; and each cut is approved, edited or
-replaced before anything is filled in. Under 40 characters of room the tweet goes without a hook.
-Without Claude the same screen asks for the cut by hand. Everything else on the screen is
-assembled, not written, and needs no approval.
+to 300 characters. Cutting the hook alone does not work either: the tweet's fixed lines take 200
+or more of the 280, so the hook comes out as a fragment. The archive's own announcement tweets
+were written as tweets, with a shorter frame and one hook sentence at most. So the tool has a
+generate step, the one place it lets Claude write: Everything else stays blank until "Generate
+comms plan copy" is pressed; the templates render; any tweet over the limit is written again
+whole, as a tweet, beside the original; and each rewrite is approved, edited or replaced before
+anything is filled in. What the rewrite must keep is checked rather than locked, and shown under
+it as it is edited: the titles, the artist, the words "limited edition", the launch or closing
+date, the beneficiary, the link, and the count. Approval waits until all of them hold. Without
+Claude the same screen takes the rewrite by hand. Everything else on the screen is assembled, not
+written, and needs no approval.
 
 **The artist's own posts**, `templates/artist-set.txt`: the plan holds as many posts on the
 artist's channels as on ours, and the archive's are the same six phases in the artist's voice.

@@ -458,29 +458,40 @@ function outputs(){
     {n:"Last chance", t:P(X(`Last chance to ${d.draw?"enter the draw for":"collect"} ${d.work} by ${d.named}.`), openT)}
   ];
 
-  // the artist's own accounts: the same fragments in their voice, @avant.arte on Instagram, Avant Arte named on X
-  const first = !String(f.artist_voice || "").startsWith("third"), collab = f.collab_with || f.artist;
-  const mineIG = first ? `my ${f.ordinal} collaboration with @avant.arte` : `${collab}'s ${f.ordinal} collaboration with @avant.arte`;
-  const mineX = first ? `my ${f.ordinal} collaboration with Avant Arte` : `${collab}'s ${f.ordinal} collaboration with Avant Arte`;
+  // the artist's own accounts: the same fragments in their voice, built to the archive's artist posts.
+  // The edition is one sentence, never a features list, which reads as a shop on an artist's account.
+  const first = !String(f.artist_voice || "").startsWith("third");
+  const ed = [], ship = d.feats.some(x => /shipping/i.test(x));
+  d.feats.forEach(x => { const low = x.toLowerCase();
+    if (/shipping/.test(low)) return;
+    if (/signed/.test(low) && /numbered/.test(low)) ed.push("signed and numbered");
+    else if (/signed/.test(low)) ed.push("signed");
+    else if (/numbered/.test(low)) ed.push("numbered");
+    else ed.push(first ? low.replace("by the artist", "by me") : low); });
+  const editionSentence = (ed.length ? `Each ${f.unit || "print"} is ${ed.join(" and ")}` : "") + (ship ? (ed.length ? ", with free worldwide shipping" : "Free worldwide shipping") : "") + ((ed.length || ship) ? "." : "");
+  const mineIG = `my ${f.ordinal} collaboration with @avant.arte`, mineX = `my ${f.ordinal} collaboration with Avant Arte`;
+  const workIG = first ? `${d.work}, ${mineIG}` : `${d.work} by ${f.artist}, created in collaboration with @avant.arte`;
+  const workX = first ? `${d.work}, ${mineX}` : `${d.work} by ${f.artist}, created in collaboration with Avant Arte`;
   const benIG = f.beneficiary ? `, in support of ${d.benTagged}` : "", benX = f.beneficiary ? `, in support of ${f.beneficiary}` : "";
   const bio = first ? "my bio" : "bio";
   const preA = d.draw ? `Enter the draw via the link in ${bio}. ${deadline}` : `Available for ${f.window} from ${d.launchTime} on ${d.launchDate}. Link in ${bio} to get updates.`;
   const openA = d.draw ? `Enter the draw via the link in ${bio}. ${deadline}` : `Link in ${bio} to buy ${d.aUnit}. ${deadline}`;
-  const makingTheirs = M.replace("printmakers at Make-Ready", "Avant Arte's printmakers at Make-Ready (@make__ready)");
+  const makingIG = M.replace("printmakers at Make-Ready", "Avant Arte's printmakers at Make-Ready (@make__ready)");
+  const lastA = d.draw ? "There are 24 hours left to enter the draw for" : "Last chance to collect";
   const artistPosts = [
-    {n:"Coming soon", t:P(`${cap(mineIG)} is on the horizon: ${f.edition_phrase}${benIG}, launching on ${d.launchDate}.`, `Link in ${bio} to get updates.`)},
-    {n:"Announcement", t:P(`Announcing ${mineIG} – ${d.work}, ${f.edition_phrase}${d.hookNamesBen ? "" : benIG}.`, H, feat, preA)},
-    {n:"Sustain", t:P(`A closer look at ${d.work}, ${f.edition_phrase} and ${mineIG}.`, makingTheirs, feat, preA)},
-    {n:"Now live", t: d.draw ? NA : P(`${d.Work}, ${mineIG}, is now available to collect for ${f.window} only.`, feat, openA)},
-    {n:"Still time", t: d.draw ? NA : P(`There's still time to collect ${d.work}, ${mineIG}.`, feat, openA)},
-    {n:"Last chance", t:P(`Last chance to ${d.draw ? "enter the draw for" : "collect"} ${d.work}, ${mineIG}.`, feat, openA)}
+    {n:"Coming soon", t:P(first ? `${cap(mineIG)} is on the horizon: ${f.edition_phrase}${benIG}, launching on ${d.launchDate}.` : `${cap(f.edition_phrase)} by ${f.artist} is on the horizon, created in collaboration with @avant.arte${benIG}, launching on ${d.launchDate}.`, `Link in ${bio} to get updates.`)},
+    {n:"Announcement", t:P(first ? `Announcing ${mineIG} – ${d.work}, ${f.edition_phrase}${d.hookNamesBen ? "" : benIG}.` : `Announcing ${d.work}, ${f.edition_phrase} by ${f.artist}, created in collaboration with @avant.arte${d.hookNamesBen ? "" : benIG}.`, H, editionSentence, preA, f.hashtag ? "#" + f.hashtag : "")},
+    {n:"Sustain", t:P(`A closer look at ${workIG}.`, makingIG, preA)},
+    {n:"Now live", t: d.draw ? NA : P(`${cap(workIG)}, is now available to collect for ${f.window} only.`, editionSentence, openA)},
+    {n:"Still time", t: d.draw ? NA : P(`There's still time to collect ${workIG}.`, openA)},
+    {n:"Last chance", t:P(`${lastA} ${workIG}.`, makingIG, openA)}
   ];
   const artistTweets = [
-    {n:"Coming soon", t:P(`${cap(mineX)} is on the horizon: ${f.edition_phrase}${benX}, launching on ${d.launchDate}.`, `Sign up for updates: ${f.link}`)},
-    {n:"Announcement", t:P(`Announcing ${mineX} – ${d.work}, ${f.edition_phrase}${d.hookNamesBen ? "" : benX}.`, H, preT)},
-    {n:"Now live", t: d.draw ? NA : P(`${d.Work}, ${mineX}, is now available to collect, for ${f.window} only.`, openT)},
-    {n:"Still time", t: d.draw ? NA : P(`There's still time to collect ${d.work}, ${mineX}.`, openT)},
-    {n:"Last chance", t:P(`Last chance to ${d.draw ? "enter the draw for" : "collect"} ${d.work}, ${mineX}.`, openT)}
+    {n:"Coming soon", t:P(first ? `${cap(mineX)} is on the horizon: ${f.edition_phrase}${benX}, launching on ${d.launchDate}.` : `${cap(f.edition_phrase)} by ${f.artist} is on the horizon, created in collaboration with Avant Arte${benX}, launching on ${d.launchDate}.`, `Sign up for updates: ${f.link}`)},
+    {n:"Announcement", t:P(first ? `Announcing ${mineX} – ${d.work}, ${f.edition_phrase}${d.hookNamesBen ? "" : benX}.` : `Announcing ${d.work}, ${f.edition_phrase} by ${f.artist}, created in collaboration with Avant Arte${d.hookNamesBen ? "" : benX}.`, H, preT)},
+    {n:"Now live", t: d.draw ? NA : P(`${cap(workX)}, is now available to collect, for ${f.window} only.`, openT)},
+    {n:"Still time", t: d.draw ? NA : P(`There's still time to collect ${workX}.`, openT)},
+    {n:"Last chance", t:P(`${lastA} ${workX}.`, openT)}
   ];
 
   const greet = "Hi {{ personalization_token('contact.firstname', 'there') }},";
@@ -1627,7 +1638,7 @@ function renderOut(){
     ${block("Instagram", "Insiders posts the same caption; the plan says which.", sets.posts, true)}
     ${block("Twitter", "Status line with the X handle, the hook on the announcement, an action line ending in the link.", sets.tweets, "x")}
     ${block("Email", srv ? "Whole emails, with the HubSpot module markers." : "Body copy only. Subject, preview, kicker and headline are on the writing screen.", sets.emails, false)}
-    ${block("The artist's Instagram", `In the ${first ? "first person, as most artists post" : "third person, as a studio or an estate posts"}; the voice is set in the details. Avant Arte is tagged, and Make-Ready in the sustain post.`, sets.artistPosts, true)}
+    ${block("The artist's Instagram", `In the ${first ? "first person, as most artists post" : "third person, as a studio or an estate posts"}; the voice is set in the details. Avant Arte is tagged, Make-Ready in the sustain and last chance posts, and the edition is one sentence rather than a features list.`, sets.artistPosts, true)}
     ${block("The artist's X", "Avant Arte named rather than tagged. The announcement carries the hook, cut to fit.", sets.artistTweets, "x")}`;
   $("#regen").onclick = () => { S.gen = null; generate(); };
 }

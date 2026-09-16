@@ -275,11 +275,14 @@ written, and needs no approval.
 **The artist's own posts**, `templates/artist-set.txt`: the plan holds as many posts on the
 artist's channels as on ours, and the archive's are the same six phases in the artist's voice.
 Coming soon, announcement, sustain, now live, still time and last chance on the artist's
-Instagram, and the tweets to match; stories carry no copy in the plan and are not made. The same
-hook and making line, with @avant.arte tagged and Make-Ready tagged in the sustain post, and no
-bio or quote, which would be redundant on the artist's own account. A details field sets the
-voice: first person ("my latest collaboration with @avant.arte"), which is 63% of the archive,
-or third person for a studio or an estate ("Grayson Perry's latest collaboration"). In the first
+Instagram, and the tweets to match; stories carry no copy in the plan and are not made. Built to
+what the archive's artist posts do: the announcement carries the hook, the sustain and the last
+chance carry the making line, and the edition appears in the announcement and the live post as
+one sentence, "Each print is signed and numbered, with free worldwide shipping", the form 78
+artist posts use, never as the features list, which reads as a shop on an artist's account. No
+bio or quote, which would be redundant there. A details field sets the voice: first person ("my
+latest collaboration with @avant.arte"), which is 63% of the archive, or third person for a
+studio or an estate ("by Grayson Perry, created in collaboration with @avant.arte"). In the first
 person a hook that names the artist reads as someone else speaking, and the checks say so. The
 workbook does not carry the artist set.
 

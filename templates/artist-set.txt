@@ -1,17 +1,19 @@
 {#
   THE ARTIST SET — the posts and tweets the artist publishes on their own accounts, in their own voice.
-  Same skeleton as the Instagram set, same fragments (hook, making). No bio and no quote: on the
-  artist's own account the bio is redundant and the quote is theirs to say unquoted.
+  Same fragments as the Instagram set (hook, making); no bio and no quote, which are redundant on
+  the artist's own account. Built to the archive's own artist posts: the announcement carries the
+  hook; the sustain and the last chance carry the making line; the announcement and the live post
+  carry the edition as one sentence, "Each print is signed and numbered, with free worldwide
+  shipping", never as a features list, which reads as a shop on an artist's account.
   Voice: artist.voice is "first" (I, my: 63% of the archive's artist posts) or "third" (a studio's or
-  an estate's account speaks of the artist by name). Avant Arte is @avant.arte on Instagram, named on X.
-  Stories carry no copy in the plan and are not here.
+  an estate's account: "by Grayson Perry, created in collaboration with @avant.arte").
+  Avant Arte is @avant.arte on Instagram and named on X. Stories carry no copy in the plan.
   Posts: coming soon · announce · sustain · live · still time · last chance (a draw has no live or still time).
   Tweets: the same phases, the hook on the announcement only, the link in the action line.
 #}
 {% set first = not (artist.voice is defined and artist.voice == "third") %}
 {% set draw = release.mechanic == "draw" %}
 {% set ordinal = artist.collaboration_ordinal %}
-{% set collab = artist.collab_with if (artist.collab_with is defined and artist.collab_with) else artist.name %}
 {% set fundraiser = release.fundraiser if release.fundraiser is defined and release.fundraiser else "" %}
 {% set bh = release.beneficiary_handle if release.beneficiary_handle is defined and release.beneficiary_handle else "" %}
 {% set hook_names_beneficiary = fundraiser and fundraiser in context.hook %}
@@ -22,8 +24,7 @@
 {% set work = ("the " ~ series ~ " series") if series else artworks|titles_q %}
 {% set ep = edition|edition_phrase %}
 {% set a_unit = edition|a_unit %}
-{% set feats = edition.features if edition.features is defined and edition.features else ["Signed by the artist", "Individually numbered"] %}
-{% set edition_line = feats|join(". ") ~ "." %}
+{% set unit = edition.unit if edition.unit is defined and edition.unit else "print" %}
 {% set link = release.link if release.link is defined and release.link else "[link]" %}
 {% set deadline = "Closes " ~ release.closes_at|ukdate ~ " at " ~ release.closes_at|uktime ~ "." %}
 {% set bio = "my bio" if first else "bio" %}
@@ -31,10 +32,26 @@
 {% set open = ("Enter the draw via the link in " ~ bio ~ ". " ~ deadline) if draw else ("Link in " ~ bio ~ " to buy " ~ a_unit ~ ". " ~ deadline) %}
 {% set pre_launch_x = (deadline ~ " Enter the draw: " ~ link) if draw else ("Launches " ~ release.launch_at|ukdate ~ " at " ~ release.launch_at|uktime ~ " for " ~ release.window ~ ". Sign up for updates: " ~ link) %}
 {% set open_x = (deadline ~ " Enter the draw: " ~ link) if draw else (deadline ~ " Buy " ~ a_unit ~ ": " ~ link) %}
-{# the collaboration, in the voice: "my latest collaboration with @avant.arte" or "Grayson Perry's latest collaboration with @avant.arte" #}
-{% set mine_ig = ("my " ~ ordinal ~ " collaboration with @avant.arte") if first else (collab ~ "'s " ~ ordinal ~ " collaboration with @avant.arte") %}
-{% set mine_x = ("my " ~ ordinal ~ " collaboration with Avant Arte") if first else (collab ~ "'s " ~ ordinal ~ " collaboration with Avant Arte") %}
-{% set ns = namespace(p=0, t=0) %}
+{# the edition as the artist would say it: "Each print is signed and numbered, with free worldwide shipping." #}
+{% set feats = edition.features if edition.features is defined and edition.features else ["Signed by the artist", "Individually numbered"] %}
+{% set ns = namespace(ed=[], ship=false, p=0, t=0) %}
+{% for f in feats %}
+{% set low = f|lower %}
+{% if "shipping" in low %}{% set ns.ship = true %}
+{% elif "signed" in low and "numbered" in low %}{% set ns.ed = ns.ed + ["signed and numbered"] %}
+{% elif "signed" in low %}{% set ns.ed = ns.ed + ["signed"] %}
+{% elif "numbered" in low %}{% set ns.ed = ns.ed + ["numbered"] %}
+{% else %}{% set ns.ed = ns.ed + [low.replace("by the artist", "by me") if first else low] %}
+{% endif %}
+{% endfor %}
+{% set edition_sentence = (("Each " ~ unit ~ " is " ~ ns.ed|join(" and ")) if ns.ed else "") ~ ((", with free worldwide shipping" if ns.ed else "Free worldwide shipping") if ns.ship else "") ~ ("." if (ns.ed or ns.ship) else "") %}
+{# the work, with the collaboration in the voice #}
+{% set mine_ig = "my " ~ ordinal ~ " collaboration with @avant.arte" %}
+{% set mine_x = "my " ~ ordinal ~ " collaboration with Avant Arte" %}
+{% set work_ig = (work ~ ", " ~ mine_ig) if first else (work ~ " by " ~ artist.name ~ ", created in collaboration with @avant.arte") %}
+{% set work_x = (work ~ ", " ~ mine_x) if first else (work ~ " by " ~ artist.name ~ ", created in collaboration with Avant Arte") %}
+{% set making_ig = context.making|voice("theirs", true) %}
+{% set making_x = context.making|voice("theirs") %}
 {% for phase, send in phases(release, artist) %}
 {% if phase != "sustain, the artist's words" %}
 {% set ns.p = ns.p + 1 %}
@@ -43,41 +60,53 @@
 {% endif %}
 [ARTIST POST {{ ns.p }} · {{ phase }} · {{ send|ddmmyy }} · {{ release.campaign_code }}]
 {% if phase == "coming soon" %}
+{% if first %}
 {{ mine_ig|cap_first }} is on the horizon: {{ ep }}{{ ben_ig }}, launching on {{ release.launch_at|ukdate }}.
+{% else %}
+{{ ep|cap_first }} by {{ artist.name }} is on the horizon, created in collaboration with @avant.arte{{ ben_ig }}, launching on {{ release.launch_at|ukdate }}.
+{% endif %}
 
 Link in {{ bio }} to get updates.
 {% elif phase == "announce" %}
+{% if first %}
 Announcing {{ mine_ig }} – {{ work }}, {{ ep }}{{ "" if hook_names_beneficiary else ben_ig }}.
+{% else %}
+Announcing {{ work }}, {{ ep }} by {{ artist.name }}, created in collaboration with @avant.arte{{ "" if hook_names_beneficiary else ben_ig }}.
+{% endif %}
 
 {{ context.hook }}
+{% if edition_sentence %}
 
-{{ edition_line }}
+{{ edition_sentence }}
+{% endif %}
 
 {{ pre_launch }}
+{% if artist.hashtag is defined and artist.hashtag %}
+
+#{{ artist.hashtag }}
+{% endif %}
 {% elif phase == "sustain" %}
-A closer look at {{ work }}, {{ ep }} and {{ mine_ig }}.
+A closer look at {{ work_ig }}.
 
-{{ context.making|voice("theirs", true) }}
-
-{{ edition_line }}
+{{ making_ig }}
 
 {{ pre_launch }}
 {% elif phase == "live" %}
-{{ work|cap_first }}, {{ mine_ig }}, is now available to collect for {{ release.window }} only.
+{{ work_ig|cap_first }}, is now available to collect for {{ release.window }} only.
+{% if edition_sentence %}
 
-{{ edition_line }}
+{{ edition_sentence }}
+{% endif %}
 
 {{ open }}
 {% elif phase == "still time" %}
-There's still time to collect {{ work }}, {{ mine_ig }}.
-
-{{ edition_line }}
+There's still time to collect {{ work_ig }}.
 
 {{ open }}
 {% else %}
-Last chance to {{ "enter the draw for" if draw else "collect" }} {{ work }}, {{ mine_ig }}.
+{{ "There are 24 hours left to enter the draw for" if draw else "Last chance to collect" }} {{ work_ig }}.
 
-{{ edition_line }}
+{{ making_ig }}
 
 {{ open }}
 {% endif %}
@@ -89,25 +118,33 @@ Last chance to {{ "enter the draw for" if draw else "collect" }} {{ work }}, {{ 
 
 [ARTIST TWEET {{ ns.t }} · {{ phase }} · {{ send|ddmmyy }} · {{ release.campaign_code }}]
 {% if phase == "coming soon" %}
+{% if first %}
 {{ mine_x|cap_first }} is on the horizon: {{ ep }}{{ ben_x }}, launching on {{ release.launch_at|ukdate }}.
+{% else %}
+{{ ep|cap_first }} by {{ artist.name }} is on the horizon, created in collaboration with Avant Arte{{ ben_x }}, launching on {{ release.launch_at|ukdate }}.
+{% endif %}
 
 Sign up for updates: {{ link }}
 {% elif phase == "announce" %}
+{% if first %}
 Announcing {{ mine_x }} – {{ work }}, {{ ep }}{{ "" if hook_names_beneficiary else ben_x }}.
+{% else %}
+Announcing {{ work }}, {{ ep }} by {{ artist.name }}, created in collaboration with Avant Arte{{ "" if hook_names_beneficiary else ben_x }}.
+{% endif %}
 
 {{ context.hook }}
 
 {{ pre_launch_x }}
 {% elif phase == "live" %}
-{{ work|cap_first }}, {{ mine_x }}, is now available to collect, for {{ release.window }} only.
+{{ work_x|cap_first }}, is now available to collect, for {{ release.window }} only.
 
 {{ open_x }}
 {% elif phase == "still time" %}
-There's still time to collect {{ work }}, {{ mine_x }}.
+There's still time to collect {{ work_x }}.
 
 {{ open_x }}
 {% else %}
-Last chance to {{ "enter the draw for" if draw else "collect" }} {{ work }}, {{ mine_x }}.
+{{ "There are 24 hours left to enter the draw for" if draw else "Last chance to collect" }} {{ work_x }}.
 
 {{ open_x }}
 {% endif %}

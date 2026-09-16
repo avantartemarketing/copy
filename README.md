@@ -333,7 +333,7 @@ Twitter is the live tweet, a second "Sustain" on Instagram is the artist's words
 (LE Insiders) (Sam)" and "(Curtis)" are the same Insiders email. The shape is a menu on the row,
 so an uncertain guess is a click to correct, and "By hand" leaves the row alone. Rows the tool has
 no shape for, the stories, the partner's posts, a deep dive, are listed and left alone so the writer
-sees them. Rows that already carry copy keep it unless the writer swaps in the tool's version. The
+sees them. Rows that already carry copy keep it, unless the tool wrote that copy itself, until the writer swaps it. The
 templates take each phase's date from the rows' "Live Date", so "3 days to go" goes out when the
 plan says. Generate only rewrites the tweets the plan has, and Write puts each row's copy into
 that row, by its id, never by its name. Nothing is written the plan lacks. Outside a campaign the
@@ -346,11 +346,24 @@ emails as messages, features as sentences rather than bullets ("Signed by the ar
 numbered.") and "link in bio" where the email has a button. In a campaign a row on a broadcast
 channel takes one of those three shapes.
 
-**Regenerating is cheap.** A change to the details or the fragments makes the generated copy
-stale, and generating again keeps every approved rewrite whose input has not changed; a tweet
-whose text has changed is rewritten with the last approved version handed to Claude as the one
-to keep close to. So a change to the making line costs no approvals, and a change to the hook
-costs one look at each tweet.
+**Regenerating is a choice.** A change to the details or the fragments makes the generated copy
+stale, and the page then offers two ways back: generate again keeping the approved tweets, or
+generate again and redo them. Keeping them, everything else is written afresh and each approved
+tweet stands as it is; one comes back for approval only if a fact it must carry has changed (a
+date, a title, the link), and then Claude writes it again close to the approved version, saying
+which fact moved. Redoing them, Claude writes every tweet again, close to the approved version,
+and each comes back for approval with the approved version a click away. A hook that names the
+artist has its first-person version kept while the hook is unchanged and written again when it
+has changed, whichever is chosen. Once filled in, each rewrite has a Redo of its own, a fresh
+take with the approved version a click away, and "Redo every tweet" does them all. A shape
+change that brings in a new tweet writes that one and carries the rest. So a change to the email
+copy costs no approvals at all, and putting it into the plan is one press.
+
+**Writing touches only what changed.** A row already carrying the copy the tool would write is
+left alone, and the Write button counts only the rows whose copy differs. A row whose copy the
+tool wrote earlier is replaced when the tool's copy changes; a row whose copy someone wrote or
+edited in Notion is kept, shown beside the tool's version, until the writer swaps it. The draft
+remembers what the tool wrote, so this holds for anyone who opens the campaign.
 
 **Campaigns and drafts.** Served, the page opens on the plan's campaigns, read from the campaigns
 database the plan's Campaign column points to, most recently edited first. Choose one and the
@@ -388,7 +401,8 @@ until the generate step has run and every cut is approved. Items are matched to 
 and name, the artist's channels included: an Instagram caption goes to the Main and Insiders rows
 where the plan has both, an email that stands for two rows ("Now Live (TL Flow and Non-flow)")
 is written to both, and an item with no row is listed rather than written. Nothing is written
-until "Write … items into Copy" is pressed, and it overwrites what is there.
+until "Write … rows into Copy" is pressed; it overwrites the rows it names and no others, and a
+row already carrying the same copy is not named.
 
 Locally: `pip install -r requirements.txt`, copy `.env.example` to `.env` and fill in what you
 have (nothing is required), then `python3 app.py` and open http://127.0.0.1:8000. `.env` is

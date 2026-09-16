@@ -749,7 +749,7 @@ function render(){
   const pw = pageStats().total; $("#npage").textContent = pw ? pw + " words" : "";
   $("#nwrite").textContent = (3 + D().cardTitles.length) + " fields";
   document.querySelectorAll("nav button").forEach(b => b.setAttribute("aria-current", String(b.dataset.view===S.view)));
-  showSaved();
+  showSaved(); syncURL();
   if (S.view === "campaigns") { renderCampaigns(); loadCampaigns().then(() => { if (S.view === "campaigns") renderCampaigns(); }); return; }
   if (S.view === "write") { renderWrite(); renderAside(); }
   else if (S.view === "facts") { renderFacts(); $("#aside").innerHTML = asideFacts(); }
@@ -1666,6 +1666,12 @@ async function tweetRound(){
   await Promise.all(fresh.map(rewriteJob));
   render();
 }
+// after a reload the approved copy is back before the server has rendered it in this browser; the
+// templates run once more, so the rows carry the server's text and can be written
+function ensureServerRender(){
+  if (!SERVED || S.server.out || S.server.err || S.server.busy) return;
+  serverRender().then(() => render());
+}
 // the sets as they will go out: the templates' text with each approved rewrite in place
 function finalSets(){
   const b = voicedSets(baseSets());
@@ -1784,6 +1790,7 @@ function renderOut(){
   // 3. the cuts, for approval
   if (!S.gen.done) { renderReview(); return; }
   // 4. filled in: the plan's rows inside a campaign, the whole set otherwise
+  ensureServerRender();
   if (inPlan && S.plan) { renderPlan(); return; }
   const sets = finalSets(), srv = SERVED ? S.server.out : null, cuts = S.gen.items;
   const cutOK = cuts.every(j => xLen(jobText(j)) <= X_LIMIT);
@@ -1843,6 +1850,7 @@ async function notionPanel(){
   const html = `<section><h3>Notion</h3>
     <p class="note">The rows of <b>${esc(S.campaign.name)}</b>${S.plan ? `, read ${esc((S.plan.at || "").slice(11, 16))}` : ""}. <button class="act ghost" id="nrefresh" style="width:auto;padding:2px 8px;font-size:11.5px"${S.planBusy ? " disabled" : ""}>Read again</button></p>
     ${N.err ? `<p class="note">${esc(N.err)}</p>` : ""}
+    ${S.plan && !srv ? `<p class="note">${S.server.err ? `The server could not render this release, so nothing can be written: ${esc(S.server.err)}` : "Rendering the templates on the server first…"}</p>` : ""}
     ${S.plan ? `<button class="act" id="npush"${(N.busy || !srv || !toWrite.length) ? " disabled" : ""}>${toWrite.length ? `Write ${toWrite.length} row${toWrite.length === 1 ? "" : "s"} into Copy` : "Nothing to write"}</button>
       <p class="note">${toWrite.length ? `Each row gets the copy shown for it on the left.${already ? ` ${already === 1 ? "One row already carries" : already + " rows already carry"} the same copy and ${already === 1 ? "is" : "are"} left alone.` : ""} Rows keeping their own copy, and rows by hand, are not touched.` : "Every row the tool writes already carries the copy shown for it."}</p>
       ${kept.length ? `<p class="note">${kept.length === 1 ? "One row keeps" : kept.length + " rows keep"} the copy already in Notion, the tool's version shown beside it; Replace on the row swaps one. <button class="act ghost" id="nreplace" style="width:auto;padding:2px 8px;font-size:11.5px">Replace ${kept.length === 1 ? "it" : "them all"} with the tool's</button></p>` : ""}` : ""}
@@ -1963,7 +1971,7 @@ async function searchCampaigns(q){                       // the list holds the h
     if (S.view === "campaigns" && (S.campQ || "").toLowerCase() === q) renderCampaigns();
   }, 400);
 }
-async function openCampaign(c){                          // c: {id, name}, or null for a release kept only here
+async function openCampaign(c, nav){                     // c: {id, name}, or null for a release kept only here; nav "replace" when the address led here
   if (S.saved && S.saved.status === "pending") await saveRemote();
   const carry = (!S.campaign && hasContent()) ? snapshot() : null;   // work begun outside a campaign travels into an empty one
   let snap = null, err = null;
@@ -1981,8 +1989,51 @@ async function openCampaign(c){                          // c: {id, name}, or nu
   if (err) S.saved = {status: "error", err};
   if (c) { S.plan = S.plan && S.plan.campaign === c.id ? S.plan : null; loadPlan(true).then(() => { if (S.campaign && S.campaign.id === c.id) render(); }); }
   S.view = missing().length ? "facts" : "write"; S.focus = "hook";
-  saveLocal(); render();
+  PUSH = nav !== "replace"; saveLocal(); render();
   if (c && !snap && !err) persist();                     // a draft begun: the campaign is marked as having one
+}
+// ---------- addresses: each campaign has its own, with the screen after the #, so a refresh or a shared link lands there ----------
+const VIEWS = ["facts", "write", "page", "out"];
+function pathCampaignId(){ const m = location.pathname.match(/^\/c\/([^/]+)/); try { return m ? decodeURIComponent(m[1]) : ""; } catch (_) { return ""; } }
+const slugOf = s => (s || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
+const campaignPath = c => c ? `/c/${encodeURIComponent(c.id)}${slugOf(c.name) ? "/" + slugOf(c.name) : ""}` : "/";
+let PUSH = false;                                        // the next change of address is a step in the history: a campaign opened or left
+function syncURL(){
+  if (!SERVED) return;
+  const want = S.view === "campaigns" ? "/" : campaignPath(S.campaign) + "#" + S.view, have = location.pathname + location.hash;
+  document.title = S.campaign && S.view !== "campaigns" ? `${S.campaign.name} · Copy Generator` : "Copy Generator";
+  if (want !== have) { try { history[PUSH && want.split("#")[0] !== location.pathname ? "pushState" : "replaceState"](null, "", want); } catch (_) {} }
+  PUSH = false;
+}
+function startBlank(){ Object.assign(S, blankRelease(), {lead: 0, ai: {}, gen: null, server: {}, suggest: null, notion: {}, from: {}, campaign: null, saved: {}, plan: null, shapes: {}, keep: {}, wrote: {}, showAll: false}); }
+// the campaign an address names: from the list kept here, the draft kept here, the list from Notion, or the draft from Notion
+async function campaignByID(id){
+  const find = () => (S.camps && S.camps.list || []).find(c => c.id === id);
+  if (!S.camps) { try { const c = JSON.parse(localStorage.getItem("cg:camps") || "null"); if (c && c.list) S.camps = Object.assign(c, {cached: true}); } catch (_) {} }
+  let c = find(); if (c) return c;
+  const local = localGet(id); if (local && local.campaign && local.campaign.id === id) return local.campaign;
+  await loadCampaigns(); c = find(); if (c) return c;
+  try { const r = await fetch(`/api/notion/draft/${encodeURIComponent(id)}`); const j = await r.json(); if (r.ok && j.state && j.state.campaign && j.state.campaign.id === id) return j.state.campaign; } catch (_) {}
+  return null;
+}
+// what the address names: a campaign on a screen, the release kept in this browser, or the campaigns to choose from
+async function route(){
+  const id = pathCampaignId(), hv = location.hash.slice(1), view = VIEWS.includes(hv) ? hv : "";
+  if (id) {
+    if (S.campaign && S.campaign.id === id) { S.view = view || (missing().length ? "facts" : "write"); render(); return; }
+    const c = await campaignByID(id);
+    if (!c) { S.routeErr = "Nothing is at that address: no campaign in the plan has that id. Here is the list."; S.view = "campaigns"; render(); return; }
+    await openCampaign(c, "replace");
+    if (view && view !== S.view) { S.view = view; render(); }
+    return;
+  }
+  if (!view) { S.view = "campaigns"; render(); return; }
+  if (S.campaign || !hasContent()) {                     // the release outside any campaign, as it was left
+    if (S.saved && S.saved.status === "pending") await saveRemote();
+    const local = localGet(null); if (local) restore(local); else startBlank();
+    S.campaign = null; S.saved = {};
+  }
+  S.view = view; render();
 }
 function renderCampaigns(){
   const cs = S.camps || {list: null}, q = (S.campQ || "").toLowerCase();
@@ -1998,6 +2049,7 @@ function renderCampaigns(){
     </div>
     <div class="sheet camps">
       <div class="row head2"><input id="campq" type="search" placeholder="Search by artist or title" value="${esc(S.campQ || "")}"><span>${cs.loading ? "reading Notion…" : cs.took ? `read in ${cs.took}s` : cs.cached ? "last time's list" : ""}</span><button class="act ghost" id="campreload" style="width:auto;padding:3px 10px;font-size:12px"${cs.loading ? " disabled" : ""}>Read again</button></div>
+      ${S.routeErr ? `<div class="row"><span class="note" style="margin:0;white-space:normal">${esc(S.routeErr)}</span></div>` : ""}
       <div class="row" data-open=""><b>A release outside any campaign</b><span>kept in this browser only</span></div>
       ${!cs.list ? `<div class="row"><span>Reading the campaigns…</span></div>`
         : cs.err ? `<div class="row"><span class="note" style="margin:0;white-space:normal">${esc(cs.err)}</span></div>`
@@ -2182,10 +2234,10 @@ $("#new").onclick = () => {
   }
   clearTimeout(b._t); b.dataset.arm = ""; b.textContent = "New release"; b.classList.remove("arm");
   S.campaign = null; S.saved = {};                     // the campaign's saved draft is left as it is
-  Object.assign(S, blankRelease(), {view:"facts", focus:"hook", lead:0, ai:{}, gen:null, server:{}, suggest:null, notion:{}, from:{}, plan:null, shapes:{}, keep:{}, showAll:false});
-  saveLocal(); render();
+  Object.assign(S, blankRelease(), {view:"facts", focus:"hook", lead:0, ai:{}, gen:null, server:{}, suggest:null, notion:{}, from:{}, plan:null, shapes:{}, keep:{}, wrote:{}, showAll:false});
+  PUSH = true; saveLocal(); render();
 };
-$("#camp").onclick = () => { S.view = "campaigns"; render(); };
+$("#camp").onclick = () => { S.view = "campaigns"; PUSH = true; render(); };
 addEventListener("visibilitychange", () => { if (document.hidden && S.saved && S.saved.status === "pending") saveRemote(true); });
 addEventListener("pagehide", () => { if (S.saved && S.saved.status === "pending") saveRemote(true); });
 $("#theme").onclick = () => {
@@ -2195,15 +2247,15 @@ $("#theme").onclick = () => {
 };
 addEventListener("resize", () => { if (S.view === "write") drawGutter(); });
 const SAMPLE = snapshot();                             // the Perry release the page ships with, for the file and the artifact
-render();
-// what was open last time comes back: a campaign's draft from Notion, or the release kept here.
-// Served, an empty browser starts on the campaigns screen rather than the sample release.
+if (HTTP && pathCampaignId()) $("#main").innerHTML = `<div class="head"><span class="lbl">Campaign</span><h1>Opening…</h1></div>`;   // the campaign named, not the sample first
+else render();
+// Served, the address decides: a campaign's draft from Notion on its own screen, the release kept in
+// this browser, or the campaigns to choose from. The file and the artifact keep what was open.
 serverHealth().then(async () => {
-  let last = ""; try { last = localStorage.getItem(LS.last) || ""; } catch (_) {}
-  const local = localGet(last || null);
-  if (last && SERVED && local && local.campaign) await openCampaign(local.campaign);
-  else if (local) { restore(local); S.campaign = local.campaign && SERVED ? local.campaign : null; S.view = missing().length ? "facts" : "write"; render(); }
-  else if (SERVED) { Object.assign(S, blankRelease(), {lead: 0, ai: {}, gen: null, server: {}, suggest: null, notion: {}, from: {}, campaign: null, view: "campaigns"}); render(); }
-  else render();
+  if (SERVED) { startBlank(); await route(); return; }
+  const local = localGet(null);
+  if (local) { restore(local); S.campaign = null; S.view = missing().length ? "facts" : "write"; }
+  render();
 });
+addEventListener("popstate", () => { if (SERVED) route(); });
 </script>

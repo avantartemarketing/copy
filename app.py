@@ -54,7 +54,10 @@ def gate():
 
 
 @app.get("/")
-def page():
+@app.get("/c/<cid>")
+@app.get("/c/<cid>/<slug>")
+def page(cid="", slug=""):
+    """The one page; a campaign's address (/c/<id>/<name>) serves it too, and the page opens that campaign."""
     return send_from_directory(ROOT / "tool", "copy-generator.html")
 
 

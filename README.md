@@ -380,7 +380,11 @@ a text property called "Copy generator", so anyone can pick it up later from any
 button at the top of the page switches campaigns and the line beside it says when the draft was
 last saved. Add that property to the campaigns database once, type Text, and hide it from your
 views; the page says so if it is missing. A release can also be worked on outside any campaign,
-kept in the browser only. Two people in the same campaign overwrite each other: the later save
+kept in the browser only. Each campaign has its own address, `/c/<id>/<name>`, with the screen
+after the `#`, so a refresh or a shared link opens that campaign on that screen rather than
+whatever was open last; the root is the list of campaigns, and the browser's back button steps
+between them. After a refresh the templates run on the server once more before the rows can be
+written, and the Notion panel says so while it waits. Two people in the same campaign overwrite each other: the later save
 wins.
 
 `render.yaml` describes the service. On Render, create a Blueprint from this repository and set

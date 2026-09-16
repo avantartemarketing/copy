@@ -160,6 +160,9 @@ def push(campaign, items):
     if types.get(p_copy) != "rich_text":
         raise NotionError(f"“{p_copy}” is a {types.get(p_copy)} property; Copy must be rich text to be written.")
     rows = rows_for_campaign(campaign)
+    names = sorted({r["campaign"] for r in rows})
+    if len(names) > 1:                               # "Grayson Perry" would match two campaigns; never write into both
+        raise NotionError(f"“{campaign}” matches {len(names)} campaigns: {' / '.join(names)}. Use a name that matches one.")
     by = {}
     for r in rows:
         by.setdefault(_key(r["channel"], r["name"]), []).append(r)

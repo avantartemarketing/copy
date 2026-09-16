@@ -1378,7 +1378,7 @@ async function notionPanel(){
   const h = await serverHealth(); if (!h || !h.notion || S.view !== "out") return;
   const f = S.facts, N = S.notion;
   N.campaign ??= `${f.artist} - ${f.title_1 || ""}`.trim();
-  const rows = N.rows || [], srv = S.server.out;
+  const rows = N.rows || [], srv = S.server.out, camps = [...new Set(rows.map(r => r.campaign))];
   const items = !srv ? [] : [
     ...(srv.outputs["ig-set"]||[]).map(x => ({channel:"ig", name:x.name, text:x.text})),
     ...(srv.outputs["twitter-set"]||[]).map(x => ({channel:"twitter", name:x.name, text:x.text})),
@@ -1387,9 +1387,9 @@ async function notionPanel(){
     <label><span>Campaign, as named in the plan</span><input id="ncamp" type="text" value="${esc(N.campaign)}"></label>
     <button class="act" id="ncheck"${N.busy?" disabled":""}>${N.busy ? "…" : "Check the plan"}</button>
     ${N.err ? `<p class="note">${esc(N.err)}</p>` : ""}
-    ${N.rows ? `<p class="note">${rows.length} rows for this campaign${rows.length ? `; ${rows.filter(r=>r.has_copy).length} already carry copy` : ""}.</p>
+    ${N.rows ? `<p class="note">${rows.length} rows${camps.length === 1 ? ` in “${esc(camps[0])}”` : camps.length ? ` across <b>${camps.length} campaigns</b>: ${esc(camps.join(" / "))}. Narrow the name to one before writing` : ""}${rows.length ? `; ${rows.filter(r=>r.has_copy).length} already carry copy` : ""}.</p>
       ${rows.length ? `<details class="out"><summary><b>Rows</b></summary><pre>${esc(rows.map(r=>`${r.channel} · ${r.name}${r.has_copy?"  (has copy)":""}`).join("\n"))}</pre></details>
-      <button class="act" id="npush"${(N.busy||!srv)?" disabled":""}>Write ${items.length} items into Copy</button>
+      <button class="act" id="npush"${(N.busy||!srv||camps.length !== 1)?" disabled":""}>Write ${items.length} items into Copy</button>
       <p class="note">Writes the templates' text into each matching row's Copy field, overwriting what is there. Unmatched items are listed, not written.</p>` : ""}` : ""}
     ${N.result ? `<p class="note">Written: ${N.result.written.length}. Unmatched: ${N.result.unmatched.length}.</p>
       <details class="out"><summary><b>What happened</b></summary><pre>${esc([...N.result.written.map(w=>"wrote  "+w.channel+" · "+w.name), ...N.result.unmatched.map(u=>"no row  "+u.channel+" · "+u.name)].join("\n"))}</pre></details>` : ""}

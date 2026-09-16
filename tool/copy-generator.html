@@ -1372,21 +1372,44 @@ function asideOut(){
   </section></div>`;
 }
 
-// ---------- Notion: the plan's rows for this campaign, and the copy written into them ----------
+// ---------- Notion: the plan's campaigns to choose from, its rows for the one chosen, and the copy written into them ----------
 S.notion = S.notion || {};
+// the campaign this release is likely filed under: the one name that carries the artist, or the artist and the first title
+function guessCampaign(list){
+  const has = (c, t) => t && c.name.toLowerCase().includes(t.toLowerCase());
+  const byArtist = list.filter(c => has(c, S.facts.artist));
+  if (byArtist.length === 1) return byArtist[0].id;
+  const byTitle = byArtist.filter(c => has(c, S.facts.title_1));
+  return byTitle.length === 1 ? byTitle[0].id : "";
+}
 async function notionPanel(){
   const h = await serverHealth(); if (!h || !h.notion || S.view !== "out") return;
   const f = S.facts, N = S.notion;
   N.campaign ??= `${f.artist} - ${f.title_1 || ""}`.trim();
+  if (N.campaigns === undefined && !N.loading) {                       // the list, once per page load
+    N.loading = true;
+    try { const r = await fetch("/api/notion/campaigns"); const j = await r.json(); N.campaigns = r.ok ? j.campaigns : null; N.listErr = r.ok ? null : j.error; }
+    catch (e) { N.campaigns = null; N.listErr = String(e.message || e); }
+    N.loading = false;
+    if (N.campaigns && N.campaign_id === undefined) { N.campaign_id = guessCampaign(N.campaigns); if (N.campaign_id) check(); }
+    if (S.view !== "out") return;
+  }
   const rows = N.rows || [], srv = S.server.out, camps = [...new Set(rows.map(r => r.campaign))];
+  const chosen = N.campaigns ? N.campaigns.find(c => c.id === N.campaign_id) : null;
   const items = !srv ? [] : [
     ...(srv.outputs["ig-set"]||[]).map(x => ({channel:"ig", name:x.name, text:x.text})),
     ...(srv.outputs["twitter-set"]||[]).map(x => ({channel:"twitter", name:x.name, text:x.text})),
     ...(srv.outputs["email-set"]||[]).filter(x => x.text.trim()).map(x => ({channel:"email", name:x.name, text:x.text}))];
+  const picker = N.loading ? `<p class="note">Reading the plan's campaigns…</p>`
+    : N.campaigns ? `<label><span>Campaign</span><select id="ncampsel"><option value="">Choose the campaign…</option>${N.campaigns.map(c => `<option value="${esc(c.id)}"${c.id === N.campaign_id ? " selected" : ""}>${esc(c.name)}</option>`).join("")}</select></label>
+        <p class="note">${N.campaigns.length} campaigns, the most recently edited first.</p>`
+    : `<p class="note">${esc(N.listErr || "The plan's campaigns could not be listed.")} A typed name still works.</p>
+        <label><span>Campaign, as named in the plan</span><input id="ncamp" type="text" value="${esc(N.campaign)}"></label>
+        <button class="act" id="ncheck"${N.busy ? " disabled" : ""}>${N.busy ? "…" : "Check the plan"}</button>`;
   const html = `<section><h3>Notion</h3>
-    <label><span>Campaign, as named in the plan</span><input id="ncamp" type="text" value="${esc(N.campaign)}"></label>
-    <button class="act" id="ncheck"${N.busy?" disabled":""}>${N.busy ? "…" : "Check the plan"}</button>
+    ${picker}
     ${N.err ? `<p class="note">${esc(N.err)}</p>` : ""}
+    ${N.busy && N.campaigns ? `<p class="note">Reading the plan…</p>` : ""}
     ${N.rows ? `<p class="note">${rows.length} rows${camps.length === 1 ? ` in “${esc(camps[0])}”` : camps.length ? ` across <b>${camps.length} campaigns</b>: ${esc(camps.join(" / "))}. Narrow the name to one before writing` : ""}${rows.length ? `; ${rows.filter(r=>r.has_copy).length} already carry copy` : ""}.</p>
       ${rows.length ? `<details class="out"><summary><b>Rows</b></summary><pre>${esc(rows.map(r=>`${r.channel} · ${r.name}${r.has_copy?"  (has copy)":""}`).join("\n"))}</pre></details>
       <button class="act" id="npush"${(N.busy||!srv||camps.length !== 1)?" disabled":""}>Write ${items.length} items into Copy</button>
@@ -1396,21 +1419,24 @@ async function notionPanel(){
   </section>`;
   const panel = $("#aside .panel"); if (!panel) return;
   const old = $("#notion"); const wrap = old || document.createElement("div"); wrap.id = "notion"; wrap.innerHTML = html; if (!old) panel.appendChild(wrap);
-  $("#ncamp").oninput = e => { N.campaign = e.target.value; };
-  $("#ncheck").onclick = async () => {
-    N.busy = true; N.err = null; N.result = null; notionPanel();
-    try { const r = await fetch("/api/notion/rows", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({campaign:N.campaign})});
+  const sel = $("#ncampsel"); if (sel) sel.onchange = e => { N.campaign_id = e.target.value; N.campaign = (chosenName() || N.campaign); N.rows = null; N.result = null; N.err = null; if (N.campaign_id) check(); else notionPanel(); };
+  const inp = $("#ncamp"); if (inp) inp.oninput = e => { N.campaign = e.target.value; };
+  const chk = $("#ncheck"); if (chk) chk.onclick = check;
+  const push = $("#npush"); if (push) push.onclick = async () => {
+    N.busy = true; N.err = null; notionPanel();
+    try { const r = await fetch("/api/notion/push", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({campaign:N.campaign, campaign_id:N.campaign_id || "", items})});
+          const j = await r.json(); if (!r.ok) throw new Error(j.error); N.result = j; }
+    catch (e) { N.err = String(e.message || e); }
+    N.busy = false; await check();                                          // the rows again, now marked as carrying copy
+  };
+  function chosenName(){ const c = N.campaigns && N.campaigns.find(c => c.id === N.campaign_id); return c ? c.name : ""; }
+  async function check(){
+    N.busy = true; N.err = null; notionPanel();
+    try { const r = await fetch("/api/notion/rows", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({campaign:N.campaign, campaign_id:N.campaign_id || ""})});
           const j = await r.json(); if (!r.ok) throw new Error(j.error); N.rows = j.rows; }
     catch (e) { N.err = String(e.message || e); N.rows = null; }
     N.busy = false; notionPanel();
-  };
-  const push = $("#npush"); if (push) push.onclick = async () => {
-    N.busy = true; N.err = null; notionPanel();
-    try { const r = await fetch("/api/notion/push", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({campaign:N.campaign, items})});
-          const j = await r.json(); if (!r.ok) throw new Error(j.error); N.result = j; N.rows = null; }
-    catch (e) { N.err = String(e.message || e); }
-    N.busy = false; notionPanel();
-  };
+  }
 }
 
 // ═══════════════════════════════════════════════════ boot

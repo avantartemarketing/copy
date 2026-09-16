@@ -10,6 +10,7 @@ cannot, the pages are read and filtered here.
     NOTION_PROP_COPY       default "Copy"
 """
 import os
+import time
 
 import requests
 
@@ -64,9 +65,59 @@ def _prop(name, default):
     return os.environ.get(name, default)
 
 
+_DB = {"at": 0.0, "db": None}
+
+
+def database():
+    """The plan's definition, cached for a minute: its properties, and where the campaign relation points."""
+    if not _DB["db"] or time.time() - _DB["at"] > 60:
+        _DB["db"] = _call("GET", f"/databases/{os.environ['NOTION_DATABASE_ID']}")
+        _DB["at"] = time.time()
+    return _DB["db"]
+
+
 def schema():
-    db = _call("GET", f"/databases/{os.environ['NOTION_DATABASE_ID']}")
-    return {k: v["type"] for k, v in db["properties"].items()}
+    return {k: v["type"] for k, v in database()["properties"].items()}
+
+
+def campaign_relation():
+    """The relation property that names a row's campaign and the database it points to, as (name, id).
+    The configured campaign property is usually a rollup of that relation; it may be the relation itself."""
+    props = database()["properties"]
+    p = props.get(_prop("NOTION_PROP_CAMPAIGN", "Campaign text")) or {}
+    if p.get("type") == "rollup":
+        p = props.get((p.get("rollup") or {}).get("relation_property_name") or "") or {}
+    if p.get("type") != "relation":
+        p = next((v for k, v in props.items() if v.get("type") == "relation" and "campaign" in k.lower()), {})
+    if p.get("type") != "relation":
+        return None, None
+    return p.get("name"), (p.get("relation") or {}).get("database_id")
+
+
+def campaigns(limit=300):
+    """The campaigns a row can belong to, most recently edited first, from the campaigns database."""
+    _, db_id = campaign_relation()
+    if not db_id:
+        raise NotionError("The plan's campaign column is not a relation, so there is no list to choose from.")
+    body = {"page_size": 100, "sorts": [{"timestamp": "last_edited_time", "direction": "descending"}]}
+    out, cursor = [], None
+    while len(out) < limit:
+        if cursor:
+            body["start_cursor"] = cursor
+        try:
+            res = _call("POST", f"/databases/{db_id}/query", json=body)
+        except NotionError as e:
+            if "404" in str(e):
+                raise NotionError("The integration cannot see the campaigns database. In Notion, connect it to that database as well as the plan.")
+            raise
+        for pg in res.get("results", []):
+            title = next((plain(v) for v in pg["properties"].values() if v.get("type") == "title"), "").strip()
+            if title:
+                out.append({"id": pg["id"], "name": title, "edited": (pg.get("last_edited_time") or "")[:10]})
+        if not res.get("has_more"):
+            break
+        cursor = res.get("next_cursor")
+    return out[:limit]
 
 
 def plain(prop):
@@ -102,17 +153,25 @@ def _filter(name, ptype, text):
     return None
 
 
-def rows_for_campaign(campaign):
-    campaign = (campaign or "").strip()
-    if not campaign:
-        raise NotionError("No campaign name given.")
+def rows_for_campaign(campaign="", campaign_id=""):
+    """The plan's rows for one campaign: by the campaign page's id when chosen from the list, which is
+    exact, or by text in the campaign column when typed, which matches by containment."""
+    campaign, campaign_id = (campaign or "").strip(), (campaign_id or "").strip()
+    if not campaign and not campaign_id:
+        raise NotionError("No campaign chosen.")
     types = schema()
     p_camp, p_chan, p_copy = _prop("NOTION_PROP_CAMPAIGN", "Campaign text"), _prop("NOTION_PROP_CHANNEL", "Channel Name"), _prop("NOTION_PROP_COPY", "Copy")
     for p in (p_camp, p_chan, p_copy):
         if p not in types:
             raise NotionError(f"The database has no property called “{p}”. It has: {', '.join(sorted(types))}.")
     title = next(k for k, t in types.items() if t == "title")
-    flt = _filter(p_camp, types[p_camp], campaign)
+    if campaign_id:
+        rel, _ = campaign_relation()
+        if not rel:
+            raise NotionError("The plan has no campaign relation to look rows up by.")
+        flt = {"property": rel, "relation": {"contains": campaign_id}}
+    else:
+        flt = _filter(p_camp, types[p_camp], campaign)
     body = {"page_size": 100}
     if flt:
         body["filter"] = flt
@@ -124,7 +183,7 @@ def rows_for_campaign(campaign):
             res = _call("POST", f"/databases/{os.environ['NOTION_DATABASE_ID']}/query", json=body)
         except NotionError as e:
             # a rollup of a title, say, refuses the text filter: read the rows and filter here instead
-            if flt and "400" in str(e) and not cursor:
+            if flt and not campaign_id and "400" in str(e) and not cursor:
                 flt = None
                 body.pop("filter", None)
                 continue
@@ -138,7 +197,7 @@ def rows_for_campaign(campaign):
     for pg in pages:
         pr = pg["properties"]
         camp = plain(pr.get(p_camp, {}))
-        if not flt and campaign.lower() not in camp.lower():
+        if not flt and not campaign_id and campaign.lower() not in camp.lower():
             continue
         rows.append({
             "id": pg["id"], "name": plain(pr.get(title, {})), "channel": plain(pr.get(p_chan, {})),
@@ -153,13 +212,13 @@ def _key(channel, name):
     return (channel or "").strip().lower(), ALIAS.get(n, n)
 
 
-def push(campaign, items):
+def push(campaign, items, campaign_id=""):
     """items: [{channel: ig|ig-insiders|twitter|email, name, text}]. Writes Copy on the matching row."""
     p_copy = _prop("NOTION_PROP_COPY", "Copy")
     types = schema()
     if types.get(p_copy) != "rich_text":
         raise NotionError(f"“{p_copy}” is a {types.get(p_copy)} property; Copy must be rich text to be written.")
-    rows = rows_for_campaign(campaign)
+    rows = rows_for_campaign(campaign, campaign_id)
     names = sorted({r["campaign"] for r in rows})
     if len(names) > 1:                               # "Grayson Perry" would match two campaigns; never write into both
         raise NotionError(f"“{campaign}” matches {len(names)} campaigns: {' / '.join(names)}. Use a name that matches one.")

@@ -261,15 +261,18 @@ The page's own assembly is then compared against the templates' text item by ite
 at the top of the screen says whether they agree and lists any difference; the product pages
 count as the release's facts, so a number or a name that is on the page passes the validator.
 Claude is called from the server, with a key that never reaches the browser. When Notion is
-configured, a panel on the right reads the comms plan's rows for the campaign, shows which
-already carry copy, and writes each item's text into its row's Copy field.
+configured, a panel on the right lists the plan's campaigns to choose from, most recently edited
+first, with the one that names this release's artist and title preselected. Choosing one reads
+the plan's rows for it, shows which already carry copy, and a button writes each item's text
+into its row's Copy field.
 
 `render.yaml` describes the service. On Render, create a Blueprint from this repository and set
 the variables it declares:
 
 ```
 ANTHROPIC_API_KEY    for the two AI buttons; without it they say so and the checks still run
-NOTION_TOKEN         an internal integration; share the comms plan database with it in Notion
+NOTION_TOKEN         an internal integration; connect it to the comms plan database in Notion,
+                     and to the campaigns database the plan's Campaign column points to
 NOTION_DATABASE_ID   the database's id, the 32 characters in its URL
 APP_PASSWORD         optional; if set, the whole app asks for it (any username)
 CLAUDE_MODEL         optional, default claude-opus-5
@@ -278,8 +281,11 @@ CLAUDE_MODEL         optional, default claude-opus-5
 The plan's property names and types are read from the database rather than assumed. The
 defaults are "Campaign text" for the campaign, "Channel Name" for the channel and "Copy" for
 the copy; set `NOTION_PROP_CAMPAIGN`, `NOTION_PROP_CHANNEL` or `NOTION_PROP_COPY` if the
-database names them differently. Copy has to be a rich text property to be written. Items are
-matched to rows by channel and name: an Instagram caption goes to the Main and Insiders rows
+database names them differently. Copy has to be a rich text property to be written. Rows are
+found by the chosen campaign's id, so the spelling of its name never matters; if the campaigns
+database cannot be listed, a typed name is matched by containment instead, and a name that
+matches more than one campaign is refused rather than written into both. Items are matched to
+rows by channel and name: an Instagram caption goes to the Main and Insiders rows
 where the plan has both, an email that stands for two rows ("Now Live (TL Flow and Non-flow)")
 is written to both, and an item with no row is listed rather than written. Nothing is written
 until "Write … items into Copy" is pressed, and it overwrites what is there.

@@ -129,13 +129,23 @@ def api_claude():
 
 
 # ------------------------------------------------------------------ Notion: the comms plan's rows
+@app.get("/api/notion/campaigns")
+def api_notion_campaigns():
+    if not notion.configured():
+        return jsonify(error="Notion is not configured on this server: set NOTION_TOKEN and NOTION_DATABASE_ID."), 503
+    try:
+        return jsonify(campaigns=notion.campaigns())
+    except notion.NotionError as e:
+        return jsonify(error=str(e)), 502
+
+
 @app.post("/api/notion/rows")
 def api_notion_rows():
     if not notion.configured():
         return jsonify(error="Notion is not configured on this server: set NOTION_TOKEN and NOTION_DATABASE_ID."), 503
     body = request.get_json(force=True) or {}
     try:
-        rows = notion.rows_for_campaign(body.get("campaign", ""))
+        rows = notion.rows_for_campaign(body.get("campaign", ""), body.get("campaign_id", ""))
     except notion.NotionError as e:
         return jsonify(error=str(e)), 502
     return jsonify(rows=rows)
@@ -147,7 +157,7 @@ def api_notion_push():
         return jsonify(error="Notion is not configured on this server: set NOTION_TOKEN and NOTION_DATABASE_ID."), 503
     body = request.get_json(force=True) or {}
     try:
-        result = notion.push(body.get("campaign", ""), body.get("items") or [])
+        result = notion.push(body.get("campaign", ""), body.get("items") or [], body.get("campaign_id", ""))
     except notion.NotionError as e:
         return jsonify(error=str(e)), 502
     return jsonify(result)

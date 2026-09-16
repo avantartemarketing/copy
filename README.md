@@ -354,9 +354,10 @@ date, a title, the link), and then Claude writes it again close to the approved 
 which fact moved. Redoing them, Claude writes every tweet again, close to the approved version,
 and each comes back for approval with the approved version a click away. A hook that names the
 artist has its first-person version kept while the hook is unchanged and written again when it
-has changed, whichever is chosen. Once filled in, each rewrite has a Redo of its own, a fresh
-take with the approved version a click away, and "Redo every tweet" does them all. A shape
-change that brings in a new tweet writes that one and carries the rest. So a change to the email
+has changed, whichever is chosen. Once filled in, the copy Claude wrote carries a "Redo with
+Claude" button, on the row in the plan or on the item outside one, for a fresh take with the
+approved version a click away; the artist's posts that carry the hook in their voice have one
+for the hook. A shape change that brings in a new tweet writes that one and carries the rest. So a change to the email
 copy costs no approvals at all, and putting it into the plan is one press.
 
 **Writing touches only what changed.** A row already carrying the copy the tool would write is

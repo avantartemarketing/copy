@@ -220,6 +220,12 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .genact{display:flex;gap:8px;margin-top:12px}
 .genact .act{width:auto;padding:8px 14px}
 .rowbar{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.rowbar .act{width:auto;padding:5px 12px;font-size:12.5px;margin:0}
+.out>.rowbar{padding:14px 18px 0;margin:0}
+.out>.note{padding:0 18px 14px;margin:0}
+.out>.gencols{padding:12px 18px 0}
+.out>.gencols pre{padding:6px 0 0}
+.out>.genact{padding:12px 18px 16px;margin:0}
 .rowbar select{width:auto;min-width:22ch;padding:5px 30px 5px 10px;font-size:12.5px;background-position:calc(100% - 15px) 11px,calc(100% - 10px) 11px}
 .act.ghost{background:transparent}
 
@@ -759,7 +765,7 @@ function render(){
   $("#nout").textContent = o.posts.length + o.tweets.length + o.emails.length + o.artistPosts.length + o.artistTweets.length + o.broadcast.length;
   $("#nfacts").textContent = shownFields();
   const pw = pageStats().total; $("#npage").textContent = pw ? pw + " words" : "";
-  $("#nwrite").textContent = (3 + D().cardTitles.length) + " fields";
+  $("#nwrite").textContent = (5 + D().cardTitles.length) + " fields";
   document.querySelectorAll("nav button").forEach(b => b.setAttribute("aria-current", String(b.dataset.view===S.view)));
   showSaved(); syncURL();
   if (S.view === "campaigns") { renderCampaigns(); loadCampaigns().then(() => { if (S.view === "campaigns") renderCampaigns(); }); return; }
@@ -780,7 +786,6 @@ function renderNotReady(need){
     <div class="head">
       <span class="lbl">Before you write</span>
       <h1>The details first</h1>
-      <p>Fill in ${need.length === NEEDS.length ? "these" : `the ${need.length === 1 ? "one" : need.length} still missing`} and the email opens.</p>
     </div>
     <div class="sheet" style="padding:6px 22px 16px">
       ${todoHTML()}
@@ -818,11 +823,6 @@ function renderWrite(){
     <div class="head">
       <span class="lbl">Step three</span>
       <h1>The announcement email</h1>
-      <p>Written once, reused everywhere. Write it here, in the email it opens.</p>
-      <div class="key">
-        <span><i></i> <span>Yours: three paragraphs and a line per card. Everything else is built from them.</span></span>
-        <span><i class="fx"></i> <span>From the details. Fixed here.</span></span>
-      </div>
     </div>
     <div class="sheet">
       <dl class="meta">
@@ -848,9 +848,18 @@ function renderWrite(){
         </div>
       </div>
       <div class="foot" id="foot">${o.posts.length} posts, ${o.tweets.length} tweets and ${live} more emails follow from these.</div>
-    </div>`;
+    </div>
+    <div style="margin-top:34px">${FORM.filter(s => s.write).map(factSectionHTML).join("")}</div>`;
 
   wireFields($("#main")); wireLock($("#main"));
+  // the quote and the bio, written here: the pull quote in the email follows as it is typed
+  const syncPull = () => {
+    const doc = $("#doc"), old = doc.querySelector(".pull");
+    if (!(S.facts.quote || "").trim()) { if (old) old.remove(); return; }
+    const html = `${esc("\u201c"+S.facts.quote+"\u201d")}<cite>${esc(S.facts.artist)}</cite>`;
+    if (old) old.innerHTML = html; else { const bq = document.createElement("blockquote"); bq.className = "pull"; bq.innerHTML = html; doc.insertBefore(bq, doc.querySelector(".sig")); }
+  };
+  $("#main").querySelectorAll("[data-f]").forEach(el => el.addEventListener("input", e => { S.facts[e.target.dataset.f] = e.target.value; touch(); syncPull(); renderAside(); requestAnimationFrame(drawGutter); }));
   $("#main").querySelectorAll("[data-goto]").forEach(b => b.onclick = () => { S.view = b.dataset.goto; render(); });
   requestAnimationFrame(drawGutter);
 }
@@ -1146,7 +1155,6 @@ function renderPage(){
     <div class="head">
       <span class="lbl">Step two</span>
       <h1>The product page${n > 1 ? "s" : ""}</h1>
-      <p>${n > 1 ? `One per artwork. Write the first; the others start as copies of it.` : `As it will go to the site.`} Claude suggests the email from ${n > 1 ? "these" : "this"}, and from nothing else.</p>
     </div>
     <fieldset><legend>The description</legend>
       <p>Three or four paragraphs: what it is, the work and where it comes from, how it was made.</p>
@@ -1361,7 +1369,7 @@ const FORM = [
     ["framing_code","Framing offer code","text","Blank for no offer", timed],
     ["framing_percent","Framing offer %","number","", timed]
   ]},
-  {g:"Written elsewhere", d:"The quote verbatim. The bio opens the Coming Soon post only.", f:[
+  {g:"Written elsewhere", write:true, d:"The quote verbatim. The bio opens the Coming Soon post only.", f:[
     ["quote","Artist quote","textarea","Verbatim, or blank"],
     ["bio","Artist bio","textarea","Two or three sentences, third person"]
   ]}
@@ -1371,9 +1379,13 @@ function renderFacts(){
     <div class="head">
       <span class="lbl">Step one</span>
       <h1>Release details</h1>
-      <p>Stated once here. Every date, name and count in the copy comes from these.</p>
     </div>
-    ${FORM.map(sec=>`<fieldset><legend>${esc(sec.g)}</legend><p>${esc(sec.d)}</p>
+    ${FORM.filter(s => !s.write).map(factSectionHTML).join("")}`;
+  wireFactInputs();
+}
+// one section of the details form; the "Written elsewhere" section is shown on the writing screen instead
+function factSectionHTML(sec){
+  return `<fieldset><legend>${esc(sec.g)}</legend><p>${esc(sec.d)}</p>
       <div class="grid${rows(sec)[0][2]==="textarea"?" wide":""}">
       ${rows(sec).map(r=>{
         const [k,lab,type,hint] = r;
@@ -1385,7 +1397,9 @@ function renderFacts(){
             : `<input id="f_${k}" data-f="${k}" type="${type}" value="${esc(String(v))}">`;
         const sub = (type==="select"||!hint) ? "" : `<small>${esc(hint)}</small>`;
         return `<label data-field="${k}"${r[4] && !r[4]() ? " hidden" : ""}><span>${esc(lab)}</span>${ctl}${sub}</label>`;
-      }).join("")}</div>${sec.live?`<p class="live" data-live="${esc(sec.g)}">${esc(sec.live())}</p>`:""}</fieldset>`).join("")}`;
+      }).join("")}</div>${sec.live?`<p class="live" data-live="${esc(sec.g)}">${esc(sec.live())}</p>`:""}</fieldset>`;
+}
+function wireFactInputs(){
   $("#main").querySelectorAll("[data-f]").forEach(el => el.addEventListener("input", e => {
     const k = e.target.dataset.f;
     S.facts[k] = e.target.type === "number" ? (+e.target.value||0) : e.target.value;
@@ -1417,7 +1431,7 @@ function syncFields(){
   });
   $("#nfacts").textContent = shownFields();
 }
-const shownFields = () => FORM.reduce((n,s)=>n+rows(s).filter(r=>!r[4]||r[4]()).length,0);
+const shownFields = () => FORM.filter(s => !s.write).reduce((n,s)=>n+rows(s).filter(r=>!r[4]||r[4]()).length,0);
 function asideFacts(){
   const need = missing();
   if (need.length) return `<div class="panel"><span class="lbl">From these facts</span><h2>What the frame needs</h2>
@@ -1717,19 +1731,18 @@ function finalSets(){
   const apply = (list, set) => list.map(x => { const j = genReady() ? S.gen.items.find(j => j.set === set && j.name === x.n) : null; return j ? Object.assign({}, x, {t: jobText(j)}) : x; });
   return {posts: b.posts, tweets: apply(b.tweets, "tweets"), emails: b.emails, artistPosts: b.artistPosts, artistTweets: apply(b.artistTweets, "artistTweets"), broadcast: b.broadcast};
 }
-// the line above the filled-in copy: what Claude wrote, each with a Redo, and a way to redo them all
-const byWhom = j => j.ai && j.text === j.ai ? " by Claude" : j.ai ? " by Claude, then edited" : " by hand";
-const tinyBtn = (attr, label) => `<button class="act ghost" ${attr} style="width:auto;padding:3px 10px;margin-left:6px;font-size:12px">${label}</button>`;
-function genLineHTML(extra){
-  const cuts = S.gen.items, tweets = cuts.filter(j => j.kind !== "voice").length, asBefore = j => j.last && j.text === j.last;
-  const one = (j, i) => (j.kind === "voice" ? `The hook, in the artist's first person${asBefore(j) ? " as approved before" : byWhom(j)}, approved.`
-    : `${esc(j.channel)} · ${esc(j.name)}: ${asBefore(j) ? "the version approved before" : "rewritten" + byWhom(j)}, ${j.len} to ${xLen(jobText(j))} characters, approved${j.kept ? ", and kept though the text it was cut from has changed since" : ""}.`) + tinyBtn(`data-redo="${i}"`, "Redo");
-  return `<p class="live">Generated at ${fmtTime(S.gen.at)}. ${cuts.length ? cuts.map(one).join(" ") : "Nothing needed Claude: every tweet fits."}${extra ? " " + extra : ""}${tweets ? tinyBtn('id="regen"', "Redo every tweet") : cuts.length ? "" : tinyBtn('id="regen"', "Generate again")}</p>`;
+// the rewrite behind an item's copy, or the hook in the artist's voice it carries: what "Redo with Claude" asks for again
+function jobFor(set, x){
+  if (!S.gen || !S.gen.done) return -1;
+  let i = S.gen.items.findIndex(j => j.kind !== "voice" && j.set === set && j.name === x.n);
+  if (i < 0) { const v = voicedHook(); if (v && x.t && x.t.includes(v)) i = S.gen.items.findIndex(j => j.kind === "voice"); }
+  return i;
 }
-function wireGenLine(){
-  const rg = $("#regen"); if (rg) rg.onclick = () => generate(S.gen.items.some(j => j.kind !== "voice") ? "redo" : "keep");
-  $("#main").querySelectorAll("[data-redo]").forEach(b => b.onclick = () => redoOne(S.gen.items[+b.dataset.redo]));
+function redoBtn(set, x, style){
+  const i = set ? jobFor(set, x) : -1; if (i < 0) return "";
+  return `<button class="act ghost redo" data-job="${i}"${style ? ` style="${style}"` : ""}>${S.gen.items[i].kind === "voice" ? "Redo the hook with Claude" : "Redo with Claude"}</button>`;
 }
+function wireRedo(){ $("#main").querySelectorAll("button.redo").forEach(b => b.onclick = e => { e.preventDefault(); e.stopPropagation(); redoOne(S.gen.items[+b.dataset.job]); }); }
 // one rewrite again on its own: a fresh take, with the approved version a click away
 function redoOne(j){
   Object.assign(j, {last: j.text, anchor: false, why: null, kept: false, approved: false, err: null}); S.gen.done = false; persist();
@@ -1758,7 +1771,6 @@ function renderReview(){
     <div class="head">
       <span class="lbl">Then</span>
       <h1>Approve what Claude wrote</h1>
-      <p>${jobs.some(j => j.kind === "voice") ? "The hook names the artist, so their own posts get it in the first person first. " : ""}${jobs.filter(j => j.kind !== "voice").length ? `${jobs.filter(j => j.kind !== "voice").length === 1 ? "One tweet carries" : jobs.filter(j => j.kind !== "voice").length + " tweets carry"} the hook whole and ${jobs.filter(j => j.kind !== "voice").length === 1 ? "does" : "do"} not fit X's limit, so Claude has written ${jobs.filter(j => j.kind !== "voice").length === 1 ? "it" : "each"} again as a tweet. ` : ""}${back ? `${back === 1 ? "One comes" : back + " come"} back because a fact ${back === 1 ? "it" : "they"} must carry has changed. ` : S.gen.mode === "redo" && jobs.some(j => j.anchor && !j.approved) ? "You asked for the tweets again: each is written close to the version approved before. " : ""}What each must keep is checked below, and the words are yours to change. Nothing is filled in until each is approved. Everything else is assembled from what you wrote and needs no approval.</p>
     </div>
     ${rows}`;
   jobs.forEach((j, i) => {
@@ -1781,7 +1793,6 @@ function renderOut(){
       <div class="head">
         <span class="lbl">Everything else</span>
         <h1>Nothing to assemble yet</h1>
-        <p>Built from the details and the fragments. Neither is in place yet.</p>
       </div>
       <div class="sheet" style="padding:6px 22px 16px">${todoHTML()}
         <button class="act" data-goto="facts" style="width:auto;padding:9px 16px">Go to the details</button></div>`;
@@ -1803,15 +1814,14 @@ function renderOut(){
       else if (heldV) staleNote += ` Generate again and the hook in the artist's first person is kept, or written again if the hook has changed.`;
     }
     const pi = inPlan && S.plan ? planItems(o) : null;
-    const planLine = !inPlan ? "" : S.planBusy || !S.plan ? `Reading the plan's rows from Notion…` : S.planErr ? `The rows could not be read: ${esc(S.planErr)}`
-      : `The plan has ${pi.length} row${pi.length === 1 ? "" : "s"} ${planHasNeeds() && !S.showAll ? "ticked as needing copy" : "for this campaign"}: ${pi.filter(p => p.item).length} the tool can write, ${pi.filter(p => p.item && p.keep).length} already carrying copy it will keep, and ${pi.filter(p => !p.shape).length} it has no shape for, which are listed for writing by hand.`;
+    const planLine = !inPlan ? "" : S.planBusy || !S.plan ? `Reading the plan's rows from Notion…` : S.planErr ? `The rows could not be read: ${esc(S.planErr)}` : "";
     $("#main").innerHTML = `
       <div class="head">
         <span class="lbl">Then</span>
         <h1>${inPlan ? "The plan's copy" : "Everything else"}</h1>
-        <p>${inPlan ? planLine : `Assembled from the details and the fragments when you ask: ${o.posts.length} posts, ${used(o.tweets)} tweets and ${used(o.emails)} emails for Avant Arte, and ${used(o.artistPosts)} posts and ${used(o.artistTweets)} tweets for the artist.`}</p>
       </div>
       <div class="sheet" style="padding:18px 22px">
+        ${inPlan && (S.planBusy || !S.plan || S.planErr) ? `<p class="note" style="margin:0 0 12px">${planLine}</p>` : ""}
         ${stale ? `<p class="note" style="margin:0 0 12px">${staleNote}</p>` : ""}
         ${held.length ? "" : `<p class="note" style="margin:0 0 12px">${over ? `${over === 1 ? "One tweet runs" : over + " tweets run"} over X's limit of ${X_LIMIT}, because ${over === 1 ? "it carries" : "they carry"} the hook whole. Claude writes ${over === 1 ? "it" : "each"} again as a tweet, keeping every fact, and you approve the rewrite before anything is filled in. Everything else is assembled, not written.` : "Every tweet fits, so nothing here needs Claude: it is all assembled from what you wrote."}</p>`}
         <button class="act" id="gen" style="width:auto;padding:9px 16px"${dis}>${heldT ? `Generate again, keeping the approved ${heldT === 1 ? "tweet" : "tweets"}` : held.length ? "Generate again, keeping what was approved" : stale ? "Generate again" : "Generate comms plan copy"}</button>
@@ -1823,7 +1833,7 @@ function renderOut(){
   }
   // 2. rendering, before there is anything to approve
   if (S.gen.busy && !S.gen.items.length) {
-    $("#main").innerHTML = `<div class="head"><span class="lbl">Then</span><h1>Everything else</h1><p>${esc(S.gen.step || "Working…")}</p></div>`;
+    $("#main").innerHTML = `<div class="head"><span class="lbl">Then</span><h1>Everything else</h1></div>`;
     return;
   }
   // 3. the cuts, for approval
@@ -1833,7 +1843,6 @@ function renderOut(){
   if (inPlan && S.plan) { renderPlan(); return; }
   const sets = finalSets(), srv = SERVED ? S.server.out : null, cuts = S.gen.items;
   const cutOK = cuts.every(j => xLen(jobText(j)) <= X_LIMIT);
-  const genLine = genLineHTML();
   const band = !SERVED ? "" : srv
     ? (() => { const pv = parity(srv), warns = srv.warnings.filter(w => !(cutOK && /^tweet of \d+ characters/.test(w)));
         return `<p class="live" id="band">Rendered by the templates on the server${srv.errors.length ? `: <b>${srv.errors.length} validator error${srv.errors.length===1?"":"s"}</b>` : ", validator clean"}${warns.length ? `, ${warns.length} warning${warns.length===1?"":"s"}` : ""}. The page's own assembly ${pv.diffs.length ? `<b>differs in ${pv.diffs.length}</b> of ${pv.n} items.` : `matches all ${pv.n} items.`}${pv.extra ? ` ${pv.extra} more come from the templates only.` : ""}</p>`
@@ -1841,24 +1850,22 @@ function renderOut(){
     : S.server.err ? `<p class="live">The server could not render this release: ${esc(S.server.err)}. Showing the page's own assembly.</p>`
     : "";
   const first = !String(S.facts.artist_voice || "").startsWith("third");
-  const block = (title, note, list, meta) => `<div class="groupline"><span class="lbl">${esc(title)}</span></div>
+  const block = (title, note, list, meta, set) => `<div class="groupline"><span class="lbl">${esc(title)}</span></div>
     <p class="note" style="max-width:60ch;margin:0 0 14px">${esc(note)}</p>
-    ${list.map(x=>`<details class="out"><summary><b>${esc(x.n)}</b>${x.ch?`<span class="note">${esc(x.ch)}</span>`:""}${x.use?`<span class="note">${esc(x.use)}</span>`:""}<i>${x.t.startsWith("—")?"not used":(meta?(meta==="x"?xLen(x.t)+" on X":x.t.length+" chars"):"")}</i></summary><pre>${x.t.startsWith("—")?`<span class="na">${esc(x.t)}</span>`:esc(x.t)}</pre></details>`).join("")}`;
+    ${list.map(x=>`<details class="out"><summary><b>${esc(x.n)}</b>${x.ch?`<span class="note">${esc(x.ch)}</span>`:""}${x.use?`<span class="note">${esc(x.use)}</span>`:""}<i>${x.t.startsWith("—")?"not used":(meta?(meta==="x"?xLen(x.t)+" on X":x.t.length+" chars"):"")}</i></summary><pre>${x.t.startsWith("—")?`<span class="na">${esc(x.t)}</span>`:esc(x.t)}</pre>${x.t.startsWith("—") ? "" : (b => b ? `<div class="genact">${b}</div>` : "")(redoBtn(set, x))}</details>`).join("")}`;
   $("#main").innerHTML = `
     <div class="head">
       <span class="lbl">Then</span>
       <h1>Everything else</h1>
-      <p>Built from the fragments and the details. If a line is wrong, fix the fragment or the fact it came from, and generate again.</p>
     </div>
-    ${genLine}
     ${band}
-    ${block("Instagram", "Insiders posts the same caption; the plan says which.", sets.posts, true)}
-    ${block("Twitter", "Status line with the X handle, the hook on the announcement, an action line ending in the link.", sets.tweets, "x")}
+    ${block("Instagram", "Insiders posts the same caption; the plan says which.", sets.posts, true, "posts")}
+    ${block("Twitter", "Status line with the X handle, the hook on the announcement, an action line ending in the link.", sets.tweets, "x", "tweets")}
     ${block("Email", srv ? "Whole emails, with the HubSpot module markers." : "Body copy only. Subject, preview, kicker and headline are on the writing screen.", sets.emails, false)}
-    ${block("The artist's Instagram", `In the ${first ? "first person, as most artists post" : "third person, as a studio or an estate posts"}; the voice is set in the details. Avant Arte is tagged, Make-Ready in the sustain and last chance posts, and the edition is one sentence rather than a features list.`, sets.artistPosts, true)}
-    ${block("The artist's X", "Avant Arte named rather than tagged. The announcement carries the hook, cut to fit.", sets.artistTweets, "x")}
-    ${block("Broadcast channel", "The announcement, now-live and last-chance emails as messages: features as sentences, link in bio where the email has a button.", sets.broadcast, true)}`;
-  wireGenLine();
+    ${block("The artist's Instagram", `In the ${first ? "first person, as most artists post" : "third person, as a studio or an estate posts"}; the voice is set in the details. Avant Arte is tagged, Make-Ready in the sustain and last chance posts, and the edition is one sentence rather than a features list.`, sets.artistPosts, true, "artistPosts")}
+    ${block("The artist's X", "Avant Arte named rather than tagged. The announcement carries the hook, cut to fit.", sets.artistTweets, "x", "artistTweets")}
+    ${block("Broadcast channel", "The announcement, now-live and last-chance emails as messages: features as sentences, link in bio where the email has a button.", sets.broadcast, true, "broadcast")}`;
+  wireRedo();
 }
 function asideOut(){
   const o = outputs(), live = o.emails.filter(e=>!e.t.startsWith("—")).length;
@@ -2093,7 +2100,6 @@ function renderCampaigns(){
     <div class="head">
       <span class="lbl">Campaigns</span>
       <h1>Which campaign are you writing for?</h1>
-      <p>The list is the plan's campaigns database in Notion, most recently edited first. A draft is saved on the campaign's own page as you work, so you can come back to it, and so can anyone else.</p>
     </div>
     <div class="sheet camps">
       <div class="row head2"><input id="campq" type="search" placeholder="Search by artist or title" value="${esc(S.campQ || "")}"><span>${cs.loading ? "reading Notion…" : cs.took ? `read in ${cs.took}s` : cs.cached ? "last time's list" : ""}</span><button class="act ghost" id="campreload" style="width:auto;padding:3px 10px;font-size:12px"${cs.loading ? " disabled" : ""}>Read again</button></div>
@@ -2238,14 +2244,12 @@ function rowLabel(r){ return `${r.channel} · ${r.name}${r.live_date ? " · " + 
 // the plan as the screen: each row, its shape, and the copy for it
 function renderPlan(){
   const sets = finalSets(), items = planItems(sets), rows = visibleRows();
-  const written = items.filter(p => p.item && !p.keep && !rowSame(p)).length, already = items.filter(p => p.item && !p.keep && rowSame(p)).length, byHand = items.filter(p => !p.shape).length, kept = items.filter(p => p.keep).length;
-  const genLine = genLineHTML(`${items.length} rows ${planHasNeeds() && !S.showAll ? "need copy" : "in the plan"}: ${written} to write${already ? `, ${already} already carrying this copy` : ""}${kept ? `, ${kept} keeping the copy already there` : ""}${byHand ? `, ${byHand} by hand` : ""}.`);
   const groups = []; items.forEach(p => { const g = groups.find(g => g.channel === p.row.channel); if (g) g.items.push(p); else groups.push({channel: p.row.channel, items: [p]}); });
   const opts = p => { const fam = FAMILY(p.row.channel); const list = SHAPES.filter(s => !fam || s.family === fam);
     return `<select class="shape" data-row="${esc(p.row.id)}"><option value="">By hand</option>${(fam ? [list] : [SHAPES]).flat().map(s => `<option value="${esc(s.key)}"${p.key === s.key ? " selected" : ""}>${esc(fam ? s.label : s.family + " · " + s.label)}</option>`).join("")}</select>`; };
   const body = p => !p.shape ? `<p class="note" style="margin:0">${FAMILY(p.row.channel) ? "Nothing in the templates matches this name. Choose a shape, or write it in Notion." : "The tool has no shape for this channel. Choose one to start from, or write it in Notion."}${p.row.copy ? `</p><pre>${esc(p.row.copy)}</pre><p class="note">The copy already in the row, kept.` : ""}</p>`
     : !p.item ? `<p class="note" style="margin:0">This shape is not used for a ${S.facts.mechanic === "draw" ? "draw" : "timed release"}.</p>`
-    : rowSame(p) ? `<pre>${esc(p.text)}</pre><p class="note" style="margin:6px 0 0">Already in the row, as it is here.</p>`
+    : rowSame(p) ? `<pre>${esc(p.text)}</pre><p class="note">Already in the row, as it is here.</p>`
     : p.row.copy ? `<div class="gencols"><div><span class="lbl">In the row now${p.keep ? ", kept" : ""}</span><pre>${esc(p.row.copy)}</pre></div><div><span class="lbl">The tool's${p.keep ? "" : ", to be written"}</span><pre>${esc(p.text)}</pre></div></div>
         <div class="genact"><button class="act ghost keep" data-row="${esc(p.row.id)}">${p.keep ? "Use the tool's version instead" : "Keep the plan's copy"}</button></div>`
     : `<pre>${esc(p.text)}</pre>`;
@@ -2254,17 +2258,15 @@ function renderPlan(){
     <div class="head">
       <span class="lbl">Then</span>
       <h1>The plan's copy</h1>
-      <p>The rows of ${esc(S.campaign.name)} in Notion${planHasNeeds() ? ", those ticked as needing copy" : ""}, each written from the shape beside it. Change a shape and the row is rewritten; choose “By hand” and the row is left alone.</p>
     </div>
-    ${genLine}
     ${S.planErr ? `<p class="live">The rows could not be read: ${esc(S.planErr)}</p>` : ""}
     ${planHasNeeds() && !rows.length ? `<p class="live">No row in this campaign is ticked as needing copy. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Show every row</button></p>` : ""}
     ${groups.map(g => `<div class="groupline"><span class="lbl">${esc(g.channel)}</span></div>
       ${g.items.map(p => `<details class="out" data-row="${esc(p.row.id)}"><summary><b>${esc(p.row.name)}</b>${p.row.live_date ? `<span class="note">${esc(p.row.live_date.slice(0, 10))}</span>` : ""}${p.row.copy ? `<span class="note">${rowSame(p) ? "already in the row" : p.keep ? "keeps its copy" : "will be replaced"}</span>${p.item && !rowSame(p) ? `<button class="act ghost keep" data-row="${esc(p.row.id)}" style="width:auto;padding:1px 8px;margin:0 0 0 4px;font-size:11.5px">${p.keep ? "Replace" : "Keep"}</button>` : ""}` : ""}<i>${p.item ? (SETOF[p.shape.family] === "tweets" || SETOF[p.shape.family] === "artistTweets" ? xLen(p.text) + " on X" : p.text.length + " chars") : ""}</i></summary>
-        <div class="rowbar"><span class="lbl">Shape</span>${opts(p)}</div>${body(p)}</details>`).join("")}`).join("")}
+        <div class="rowbar"><span class="lbl">Shape</span>${opts(p)}${p.item && p.shape ? redoBtn(SETOF[p.shape.family], {n: p.item.n, t: p.text}, "margin-left:auto") : ""}</div>${body(p)}</details>`).join("")}`).join("")}
     ${planHasNeeds() && rows.length ? `<p class="note" style="margin-top:18px">${S.showAll ? `Showing every row. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Only rows that need copy</button>` : `Rows without the Needs copy tick are hidden. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Show every row</button>`}</p>` : ""}`;
   open.forEach(id => { const d = $("#main").querySelector(`details[data-row="${CSS.escape(id)}"]`); if (d) d.open = true; });
-  wireGenLine();
+  wireRedo();
   const sa = $("#showall"); if (sa) sa.onclick = () => { S.showAll = !S.showAll; afterShapeChange(); persist(); render(); };
   $("#main").querySelectorAll("select.shape").forEach(el => el.onchange = e => { S.shapes[el.dataset.row] = e.target.value; afterShapeChange(); persist(); render(); });
   $("#main").querySelectorAll("button.keep").forEach(el => el.onclick = e => { e.preventDefault(); e.stopPropagation(); const p = items.find(p => p.row.id === el.dataset.row); S.keep[el.dataset.row] = p ? !p.keep : false; persist(); render(); });

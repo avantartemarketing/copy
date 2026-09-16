@@ -19,7 +19,7 @@ def page_text(page):
     assert: a number or a name on the page is sourced, so the validator lets it through."""
     out = []
     for pg in [page] + list(page.get("more") or []):
-        for k in ("description", "seo", "medium", "authentication"):
+        for k in ("description", "medium"):
             v = (pg or {}).get(k)
             if isinstance(v, str) and v.strip():
                 out.append(v.strip())

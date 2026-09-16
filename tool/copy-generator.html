@@ -267,7 +267,7 @@ function blankRelease(){
       quote:"", bio:""
     },
     blocks: { opener:"", qualifier:"", hook:"", making:"", card_1:"", card_2:"", card_3:"" },
-    page: { description:"", seo:"", medium:"", authentication:"", more: [] },
+    page: { description:"", medium:"", more: [] },
     suggest: null,     // Claude's reading of the page, once asked for
     from: {}           // fragment key -> "page" while it is the accepted suggestion, untouched
   };
@@ -311,9 +311,7 @@ const S = {
   // the product page as it went to the site, from the Storyblok export
   page: {
     description:"Grayson Perry turns his inimitable hand to a new silkscreen print launched in support of the Foundling Museum.\n\nThe Changeling is a vivid artwork that portrays changeling folklore when a child is swapped by malevolent spirits – reinterpreted by the artist for the digital age. Grayson Perry describes the artwork as intentionally “quite disturbing”, reflecting on how digital culture and AI are callously shaping our sense of self. His newly imagined changeling challenges us to rethink identity, belonging, and what truly makes us human. It sits in contrast to the stories and lives of foundlings, children ‘found’ and cared for by supportive communities.\n\nThis 9-colour silkscreen print was carefully produced at our London studio, Make-Ready, in close collaboration with the artist to capture the vivid detail of his world-renowned drawing style, exemplified in this new design.\n\nFor each artwork sold, a minimum of €195 will be donated to the Foundling Museum. The total donation made to the charity will depend on the final number of artworks sold in the edition",
-    seo:"",
     medium:"9 colour silkscreen on bespoke 410gsm Somerset White Rough Textured M-R 100% cotton paper.",
-    authentication:"Signed by the artist. Individually numbered.",
     more: []
   },
   pageTab: 0,
@@ -667,7 +665,7 @@ function checks(key, text){
       out.push({k:"warn", t:"An aside between two dashes reads as machine-written. Use commas or a new sentence."});
   });
   if (pageText().trim()) {
-    const known = new Set((pageText() + " " + pages().map(x => (x.page.medium||"") + " " + (x.page.seo||"")).join(" ") + " " + S.page.authentication + " "
+    const known = new Set((pageText() + " " + pages().map(x => (x.page.medium||"")).join(" ") + " "
       + Object.values(S.facts).filter(v => typeof v === "string").join(" ")).match(/[\w'’.-]+/g) || []);
     const seen = new Set();
     for (const w of [...known]) { seen.add(w); seen.add(w.replace(/['’]s$/, "")); seen.add(w.replace(/[.'’-]+$/, "")); }
@@ -1037,7 +1035,7 @@ Reply with JSON only, no other text:
 // the others are kept as edits of it.
 const MAKE = /printmaker|silkscreen|screenprint|lithograph|etching|\blayers?\b|\bgsm\b|\bpaper\b|varnish|hand-(finish|paint|pull|colour|color)|foundry|cast in|kiln|fired|glaze|woven|stitch|embroider|\bpress\b|\bplate\b|pigment|archival|Make-Ready|transparenc/i;
 const paras = t => (t || "").trim() ? t.trim().split(/\n\s*\n/).map(x => x.trim()).filter(Boolean) : [];
-function pageOf(i){ if (i === 0) return S.page; S.page.more ??= []; return S.page.more[i-1] ??= {description:"", seo:"", medium:""}; }
+function pageOf(i){ if (i === 0) return S.page; S.page.more ??= []; return S.page.more[i-1] ??= {description:"", medium:""}; }
 function pages(){ return Array.from({length: D().artworks}, (_, i) => ({i, title: S.facts["title_"+(i+1)] || `Artwork ${i+1}`, page: pageOf(i)})); }
 function pageText(){ return pages().map(x => x.page.description || "").join("\n\n"); }
 // how artwork i's page stands to the first artwork's
@@ -1064,7 +1062,6 @@ function pageNote(i){
                             : "Neither this nor the medium field says how it was made; write the making line by hand.");
 }
 const PAGE_FIELDS = [
-  ["seo", "SEO line", "About 25 words; most open “Collect a … by …”"],
   ["medium", "Medium description", "The technique in full; it can differ between artworks"]
 ];
 function renderPage(){
@@ -1087,11 +1084,10 @@ function renderPage(){
       ${empty ? `<button class="mini" id="copyfirst" style="margin-top:8px">Start from the first artwork's page</button>` : ""}
       <p class="live" id="pagenote">${esc(pageNote(S.pageTab))}</p>
     </fieldset>
-    <fieldset><legend>The page's fields</legend>
-      <p>${n > 1 ? "SEO line and medium per artwork; authentication shared." : "The medium description supplies the making line's technique when the prose doesn't."}</p>
+    <fieldset><legend>The page's medium</legend>
+      <p>${n > 1 ? "Per artwork: it can differ between them." : "It supplies the making line's technique when the prose doesn't."} What is signed and numbered comes from the features in the details.</p>
       <div class="grid">${PAGE_FIELDS.map(([k,lab,hint]) =>
         `<label><span>${esc(lab)}${n > 1 ? " · " + esc(cur.title) : ""}</span><input data-p="${k}" type="text" value="${esc(cur.page[k]||"")}"><small>${esc(hint)}</small></label>`).join("")}
-        <label><span>Authentication${n > 1 ? " · all" : ""}</span><input data-p="authentication" type="text" value="${esc(S.page.authentication||"")}"><small>e.g. Signed by the artist. Individually numbered.</small></label>
       </div>
     </fieldset>
     <fieldset><legend>Then</legend>
@@ -1102,12 +1098,12 @@ function renderPage(){
   $("#main").querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { S.pageTab = +b.dataset.tab; renderPage(); renderPageAside(); });
   const cf = $("#copyfirst"); if (cf) cf.onclick = () => {
     const src = pageOf(0), dst = pageOf(S.pageTab);
-    dst.description = src.description; dst.seo = src.seo; dst.medium = src.medium;
+    dst.description = src.description; dst.medium = src.medium;
     renderPage(); renderPageAside(); $("#main textarea").focus();
   };
   $("#main").querySelectorAll("[data-p]").forEach(el => el.addEventListener("input", e => {
     const k = e.target.dataset.p;
-    if (k === "authentication") S.page.authentication = e.target.value; else pageOf(S.pageTab)[k] = e.target.value;
+    pageOf(S.pageTab)[k] = e.target.value;
     S.suggest = null;                                   // the pages changed under the reading
     const nt = $("#pagenote"); if (nt) nt.textContent = pageNote(S.pageTab);
     const b = $("#suggest"); if (b) { b.disabled = !( !missing().length && pageStats(0).words > 0 ); b.textContent = `Suggest the email from ${D().artworks > 1 ? "these pages" : "this page"}`; }
@@ -1172,7 +1168,7 @@ function suggestPrompt(){
   const pageBlock = all.map(x => {
     const same = x.i > 0 && paras(x.page.description).join("\n\n") === paras(pageOf(0).description).join("\n\n");
     const rel = x.i === 0 ? "" : same ? " (its page is identical to artwork 1's)" : !(x.page.description||"").trim() ? " (no page written yet)" : ` (${pageDiff(x.i).replace(/\.$/, "").toLowerCase()})`;
-    return `── Artwork ${x.i+1}: ${x.title}${rel}\n${same ? "(as artwork 1)" : (x.page.description || "").trim() || "(blank)"}\n   SEO line: ${x.page.seo || "(blank)"}\n   medium: ${x.page.medium || "(blank)"}`;
+    return `── Artwork ${x.i+1}: ${x.title}${rel}\n${same ? "(as artwork 1)" : (x.page.description || "").trim() || "(blank)"}\n   medium: ${x.page.medium || "(blank)"}`;
   }).join("\n\n");
   return `You are drafting fragments of campaign copy for Avant Arte, a publisher of limited edition artworks, from product page${n>1?"s":""} a person has already written and approved. Every fragment must be a shortening or re-voicing of what is on the page${n>1?"s":""} or in the fields. Add no fact of any kind that is not there: no date, number, place, name, material, exhibition or claim. If a fragment cannot be written from the page${n>1?"s":""}, return null for its text and say why in "from".
 
@@ -1180,10 +1176,9 @@ THE PRODUCT PAGE${n>1?"S, one per artwork. The first is the release's page; the 
 
 ${pageBlock}
 
-Authentication${n>1?" (all)":""}: ${S.page.authentication || "(blank)"}
-
 THE RELEASE:
 - artist: ${f.artist}; the collaboration is with ${f.collab_with}
+- the edition's features, as the emails list them: ${d.feats.join("; ") || "(none)"}
 - ${n === 1 ? "one artwork: " + d.cardTitles[0] : n + " artworks: " + all.map(x=>x.title).join("; ")}
 - edition phrase: ${f.edition_phrase}
 - mechanic: ${d.draw ? "allocated by draw" : "timed, " + f.window}${f.beneficiary ? "\n- released in support of " + f.beneficiary : ""}

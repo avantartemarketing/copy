@@ -13,6 +13,7 @@ key that stays here, and reads and writes the comms plan in Notion.
 import json
 import os
 import pathlib
+import time
 
 from flask import Flask, Response, jsonify, request, send_from_directory
 
@@ -137,10 +138,15 @@ def api_claude():
 # ------------------------------------------------------------------ Notion: the comms plan's rows
 @app.get("/api/notion/campaigns")
 def api_notion_campaigns():
+    """The cached list, or with ?q= a search of every campaign, or with ?force=1 a fresh read."""
     if not notion.configured():
         return jsonify(error="Notion is not configured on this server: set NOTION_TOKEN and NOTION_DATABASE_ID."), 503
+    t0 = time.time()
     try:
-        return jsonify(campaigns=notion.campaigns())
+        q = (request.args.get("q") or "").strip()
+        lst = notion.search_campaigns(q) if q else notion.campaigns(force=request.args.get("force") == "1")
+        app.logger.info("campaigns %s in %.2fs", "search" if q else "list", time.time() - t0)
+        return jsonify(campaigns=lst, took=round(time.time() - t0, 2))
     except notion.NotionError as e:
         return jsonify(error=str(e)), 502
 
@@ -171,11 +177,13 @@ def api_notion_rows():
     if not notion.configured():
         return jsonify(error="Notion is not configured on this server: set NOTION_TOKEN and NOTION_DATABASE_ID."), 503
     body = request.get_json(force=True) or {}
+    t0 = time.time()
     try:
         rows = notion.rows_for_campaign(body.get("campaign", ""), body.get("campaign_id", ""))
     except notion.NotionError as e:
         return jsonify(error=str(e)), 502
-    return jsonify(rows=rows)
+    app.logger.info("rows for %s in %.2fs", body.get("campaign_id") or body.get("campaign"), time.time() - t0)
+    return jsonify(rows=rows, took=round(time.time() - t0, 2))
 
 
 @app.post("/api/notion/write")

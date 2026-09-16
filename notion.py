@@ -13,6 +13,7 @@ import datetime
 import json
 import os
 import re
+import threading
 import time
 
 import requests
@@ -142,26 +143,66 @@ def _saved_at(prop):
     return m.group(1) if m else ""
 
 
-def campaigns(limit=300):
-    """The campaigns a row can belong to, most recently edited first, each with whether a draft is saved on it."""
-    db_id, db = campaigns_db()
+def _campaign_rows(res):
     state = _prop(STATE_PROP, "Copy generator")
-    body = {"page_size": 100, "sorts": [{"timestamp": "last_edited_time", "direction": "descending"}]}
-    out, cursor = [], None
-    while len(out) < limit:
-        if cursor:
-            body["start_cursor"] = cursor
-        res = _call("POST", f"/databases/{db_id}/query", json=body)
-        for pg in res.get("results", []):
-            title = next((plain(v) for v in pg["properties"].values() if v.get("type") == "title"), "").strip()
-            if title:
-                saved = _saved_at(pg["properties"].get(state)) if state in pg["properties"] else None
-                out.append({"id": pg["id"], "name": title, "edited": (pg.get("last_edited_time") or "")[:10],
-                            "has_draft": saved is not None, "saved_at": saved or None})
-        if not res.get("has_more"):
-            break
-        cursor = res.get("next_cursor")
-    return out[:limit]
+    out = []
+    for pg in res.get("results", []):
+        title = next((plain(v) for v in pg["properties"].values() if v.get("type") == "title"), "").strip()
+        if title:
+            saved = _saved_at(pg["properties"].get(state)) if state in pg["properties"] else None
+            out.append({"id": pg["id"], "name": title, "edited": (pg.get("last_edited_time") or "")[:10],
+                        "has_draft": saved is not None, "saved_at": saved or None})
+    return out
+
+
+_CAMPS = {"at": 0.0, "list": None, "lock": threading.Lock(), "refreshing": False}
+CAMPS_FRESH, CAMPS_STALE = 120, 3600                    # served as is for two minutes; refreshed behind the answer for an hour
+
+
+def _fetch_campaigns(limit=100):
+    """One request: the hundred most recently edited campaigns, which covers months of releases."""
+    db_id, _ = campaigns_db()
+    res = _call("POST", f"/databases/{db_id}/query", json={"page_size": min(100, limit), "sorts": [{"timestamp": "last_edited_time", "direction": "descending"}]})
+    return _campaign_rows(res)
+
+
+def campaigns(force=False):
+    """The campaigns, most recently edited first, from a cache that Notion's latency never shows through:
+    a fresh list is answered at once; a stale one is answered at once and refreshed behind it."""
+    age = time.time() - _CAMPS["at"]
+    if _CAMPS["list"] is not None and not force and age < CAMPS_STALE:
+        if age > CAMPS_FRESH and not _CAMPS["refreshing"]:
+            _CAMPS["refreshing"] = True
+            threading.Thread(target=_refresh_campaigns, daemon=True).start()
+        return _CAMPS["list"]
+    lst = _fetch_campaigns()
+    _CAMPS.update(list=lst, at=time.time())
+    return lst
+
+
+def _refresh_campaigns():
+    try:
+        _CAMPS.update(list=_fetch_campaigns(), at=time.time())
+    except Exception:
+        pass
+    finally:
+        _CAMPS["refreshing"] = False
+
+
+def search_campaigns(q):
+    """Every campaign whose name contains q, for the ones older than the cached hundred."""
+    db_id, db = campaigns_db()
+    title = next(k for k, v in db["properties"].items() if v.get("type") == "title")
+    res = _call("POST", f"/databases/{db_id}/query", json={"page_size": 50, "filter": {"property": title, "title": {"contains": q}},
+                                                            "sorts": [{"timestamp": "last_edited_time", "direction": "descending"}]})
+    return _campaign_rows(res)
+
+
+def note_draft(campaign_id, saved_at):
+    """A draft was just saved: the cached list says so without a round trip."""
+    for c in _CAMPS["list"] or []:
+        if c["id"] == campaign_id:
+            c["has_draft"], c["saved_at"] = True, saved_at
 
 
 def draft(campaign_id):
@@ -197,6 +238,7 @@ def save_draft(campaign_id, state, who=""):
     if len(chunks) > 100:
         raise NotionError("The draft is too large to save on the campaign page.")
     _call("PATCH", f"/pages/{campaign_id}", json={"properties": {name: {"rich_text": [{"type": "text", "text": {"content": c}} for c in chunks]}}})
+    note_draft(campaign_id, body["savedAt"])
     return body["savedAt"]
 
 

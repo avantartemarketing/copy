@@ -54,7 +54,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .saved[data-k="pending"],.saved[data-k="saving"]{color:var(--ink-soft)}
 .camps{padding:4px 0 6px}
 .camps .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 16px;border-top:1px solid var(--line-soft);cursor:pointer}
-.camps .row.head2{border-top:none;cursor:default}
+.camps .row.head2{border-top:none;cursor:default;align-items:center}
+.camps .row.head2 input{flex:1}
 .camps .row:not(.head2):hover{background:var(--sunk)}
 .camps .row[aria-current="true"] b{color:var(--accent)}
 .camps .row b{font-weight:500;min-width:0}
@@ -1781,10 +1782,24 @@ function prefillFromName(name){
 }
 async function loadCampaigns(force){
   if (!SERVED) { S.camps = {list: [], err: "Campaigns come from Notion, which the served version reads."}; return S.camps; }
-  if (S.camps && S.camps.list && !force) return S.camps;
-  try { const r = await fetch("/api/notion/campaigns"); const j = await r.json(); S.camps = r.ok ? {list: j.campaigns} : {list: [], err: j.error}; }
-  catch (e) { S.camps = {list: [], err: String(e.message || e)}; }
+  if (!S.camps) { try { const c = JSON.parse(localStorage.getItem("cg:camps") || "null"); if (c && c.list) S.camps = Object.assign(c, {cached: true}); } catch (_) {} }   // last time's list, at once
+  if (S.camps && S.camps.list && !force && !S.camps.cached) return S.camps;
+  const had = S.camps;
+  if (had) { had.loading = true; if (S.view === "campaigns") renderCampaigns(); }
+  try { const r = await fetch("/api/notion/campaigns" + (force ? "?force=1" : "")); const j = await r.json(); S.camps = r.ok ? {list: j.campaigns, took: j.took} : (had ? Object.assign(had, {err: j.error, loading: false, cached: false}) : {list: [], err: j.error}); }
+  catch (e) { S.camps = had ? Object.assign(had, {err: String(e.message || e), loading: false, cached: false}) : {list: [], err: String(e.message || e)}; }
+  try { if (S.camps.list && S.camps.list.length) localStorage.setItem("cg:camps", JSON.stringify({list: S.camps.list})); } catch (_) {}
   return S.camps;
+}
+let searchT = null;
+async function searchCampaigns(q){                       // the list holds the hundred most recent; older ones are found by name
+  clearTimeout(searchT);
+  if (q.length < 3) { S.campHits = null; return; }
+  searchT = setTimeout(async () => {
+    try { const r = await fetch("/api/notion/campaigns?q=" + encodeURIComponent(q)); const j = await r.json(); S.campHits = r.ok ? {q, list: j.campaigns} : {q, list: [], err: j.error}; }
+    catch (e) { S.campHits = {q, list: [], err: String(e.message || e)}; }
+    if (S.view === "campaigns" && (S.campQ || "").toLowerCase() === q) renderCampaigns();
+  }, 400);
 }
 async function openCampaign(c){                          // c: {id, name}, or null for a release kept only here
   if (S.saved && S.saved.status === "pending") await saveRemote();
@@ -1809,7 +1824,9 @@ async function openCampaign(c){                          // c: {id, name}, or nu
 }
 function renderCampaigns(){
   const cs = S.camps || {list: null}, q = (S.campQ || "").toLowerCase();
-  const list = (cs.list || []).filter(c => !q || c.name.toLowerCase().includes(q));
+  let list = (cs.list || []).filter(c => !q || c.name.toLowerCase().includes(q));
+  const hits = S.campHits && S.campHits.q === q ? S.campHits : null;
+  if (hits) hits.list.forEach(c => { if (!list.some(x => x.id === c.id)) list.push(Object.assign({found: true}, c)); });
   const when = c => c.saved_at ? `draft saved ${c.saved_at.slice(0, 10)}` : c.has_draft ? "draft saved" : `edited ${c.edited}`;
   $("#main").innerHTML = `
     <div class="head">
@@ -1818,15 +1835,16 @@ function renderCampaigns(){
       <p>The list is the plan's campaigns database in Notion, most recently edited first. A draft is saved on the campaign's own page as you work, so you can come back to it, and so can anyone else.</p>
     </div>
     <div class="sheet camps">
-      <div class="row head2"><input id="campq" type="search" placeholder="Search by artist or title" value="${esc(S.campQ || "")}"></div>
+      <div class="row head2"><input id="campq" type="search" placeholder="Search by artist or title" value="${esc(S.campQ || "")}"><span>${cs.loading ? "reading Notion…" : cs.took ? `read in ${cs.took}s` : cs.cached ? "last time's list" : ""}</span><button class="act ghost" id="campreload" style="width:auto;padding:3px 10px;font-size:12px"${cs.loading ? " disabled" : ""}>Read again</button></div>
       <div class="row" data-open=""><b>A release outside any campaign</b><span>kept in this browser only</span></div>
       ${!cs.list ? `<div class="row"><span>Reading the campaigns…</span></div>`
         : cs.err ? `<div class="row"><span class="note" style="margin:0;white-space:normal">${esc(cs.err)}</span></div>`
-        : list.length ? list.map(c => `<div class="row" data-open="${esc(c.id)}"${S.campaign && S.campaign.id === c.id ? ' aria-current="true"' : ""}><b>${esc(c.name)}</b><span>${when(c)}</span></div>`).join("")
-        : `<div class="row"><span>Nothing matches.</span></div>`}
+        : list.length ? list.map(c => `<div class="row" data-open="${esc(c.id)}"${S.campaign && S.campaign.id === c.id ? ' aria-current="true"' : ""}><b>${esc(c.name)}</b><span>${c.found ? "found by search · " : ""}${when(c)}</span></div>`).join("")
+        : `<div class="row"><span>${q.length >= 3 ? (hits ? "Nothing matches, in the recent hundred or by search." : "Nothing in the recent hundred; searching every campaign…") : "Nothing matches."}</span></div>`}
     </div>`;
-  const qi = $("#campq"); if (qi) { qi.oninput = e => { S.campQ = e.target.value; const at = qi.selectionStart; renderCampaigns(); const q2 = $("#campq"); q2.focus(); q2.setSelectionRange(at, at); }; }
-  $("#main").querySelectorAll("[data-open]").forEach(el => el.onclick = () => { const id = el.dataset.open; openCampaign(id ? (cs.list || []).find(c => c.id === id) : null); });
+  const qi = $("#campq"); if (qi) { qi.oninput = e => { S.campQ = e.target.value; const at = qi.selectionStart; searchCampaigns(S.campQ.trim().toLowerCase()); renderCampaigns(); const q2 = $("#campq"); q2.focus(); q2.setSelectionRange(at, at); }; }
+  const rl = $("#campreload"); if (rl) rl.onclick = () => loadCampaigns(true).then(() => { if (S.view === "campaigns") renderCampaigns(); });
+  $("#main").querySelectorAll("[data-open]").forEach(el => el.onclick = () => { const id = el.dataset.open; openCampaign(id ? list.find(c => c.id === id) || (cs.list || []).find(c => c.id === id) : null); });
   $("#aside").innerHTML = `<div class="panel"><span class="lbl">Where drafts live</span><h2>On the campaign's page</h2>
     <p class="rule">Each campaign in Notion carries its own draft.</p>
     <section><h3>Now open</h3><p class="note">${S.campaign ? esc(S.campaign.name) : "A release outside any campaign, kept in this browser only."}</p></section>

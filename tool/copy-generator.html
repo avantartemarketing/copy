@@ -48,6 +48,17 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .ghost{padding:5px 10px;border:1px solid var(--line);border-radius:6px;font-size:12.5px;color:var(--ink-soft)}
 .ghost:hover{border-color:var(--ink-faint);color:var(--ink)}
 .ghost.arm{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+#camp{max-width:36ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink);font-weight:500}
+.saved{font-size:11.5px;color:var(--ink-faint);white-space:nowrap}
+.saved[data-k="error"]{color:var(--warn)}
+.saved[data-k="pending"],.saved[data-k="saving"]{color:var(--ink-soft)}
+.camps{padding:4px 0 6px}
+.camps .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 16px;border-top:1px solid var(--line-soft);cursor:pointer}
+.camps .row.head2{border-top:none;cursor:default}
+.camps .row:not(.head2):hover{background:var(--sunk)}
+.camps .row[aria-current="true"] b{color:var(--accent)}
+.camps .row b{font-weight:500;min-width:0}
+.camps .row span{font-size:12px;color:var(--ink-faint);white-space:nowrap}
 
 .shell{display:grid;grid-template-columns:var(--rail) minmax(0,1fr) var(--aside);min-height:calc(100dvh - 52px)}
 nav{border-right:1px solid var(--line)}
@@ -230,9 +241,11 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 </style>
 
 <header class="top">
-  <span class="mark">First <em>Proof</em></span>
+  <span class="mark">Copy <em>Generator</em></span>
+  <button class="ghost" id="camp" title="Campaigns">Choose a campaign</button>
   <span class="crumb" id="crumb"></span>
-  <button class="ghost" id="new">New release</button>
+  <span class="saved" id="saved"></span>
+  <button class="ghost" id="new" title="Start a release outside any campaign">New release</button>
   <button class="ghost" id="theme" title="Switch theme">Theme</button>
 </header>
 
@@ -716,6 +729,8 @@ function render(){
   const pw = pageStats().total; $("#npage").textContent = pw ? pw + " words" : "";
   $("#nwrite").textContent = (3 + D().cardTitles.length) + " fields";
   document.querySelectorAll("nav button").forEach(b => b.setAttribute("aria-current", String(b.dataset.view===S.view)));
+  showSaved();
+  if (S.view === "campaigns") { renderCampaigns(); loadCampaigns().then(() => { if (S.view === "campaigns") renderCampaigns(); }); return; }
   if (S.view === "write") { renderWrite(); renderAside(); }
   else if (S.view === "facts") { renderFacts(); $("#aside").innerHTML = asideFacts(); }
   else if (S.view === "page") { renderPage(); renderPageAside(); }
@@ -849,7 +864,7 @@ function caret(el){
 function onField(el){
   S.blocks[el.dataset.k] = el.innerText.replace(/\s+/g," ").trim();
   delete S.from[el.dataset.k];                       // edited, so it is the writer's now
-  S.server = {};                                     // the templates will need to run again
+  touch();                                           // the templates will need to run again, and the draft is kept
   // deleting the last word can leave a stray <br>, which loses :empty and the
   // placeholder with it. Clear it out and put the caret back.
   if (!el.textContent.trim() && el.innerHTML !== "") { el.innerHTML = ""; caret(el); }
@@ -950,8 +965,9 @@ function renderAside(){
 
   $("#aside").querySelectorAll("[data-lead]").forEach(b => b.onclick = () => {
     const i = +b.dataset.lead, L = LEADS[i];
-    if (L.shape) { S.lead = i; S.blocks.opener = L.shape(D()); delete S.from.opener; S.server = {}; S.focus = "opener"; }
-    else { S.lead = i; S.blocks.opener = ""; S.focus = "qualifier"; S.server = {}; }
+    if (L.shape) { S.lead = i; S.blocks.opener = L.shape(D()); delete S.from.opener; S.focus = "opener"; }
+    else { S.lead = i; S.blocks.opener = ""; S.focus = "qualifier"; }
+    touch();
     syncFrame(); drawGutter(); renderAside();
     const el = document.querySelector('.fld[data-k="opener"]');
     if (el && L.shape) {                                  // select the blank, if the shape has one
@@ -1105,6 +1121,7 @@ function renderPage(){
     const k = e.target.dataset.p;
     pageOf(S.pageTab)[k] = e.target.value;
     S.suggest = null;                                   // the pages changed under the reading
+    touch();
     const nt = $("#pagenote"); if (nt) nt.textContent = pageNote(S.pageTab);
     const b = $("#suggest"); if (b) { b.disabled = !( !missing().length && pageStats(0).words > 0 ); b.textContent = `Suggest the email from ${D().artworks > 1 ? "these pages" : "this page"}`; }
     const tw = pageStats().total; $("#npage").textContent = tw ? tw + " words" : "";
@@ -1154,7 +1171,7 @@ function renderPageAside(){
   const use = key => {
     const r = key.startsWith("card_") ? (sg.res.cards||[])[+key.slice(5)-1] : sg.res[key];
     if (!r || !(r.text||"").trim()) return;
-    S.blocks[key] = r.text.trim(); S.from[key] = "page"; S.ai[key] = undefined; S.server = {};
+    S.blocks[key] = r.text.trim(); S.from[key] = "page"; S.ai[key] = undefined; touch();
   };
   $("#aside").querySelectorAll("[data-use]").forEach(b => b.onclick = () => { use(b.dataset.use); renderPageAside(); });
   const ua = $("#useall"); if (ua) ua.onclick = () => { ["hook","making","qualifier",...D().cardKeys].forEach(use); renderPageAside(); };
@@ -1297,7 +1314,7 @@ function renderFacts(){
   $("#main").querySelectorAll("[data-f]").forEach(el => el.addEventListener("input", e => {
     const k = e.target.dataset.f;
     S.facts[k] = e.target.type === "number" ? (+e.target.value||0) : e.target.value;
-    S.server = {};
+    touch();
     // there cannot be fewer works than titled artworks, so adding a title raises
     // the count. Raising it further by hand is the set-under-one-title case.
     // these two decide how many title boxes there are, so the group is rebuilt
@@ -1562,7 +1579,7 @@ function renderReview(){
       $(`#facts_${i}`).innerHTML = facts.map(c => `<div class="chk" data-k="${c.ok ? "good" : "warn"}"><s></s><span>${esc(c.t)}${c.ok || c.need ? "" : " (not required)"}</span></div>`).join("") + style.map(w => `<div class="chk" data-k="warn"><s></s><span>${esc(w)}</span></div>`).join("");
       ok.disabled = !jobOK(j); ok.textContent = "Approve";
     };
-    const ok = $(`#ok_${i}`); if (ok) ok.onclick = () => { j.approved = true; if (S.gen.items.every(x => x.approved)) S.gen.done = true; render(); };
+    const ok = $(`#ok_${i}`); if (ok) ok.onclick = () => { j.approved = true; if (S.gen.items.every(x => x.approved)) S.gen.done = true; persist(); render(); };
     const again = $(`#again_${i}`); if (again) again.onclick = () => rewriteJob(j);
   });
 }
@@ -1656,26 +1673,11 @@ function asideOut(){
 
 // ---------- Notion: the plan's campaigns to choose from, its rows for the one chosen, and the copy written into them ----------
 S.notion = S.notion || {};
-// the campaign this release is likely filed under: the one name that carries the artist, or the artist and the first title
-function guessCampaign(list){
-  const has = (c, t) => t && c.name.toLowerCase().includes(t.toLowerCase());
-  const byArtist = list.filter(c => has(c, S.facts.artist));
-  if (byArtist.length === 1) return byArtist[0].id;
-  const byTitle = byArtist.filter(c => has(c, S.facts.title_1));
-  return byTitle.length === 1 ? byTitle[0].id : "";
-}
 async function notionPanel(){
   const h = await serverHealth(); if (!h || !h.notion || S.view !== "out" || !genReady()) return;
   const f = S.facts, N = S.notion;
-  N.campaign ??= `${f.artist} - ${f.title_1 || ""}`.trim();
-  if (N.campaigns === undefined && !N.loading) {                       // the list, once per page load
-    N.loading = true;
-    try { const r = await fetch("/api/notion/campaigns"); const j = await r.json(); N.campaigns = r.ok ? j.campaigns : null; N.listErr = r.ok ? null : j.error; }
-    catch (e) { N.campaigns = null; N.listErr = String(e.message || e); }
-    N.loading = false;
-    if (N.campaigns && N.campaign_id === undefined) { N.campaign_id = guessCampaign(N.campaigns); if (N.campaign_id) check(); }
-    if (S.view !== "out") return;
-  }
+  N.campaign = S.campaign ? S.campaign.name : ""; N.campaign_id = S.campaign ? S.campaign.id : "";
+  if (S.campaign && N.rows === undefined && !N.busy) { N.rows = null; check(); return; }   // the rows, as soon as the copy is approved
   const rows = N.rows || [], srv = S.server.out, camps = [...new Set(rows.map(r => r.campaign))];
   const fs = finalSets(), live = l => l.filter(x => x.t.trim() && !x.t.startsWith("—"));
   const items = !srv ? [] : [
@@ -1684,12 +1686,8 @@ async function notionPanel(){
     ...live(fs.emails).map(x => ({channel:"email", name:x.sn || x.n, text:x.t})),
     ...live(fs.artistPosts).map(x => ({channel:"artist-ig", name:x.sn || x.n, text:x.t})),
     ...live(fs.artistTweets).map(x => ({channel:"artist-twitter", name:x.sn || x.n, text:x.t}))];
-  const picker = N.loading ? `<p class="note">Reading the plan's campaigns…</p>`
-    : N.campaigns ? `<label><span>Campaign</span><select id="ncampsel"><option value="">Choose the campaign…</option>${N.campaigns.map(c => `<option value="${esc(c.id)}"${c.id === N.campaign_id ? " selected" : ""}>${esc(c.name)}</option>`).join("")}</select></label>
-        <p class="note">${N.campaigns.length} campaigns, the most recently edited first.</p>`
-    : `<p class="note">${esc(N.listErr || "The plan's campaigns could not be listed.")} A typed name still works.</p>
-        <label><span>Campaign, as named in the plan</span><input id="ncamp" type="text" value="${esc(N.campaign)}"></label>
-        <button class="act" id="ncheck"${N.busy ? " disabled" : ""}>${N.busy ? "…" : "Check the plan"}</button>`;
+  const picker = !S.campaign ? `<p class="note">Choose a campaign at the top of the page to write into its rows in the plan.</p>`
+    : `<p class="note">The plan's rows for <b>${esc(S.campaign.name)}</b>.</p>`;
   const html = `<section><h3>Notion</h3>
     ${picker}
     ${N.err ? `<p class="note">${esc(N.err)}</p>` : ""}
@@ -1703,8 +1701,6 @@ async function notionPanel(){
   </section>`;
   const panel = $("#aside .panel"); if (!panel) return;
   const old = $("#notion"); const wrap = old || document.createElement("div"); wrap.id = "notion"; wrap.innerHTML = html; if (!old) panel.appendChild(wrap);
-  const sel = $("#ncampsel"); if (sel) sel.onchange = e => { N.campaign_id = e.target.value; N.campaign = (chosenName() || N.campaign); N.rows = null; N.result = null; N.err = null; if (N.campaign_id) check(); else notionPanel(); };
-  const inp = $("#ncamp"); if (inp) inp.oninput = e => { N.campaign = e.target.value; };
   const chk = $("#ncheck"); if (chk) chk.onclick = check;
   const push = $("#npush"); if (push) push.onclick = async () => {
     N.busy = true; N.err = null; notionPanel();
@@ -1713,7 +1709,6 @@ async function notionPanel(){
     catch (e) { N.err = String(e.message || e); }
     N.busy = false; await check();                                          // the rows again, now marked as carrying copy
   };
-  function chosenName(){ const c = N.campaigns && N.campaigns.find(c => c.id === N.campaign_id); return c ? c.name : ""; }
   async function check(){
     N.busy = true; N.err = null; notionPanel();
     try { const r = await fetch("/api/notion/rows", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({campaign:N.campaign, campaign_id:N.campaign_id || ""})});
@@ -1723,25 +1718,156 @@ async function notionPanel(){
   }
 }
 
+// ═══════════════════════════════════════════════════ campaigns and drafts
+// A release is worked on inside a campaign from the plan's campaigns database in Notion, and
+// its draft is saved on that campaign's page, so it can be picked up later, by anyone. The
+// browser keeps a copy of whatever is open, campaign or not, so a reload loses nothing.
+S.campaign = S.campaign || null;                         // {id, name} from Notion, or null for a release kept only here
+S.saved = S.saved || {};
+S.camps = S.camps || null;                               // the list, once fetched: {list, err}
+const LS = {key: id => "cg:" + (id || "blank"), last: "cg:last"};
+function snapshot(){
+  return {facts: S.facts, blocks: S.blocks, page: S.page, lead: S.lead, from: S.from || {}, campaign: S.campaign,
+          gen: S.gen ? {stamp: S.gen.stamp, at: S.gen.at, done: S.gen.done, fresh: genReady(),
+                        items: S.gen.items.map(j => ({set: j.set, channel: j.channel, name: j.name, orig: j.orig, len: j.len, text: j.text, ai: j.ai, approved: j.approved}))} : null};
+}
+function restore(snap){
+  const b = blankRelease();
+  Object.assign(S, {facts: Object.assign(b.facts, snap.facts || {}), blocks: Object.assign(b.blocks, snap.blocks || {}), page: snap.page || b.page,
+                    lead: snap.lead || 0, from: snap.from || {}, server: {}, ai: {}, suggest: null, notion: {},
+                    gen: snap.gen ? Object.assign({}, snap.gen, {at: new Date(snap.gen.at), busy: false, step: "", items: (snap.gen.items || []).map(j => Object.assign({err: null, busy: false}, j))}) : null});
+  if (S.gen && snap.gen.fresh) S.gen.stamp = genStamp();  // the inputs came back with it, so it is still theirs
+}
+const hasContent = () => !!((S.facts.artist || "").trim() || (S.facts.title_1 || "").trim() || (S.blocks.hook || "").trim() || (S.blocks.making || "").trim());
+function localGet(id){ try { const t = localStorage.getItem(LS.key(id)); return t ? JSON.parse(t) : null; } catch (_) { return null; } }
+function saveLocal(){ try { localStorage.setItem(LS.key(S.campaign && S.campaign.id), JSON.stringify(snapshot())); localStorage.setItem(LS.last, S.campaign ? S.campaign.id : ""); } catch (_) {} }
+let saveT = null;
+// an edit: the templates will need to run again, and the draft is kept
+function touch(){ S.server = {}; persist(); }
+function persist(){
+  saveLocal();
+  if (!S.campaign || !SERVED) { showSaved(); return; }
+  clearTimeout(saveT); S.saved = {status: "pending"}; showSaved();
+  saveT = setTimeout(saveRemote, 4000);
+}
+async function saveRemote(keepalive){
+  if (!S.campaign || !SERVED) return;
+  clearTimeout(saveT); saveT = null;
+  const id = S.campaign.id, body = JSON.stringify({state: snapshot()});
+  S.saved = {status: "saving"}; showSaved();
+  try {
+    const r = await fetch(`/api/notion/draft/${id}`, {method: "PUT", headers: {"content-type": "application/json"}, body, keepalive: !!keepalive});
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || r.statusText);
+    if (S.campaign && S.campaign.id === id) S.saved = {status: "saved", at: new Date(j.saved_at)};
+    if (S.camps && S.camps.list) { const c = S.camps.list.find(x => x.id === id); if (c) { c.has_draft = true; c.saved_at = j.saved_at; } }
+  } catch (e) { S.saved = {status: "error", err: String(e.message || e)}; }
+  showSaved();
+}
+function showSaved(){
+  const el = $("#saved"); if (!el) return;
+  const s = S.saved || {};
+  el.textContent = !S.campaign ? (SERVED ? "Kept in this browser only" : "")
+    : s.status === "saving" ? "Saving to Notion…" : s.status === "pending" ? "Unsaved changes" : s.status === "saved" ? `Saved to Notion ${fmtTime(s.at)}`
+    : s.status === "error" ? `Not saved: ${s.err}` : s.status === "loaded" && s.at ? `Draft from ${s.at}` : "";
+  el.dataset.k = s.status || "";
+  const b = $("#camp"); if (b) b.textContent = S.campaign ? S.campaign.name : "Choose a campaign";
+}
+// the campaign's name carries the artist, the title and the mechanic: "Grayson Perry - The Changeling TL 2026"
+function prefillFromName(name){
+  const m = name.split(/\s+[-–]\s+/), artist = (m[0] || "").trim();
+  const rest = m.slice(1).join(" - ").replace(/\b(TL|LE)\b.*$/i, "").replace(/\b20\d\d\b/, "").trim();
+  if (artist && !S.facts.artist) { S.facts.artist = artist; S.facts.collab_with = S.facts.collab_with || artist; }
+  if (rest && !S.facts.title_1) S.facts.title_1 = rest;
+  if (/\bLE\b/.test(name)) S.facts.mechanic = "draw";
+}
+async function loadCampaigns(force){
+  if (!SERVED) { S.camps = {list: [], err: "Campaigns come from Notion, which the served version reads."}; return S.camps; }
+  if (S.camps && S.camps.list && !force) return S.camps;
+  try { const r = await fetch("/api/notion/campaigns"); const j = await r.json(); S.camps = r.ok ? {list: j.campaigns} : {list: [], err: j.error}; }
+  catch (e) { S.camps = {list: [], err: String(e.message || e)}; }
+  return S.camps;
+}
+async function openCampaign(c){                          // c: {id, name}, or null for a release kept only here
+  if (S.saved && S.saved.status === "pending") await saveRemote();
+  const carry = (!S.campaign && hasContent()) ? snapshot() : null;   // work begun outside a campaign travels into an empty one
+  let snap = null, err = null;
+  if (c && SERVED) {
+    try { const r = await fetch(`/api/notion/draft/${c.id}`); const j = await r.json(); if (!r.ok) throw new Error(j.error); snap = j.state; }
+    catch (e) { err = String(e.message || e); snap = localGet(c.id); }
+  } else snap = localGet(c ? c.id : null);
+  S.campaign = c; S.saved = {};
+  if (snap) { restore(snap); if (snap.savedAt) S.saved = {status: "loaded", at: `${snap.savedAt.slice(0, 10)} ${snap.savedAt.slice(11, 16)}`}; }
+  else {
+    if (carry) restore(carry); else Object.assign(S, blankRelease(), {lead: 0, ai: {}, gen: null, server: {}, suggest: null, notion: {}, from: {}});
+    if (c) prefillFromName(c.name);
+  }
+  if (err) S.saved = {status: "error", err};
+  S.view = missing().length ? "facts" : "write"; S.focus = "hook";
+  saveLocal(); render();
+  if (c && !snap && !err) persist();                     // a draft begun: the campaign is marked as having one
+}
+function renderCampaigns(){
+  const cs = S.camps || {list: null}, q = (S.campQ || "").toLowerCase();
+  const list = (cs.list || []).filter(c => !q || c.name.toLowerCase().includes(q));
+  const when = c => c.saved_at ? `draft saved ${c.saved_at.slice(0, 10)}` : c.has_draft ? "draft saved" : `edited ${c.edited}`;
+  $("#main").innerHTML = `
+    <div class="head">
+      <span class="lbl">Campaigns</span>
+      <h1>Which campaign are you writing for?</h1>
+      <p>The list is the plan's campaigns database in Notion, most recently edited first. A draft is saved on the campaign's own page as you work, so you can come back to it, and so can anyone else.</p>
+    </div>
+    <div class="sheet camps">
+      <div class="row head2"><input id="campq" type="search" placeholder="Search by artist or title" value="${esc(S.campQ || "")}"></div>
+      <div class="row" data-open=""><b>A release outside any campaign</b><span>kept in this browser only</span></div>
+      ${!cs.list ? `<div class="row"><span>Reading the campaigns…</span></div>`
+        : cs.err ? `<div class="row"><span class="note" style="margin:0;white-space:normal">${esc(cs.err)}</span></div>`
+        : list.length ? list.map(c => `<div class="row" data-open="${esc(c.id)}"${S.campaign && S.campaign.id === c.id ? ' aria-current="true"' : ""}><b>${esc(c.name)}</b><span>${when(c)}</span></div>`).join("")
+        : `<div class="row"><span>Nothing matches.</span></div>`}
+    </div>`;
+  const qi = $("#campq"); if (qi) { qi.oninput = e => { S.campQ = e.target.value; const at = qi.selectionStart; renderCampaigns(); const q2 = $("#campq"); q2.focus(); q2.setSelectionRange(at, at); }; }
+  $("#main").querySelectorAll("[data-open]").forEach(el => el.onclick = () => { const id = el.dataset.open; openCampaign(id ? (cs.list || []).find(c => c.id === id) : null); });
+  $("#aside").innerHTML = `<div class="panel"><span class="lbl">Where drafts live</span><h2>On the campaign's page</h2>
+    <p class="rule">Each campaign in Notion carries its own draft.</p>
+    <section><h3>Now open</h3><p class="note">${S.campaign ? esc(S.campaign.name) : "A release outside any campaign, kept in this browser only."}</p></section>
+    <section><h3>How it saves</h3><p class="note">Four seconds after your last change, the whole release, details, page, fragments and approved copy, is written to a text property called “Copy generator” on the campaign's page. Hide that property from your Notion views; it is not for reading. Two people editing the same campaign overwrite each other: the later save wins.</p></section>
+    </div>`;
+}
+
 // ═══════════════════════════════════════════════════ boot
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => { S.view = b.dataset.view; render(); });
 $("#new").onclick = () => {
   const b = $("#new");
   if (b.dataset.arm !== "1") {                       // arm first: this cannot be undone
-    b.dataset.arm = "1"; b.textContent = "Clear everything?"; b.classList.add("arm");
+    b.dataset.arm = "1"; b.classList.add("arm");
+    b.textContent = S.campaign ? "Leave the campaign?" : "Clear everything?";
     b._t = setTimeout(() => { b.dataset.arm = ""; b.textContent = "New release"; b.classList.remove("arm"); }, 4000);
     return;
   }
   clearTimeout(b._t); b.dataset.arm = ""; b.textContent = "New release"; b.classList.remove("arm");
-  Object.assign(S, blankRelease(), {view:"facts", focus:"hook", lead:0, ai:{}});
-  render();
+  S.campaign = null; S.saved = {};                     // the campaign's saved draft is left as it is
+  Object.assign(S, blankRelease(), {view:"facts", focus:"hook", lead:0, ai:{}, gen:null, server:{}, suggest:null, notion:{}, from:{}});
+  saveLocal(); render();
 };
+$("#camp").onclick = () => { S.view = "campaigns"; render(); };
+addEventListener("visibilitychange", () => { if (document.hidden && S.saved && S.saved.status === "pending") saveRemote(true); });
+addEventListener("pagehide", () => { if (S.saved && S.saved.status === "pending") saveRemote(true); });
 $("#theme").onclick = () => {
   const cur = document.documentElement.getAttribute("data-theme")
     || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
   document.documentElement.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
 };
 addEventListener("resize", () => { if (S.view === "write") drawGutter(); });
-serverHealth().then(h => { if (h && S.view === "out") render(); });
+const SAMPLE = snapshot();                             // the Perry release the page ships with, for the file and the artifact
 render();
+// what was open last time comes back: a campaign's draft from Notion, or the release kept here.
+// Served, an empty browser starts on the campaigns screen rather than the sample release.
+serverHealth().then(async () => {
+  let last = ""; try { last = localStorage.getItem(LS.last) || ""; } catch (_) {}
+  const local = localGet(last || null);
+  if (last && SERVED && local && local.campaign) await openCampaign(local.campaign);
+  else if (local) { restore(local); S.campaign = local.campaign && SERVED ? local.campaign : null; S.view = missing().length ? "facts" : "write"; render(); }
+  else if (SERVED) { Object.assign(S, blankRelease(), {lead: 0, ai: {}, gen: null, server: {}, suggest: null, notion: {}, from: {}, campaign: null, view: "campaigns"}); render(); }
+  else render();
+});
 </script>

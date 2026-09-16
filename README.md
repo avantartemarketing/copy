@@ -311,13 +311,25 @@ first, with the one that names this release's artist and title preselected. Choo
 the plan's rows for it, shows which already carry copy, and a button writes each item's text
 into its row's Copy field.
 
+**Campaigns and drafts.** Served, the page opens on the plan's campaigns, read from the campaigns
+database the plan's Campaign column points to, most recently edited first. Choose one and the
+release is worked on inside it; a draft of the whole release, details, page, fragments and the
+approved copy, is saved on the campaign's own Notion page four seconds after the last change, in
+a text property called "Copy generator", so anyone can pick it up later from any browser. The
+button at the top of the page switches campaigns and the line beside it says when the draft was
+last saved. Add that property to the campaigns database once, type Text, and hide it from your
+views; the page says so if it is missing. A release can also be worked on outside any campaign,
+kept in the browser only. Two people in the same campaign overwrite each other: the later save
+wins.
+
 `render.yaml` describes the service. On Render, create a Blueprint from this repository and set
 the variables it declares:
 
 ```
 ANTHROPIC_API_KEY    for the two AI buttons; without it they say so and the checks still run
 NOTION_TOKEN         an internal integration; connect it to the comms plan database in Notion,
-                     and to the campaigns database the plan's Campaign column points to
+                     and to the campaigns database the plan's Campaign column points to,
+                     which needs a Text property called "Copy generator" for the drafts
 NOTION_DATABASE_ID   the database's id, the 32 characters in its URL
 APP_PASSWORD         optional; if set, the whole app asks for it (any username)
 CLAUDE_MODEL         optional, default claude-opus-5
@@ -326,7 +338,8 @@ CLAUDE_MODEL         optional, default claude-opus-5
 The plan's property names and types are read from the database rather than assumed. The
 defaults are "Campaign text" for the campaign, "Channel Name" for the channel and "Copy" for
 the copy; set `NOTION_PROP_CAMPAIGN`, `NOTION_PROP_CHANNEL` or `NOTION_PROP_COPY` if the
-database names them differently. Copy has to be a rich text property to be written. Rows are
+database names them differently, and `NOTION_PROP_STATE` if the drafts' property is not called
+"Copy generator". Copy has to be a rich text property to be written. Rows are
 found by the chosen campaign's id, so the spelling of its name never matters; if the campaigns
 database cannot be listed, a typed name is matched by containment instead, and a name that
 matches more than one campaign is refused rather than written into both. Nothing can be written

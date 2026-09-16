@@ -9,7 +9,10 @@ cannot, the pages are read and filtered here.
     NOTION_PROP_CHANNEL    default "Channel Name"
     NOTION_PROP_COPY       default "Copy"
 """
+import datetime
+import json
 import os
+import re
 import time
 
 import requests
@@ -98,34 +101,107 @@ def campaign_relation():
     return p.get("name"), (p.get("relation") or {}).get("database_id")
 
 
-def campaigns(limit=300):
-    """The campaigns a row can belong to, most recently edited first, from the campaigns database."""
+STATE_PROP = "NOTION_PROP_STATE"                      # the campaigns database's text property that holds a draft
+CHUNK = 2000                                            # Notion's cap on one rich text item
+_CDB = {"at": 0.0, "id": None, "db": None}
+
+
+def campaigns_db():
+    """The campaigns database the plan's rows point to, with its definition cached for a minute."""
     _, db_id = campaign_relation()
     if not db_id:
-        raise NotionError("The plan's campaign column is not a relation, so there is no list to choose from.")
+        raise NotionError("The plan's campaign column is not a relation, so there is no campaigns database to read.")
+    if _CDB["id"] != db_id or not _CDB["db"] or time.time() - _CDB["at"] > 60:
+        try:
+            _CDB.update(id=db_id, db=_call("GET", f"/databases/{db_id}"), at=time.time())
+        except NotionError as e:
+            if "404" in str(e):
+                raise NotionError("The integration cannot see the campaigns database. In Notion, connect it to that database as well as the plan.")
+            raise
+    return db_id, _CDB["db"]
+
+
+def state_property():
+    """The property a draft is kept in: (name, id). Missing, it says what to add in Notion."""
+    _, db = campaigns_db()
+    name = _prop(STATE_PROP, "Copy generator")
+    prop = db["properties"].get(name)
+    if not prop:
+        raise NotionError(f"Drafts need a text property called “{name}” on the campaigns database. Add one in Notion (type Text), then try again; you can hide it from every view.")
+    if prop.get("type") != "rich_text":
+        raise NotionError(f"“{name}” on the campaigns database is a {prop.get('type')} property; a draft needs a Text property.")
+    return name, prop["id"]
+
+
+def _saved_at(prop):
+    """The draft's own timestamp, kept at the front of its JSON so the first chunk carries it."""
+    text = plain(prop or {}).strip()
+    if not text:
+        return None
+    m = re.match(r'\{"savedAt":"([^"]+)"', text)
+    return m.group(1) if m else ""
+
+
+def campaigns(limit=300):
+    """The campaigns a row can belong to, most recently edited first, each with whether a draft is saved on it."""
+    db_id, db = campaigns_db()
+    state = _prop(STATE_PROP, "Copy generator")
     body = {"page_size": 100, "sorts": [{"timestamp": "last_edited_time", "direction": "descending"}]}
     out, cursor = [], None
     while len(out) < limit:
         if cursor:
             body["start_cursor"] = cursor
-        try:
-            res = _call("POST", f"/databases/{db_id}/query", json=body)
-        except NotionError as e:
-            if "404" in str(e):
-                raise NotionError("The integration cannot see the campaigns database. In Notion, connect it to that database as well as the plan.")
-            raise
+        res = _call("POST", f"/databases/{db_id}/query", json=body)
         for pg in res.get("results", []):
             title = next((plain(v) for v in pg["properties"].values() if v.get("type") == "title"), "").strip()
             if title:
-                out.append({"id": pg["id"], "name": title, "edited": (pg.get("last_edited_time") or "")[:10]})
+                saved = _saved_at(pg["properties"].get(state)) if state in pg["properties"] else None
+                out.append({"id": pg["id"], "name": title, "edited": (pg.get("last_edited_time") or "")[:10],
+                            "has_draft": saved is not None, "saved_at": saved or None})
         if not res.get("has_more"):
             break
         cursor = res.get("next_cursor")
     return out[:limit]
 
 
+def draft(campaign_id):
+    """The draft saved on a campaign's page, or None."""
+    _, prop_id = state_property()
+    parts, cursor = [], None
+    item = lambda x: (x.get("rich_text") or {}).get("plain_text", "") if isinstance(x.get("rich_text"), dict) else plain(x)   # a property item holds one rich text object
+    while True:
+        res = _call("GET", f"/pages/{campaign_id}/properties/{prop_id}" + (f"?start_cursor={cursor}" if cursor else ""))
+        if res.get("object") == "property_item":                  # a short value comes back whole
+            parts.append(item(res))
+            break
+        parts += [item(x) for x in res.get("results", [])]
+        if not res.get("has_more"):
+            break
+        cursor = res.get("next_cursor")
+    text = "".join(parts).strip()
+    if not text:
+        return None
+    try:
+        return json.loads(text)
+    except ValueError:
+        raise NotionError("The draft saved on this campaign could not be read; it may have been edited by hand in Notion.")
+
+
+def save_draft(campaign_id, state, who=""):
+    """Writes the draft onto the campaign's page, in chunks of 2000 characters, its timestamp first."""
+    name, _ = state_property()
+    body = {"savedAt": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "savedBy": who}
+    body.update({k: v for k, v in (state or {}).items() if k not in ("savedAt", "savedBy")})
+    text = json.dumps(body, ensure_ascii=False, separators=(",", ":"))
+    chunks = [text[i:i + CHUNK] for i in range(0, len(text), CHUNK)]
+    if len(chunks) > 100:
+        raise NotionError("The draft is too large to save on the campaign page.")
+    _call("PATCH", f"/pages/{campaign_id}", json={"properties": {name: {"rich_text": [{"type": "text", "text": {"content": c}} for c in chunks]}}})
+    return body["savedAt"]
+
+
 def plain(prop):
-    """The text of a property, whatever its type."""
+    """The text of a property, whatever its type; a property_item envelope reads the same."""
     t = prop.get("type")
     if t in ("title", "rich_text"):
         return "".join(x.get("plain_text", "") for x in prop.get(t) or [])

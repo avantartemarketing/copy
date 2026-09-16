@@ -145,6 +145,27 @@ def api_notion_campaigns():
         return jsonify(error=str(e)), 502
 
 
+@app.get("/api/notion/draft/<campaign_id>")
+def api_notion_draft(campaign_id):
+    if not notion.configured():
+        return jsonify(error="Notion is not configured on this server: set NOTION_TOKEN and NOTION_DATABASE_ID."), 503
+    try:
+        return jsonify(state=notion.draft(campaign_id))
+    except notion.NotionError as e:
+        return jsonify(error=str(e)), 409 if "property" in str(e) else 502
+
+
+@app.put("/api/notion/draft/<campaign_id>")
+def api_notion_save(campaign_id):
+    if not notion.configured():
+        return jsonify(error="Notion is not configured on this server: set NOTION_TOKEN and NOTION_DATABASE_ID."), 503
+    body = request.get_json(force=True) or {}
+    try:
+        return jsonify(saved_at=notion.save_draft(campaign_id, body.get("state") or {}, (request.authorization.username if request.authorization else "") or ""))
+    except notion.NotionError as e:
+        return jsonify(error=str(e)), 409 if "property" in str(e) else 502
+
+
 @app.post("/api/notion/rows")
 def api_notion_rows():
     if not notion.configured():

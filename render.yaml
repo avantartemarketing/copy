@@ -19,4 +19,4 @@ services:
       - key: APP_PASSWORD
         sync: false
       - key: CLAUDE_MODEL
-        value: claude-opus-5
+        value: claude-fable-5-1

@@ -8,7 +8,7 @@ key that stays here, and reads and writes the comms plan in Notion.
     NOTION_TOKEN        an internal integration with access to the comms database
     NOTION_DATABASE_ID  the comms plan database
     APP_PASSWORD        if set, the whole app is behind a password (user: any)
-    CLAUDE_MODEL        default claude-opus-5
+    CLAUDE_MODEL        default claude-fable-5-1
 """
 import json
 import os
@@ -39,7 +39,7 @@ def _dotenv(path=ROOT / ".env"):
 _dotenv()
 app = Flask(__name__, static_folder=None)
 
-MODEL = os.environ.get("CLAUDE_MODEL", "claude-opus-5")
+MODEL = os.environ.get("CLAUDE_MODEL", "claude-fable-5-1")
 PASSWORD = os.environ.get("APP_PASSWORD", "")
 
 

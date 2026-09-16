@@ -39,7 +39,7 @@ def from_brief(path):
         beneficiary=g(rel, "fundraiser"), beneficiary_handle=g(rel, "beneficiary_handle"), advisor=g(rel, "advisor", "Sam"),
         early_access_code=g(rel, "early_access_code", "000-000"), framing_code=g(rel, "framing_code"), framing_percent=int(g(rel, "framing_percent", 10)),
         feature_1=feats[0], feature_2=feats[1], feature_3=feats[2], feature_4=feats[3], feature_5=feats[4],
-        bio=g(ctx, "artist_bio"), hook=ctx["hook"], making=ctx["making"], quote=g(art, "quote"), qualifier=g(ctx, "qualifier"), opener=g(ctx, "opener"),
+        bio=g(ctx, "artist_bio"), hook=ctx["hook"], making=ctx["making"], quote=g(art, "quote"), qualifier=g(ctx, "qualifier"), opener=(g(ctx, "opener") if " " in g(ctx, "opener") else ""),
         card_line_1=g(aw[0], "card_line"), card_line_2="" if len(aw) < 2 else g(aw[1], "card_line"), card_line_3="" if len(aw) < 3 else g(aw[2], "card_line"),
     )
 

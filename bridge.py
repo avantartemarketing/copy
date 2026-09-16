@@ -26,6 +26,19 @@ def page_text(page):
     return out
 
 
+def hashtag_of(name):
+    """#GraysonPerry, #AiWeiwei, #SalvadorDali: the name with its spaces and accents gone."""
+    import unicodedata
+    flat = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode()
+    return re.sub(r"[^A-Za-z0-9]", "", flat)
+
+
+def surname_of(facts):
+    """The name the copy uses after the first mention: chosen in the details, else the last word."""
+    s = (facts.get("surname") or "").strip()
+    return s or ((facts.get("artist") or "").split() or [""])[-1]
+
+
 def brief_from_state(state):
     f = state.get("facts") or {}
     blocks = state.get("blocks") or {}
@@ -36,15 +49,14 @@ def brief_from_state(state):
     for i in range(1, n + 1):
         title = (f.get(f"title_{i}") or "").strip() or ("Untitled" if series else f"Artwork {i}")
         artworks.append({"title": title, "card_line": (blocks.get(f"card_{i}") or "").strip()})
-    surname = (g("artist").split() or ["Release"])[-1]
-    surname = re.sub(r"[^A-Za-z0-9]", "", surname)
+    surname = re.sub(r"[^A-Za-z0-9]", "", surname_of(f)) or "Release"
     launch = _dt(g("launch_at"))
     year = launch[2:4] if launch else datetime.date.today().strftime("%y")
     draw = g("mechanic") == "draw"
     features = [g(k) for k in ("f1", "f2", "f3", "f4", "f5") if g(k)]
     page_facts = page_text(state.get("page") or {})
     return {
-        "outputs": ["ig-set", "twitter-set", "email-set", "artist-set"],
+        "outputs": ["ig-set", "twitter-set", "email-set", "artist-set", "broadcast-set"],
         "release": {
             "campaign_code": f"{surname}_{'LE' if draw else 'TL'}_{year}",
             "link": g("link"),
@@ -70,7 +82,8 @@ def brief_from_state(state):
             "collab_with": g("collab_with") or g("artist"),
             "handle": g("handle"),
             "x_handle": g("x_handle"),
-            "hashtag": g("hashtag"),
+            "hashtag": hashtag_of(g("artist")),
+            "surname": surname_of(f),
             "collaboration_ordinal": g("ordinal", "latest"),
             "quote": g("quote"),
             "voice": "third" if str(g("artist_voice")).startswith("third") else "first",
@@ -102,6 +115,7 @@ _HEAD = {
     "ig-set": re.compile(r"^\[POST \d+ · (?P<name>[^·\]]+?) · (?P<send>\d{6})(?: · [^\]]*)?\]\s*$", re.M),
     "twitter-set": re.compile(r"^\[TWEET \d+ · (?P<name>[^·\]]+?) · (?P<send>\d{6})(?: · [^\]]*)?\]\s*$", re.M),
     "email-set": re.compile(r"^\[EMAIL \d+ · (?P<name>[^\]]+?) · (?P<send>\d{6})\]\s*$", re.M),
+    "broadcast-set": re.compile(r"^\[BROADCAST \d+ · (?P<name>[^·\]]+?) · (?P<send>\d{6})(?: · [^\]]*)?\]\s*$", re.M),
     "artist-set": re.compile(r"^\[ARTIST (?P<kind>POST|TWEET) \d+ · (?P<name>[^·\]]+?) · (?P<send>\d{6})(?: · [^\]]*)?\]\s*$", re.M),
 }
 

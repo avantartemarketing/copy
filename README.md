@@ -241,6 +241,21 @@ hook on the announcement only, the beneficiary named once, and an action line th
 release's link. No features line, no hashtag, no bio. The workbook and the templates carry the
 same lines.
 
+**What Claude is asked for, and how it is held.** The suggestion from the product page is told
+to restate, never to lift: every idea in sentences of its own, a different opening from the
+page's, a different order, and shorter, the hook two sentences of 25 to 45 words, the making
+line under 30, a card line 15 to 25. The page checks the answer for any run of ten words copied
+from the page, asks once more with the fault named if it finds one, and marks what remains. The
+opener comes back whole, the first sentence of the announcement in one of the three shapes, not
+a few words for the end of the framed one. When the artist posts in the first person the hook is
+asked for without the artist's name; and when a hook names them anyway, the generate step first
+has Claude rewrite it in the first person for the artist's posts and tweets, for approval, before
+the tweets are measured. A tweet rewrite must carry its one idea inside the first sentence, as a
+clause, never as a participle phrase standing alone, and never with an em dash; an em dash in
+anything Claude returns is mended to the house dash before it is shown. The surname the copy
+uses after the first mention is a detail, blank for the last word of the name, "Ai" for Ai
+Weiwei, and the hashtag is made from the name. The model is `claude-fable-5-1`.
+
 **The opener can be written whole.** The archive's announcements open with a framed sentence 49
 times in 58: a lead ("We're delighted to announce our latest collaboration with"), the work and the
 edition phrase, a few words from the writer, and what it supports. One in ten opens on the artwork
@@ -326,6 +341,17 @@ page falls back to the whole set. Three more property names can be set if the pl
 `NOTION_PROP_NEEDS` ("Needs copy"), `NOTION_PROP_DATE` ("Live Date") and `NOTION_PROP_PHASE`
 ("Campaign Phase").
 
+**The broadcast channel**, `templates/broadcast-set.txt`: the announcement, now-live and last-chance
+emails as messages, features as sentences rather than bullets ("Signed by the artist. Individually
+numbered.") and "link in bio" where the email has a button. In a campaign a row on a broadcast
+channel takes one of those three shapes.
+
+**Regenerating is cheap.** A change to the details or the fragments makes the generated copy
+stale, and generating again keeps every approved rewrite whose input has not changed; a tweet
+whose text has changed is rewritten with the last approved version handed to Claude as the one
+to keep close to. So a change to the making line costs no approvals, and a change to the hook
+costs one look at each tweet.
+
 **Campaigns and drafts.** Served, the page opens on the plan's campaigns, read from the campaigns
 database the plan's Campaign column points to, most recently edited first. Choose one and the
 release is worked on inside it; a draft of the whole release, details, page, fragments and the
@@ -347,7 +373,7 @@ NOTION_TOKEN         an internal integration; connect it to the comms plan datab
                      which needs a Text property called "Copy generator" for the drafts
 NOTION_DATABASE_ID   the database's id, the 32 characters in its URL
 APP_PASSWORD         optional; if set, the whole app asks for it (any username)
-CLAUDE_MODEL         optional, default claude-opus-5
+CLAUDE_MODEL         optional, default claude-fable-5-1
 ```
 
 The plan's property names and types are read from the database rather than assumed. The

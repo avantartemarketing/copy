@@ -1,0 +1,79 @@
+{#
+  THE BROADCAST SET — messages for the Instagram broadcast channel: the announcement, now-live and
+  last-chance emails' body copy, as one message each, with the features as sentences rather than
+  bullets and "link in bio" where the email has a button. No markers, cards, quote or footer.
+#}
+{% set draw = release.mechanic == "draw" %}
+{% set ordinal = artist.collaboration_ordinal %}
+{% set collab = artist.collab_with if (artist.collab_with is defined and artist.collab_with) else artist.name %}
+{% set a_unit = edition|a_unit %}
+{% set fundraiser = release.fundraiser if release.fundraiser is defined and release.fundraiser else "" %}
+{% set series = edition.series if edition.series is defined and edition.series else "" %}
+{% set work = ("the " ~ series ~ " series") if series else artworks|titles %}
+{% set plural = artworks|length > 1 or edition.count|int > 1 %}
+{% set ep = edition|edition_phrase %}
+{% set cp = edition|collect_phrase %}
+{% set making = context.making|voice("ours") %}
+{% set launch_line = release.launch_at|uktime ~ " on " ~ release.launch_at|weekday ~ ", " ~ release.launch_at|ukdate_dd %}
+{% set close_line = release.closes_at|uktime ~ " on " ~ release.closes_at|weekday ~ ", " ~ release.closes_at|ukdate_dd %}
+{% set hook_names_beneficiary = fundraiser and fundraiser in context.hook %}
+{% set support = (", released in support of " ~ fundraiser) if (fundraiser and not hook_names_beneficiary) else "" %}
+{% set feats = edition.features if edition.features is defined and edition.features else ["Signed by the artist", "Individually numbered"] %}
+{% set qualifier = context.qualifier if (context.qualifier is defined and context.qualifier) else "" %}
+{% set work_intro = (ep if plural else (work ~ ", " ~ ep)) ~ (("" if qualifier.startswith(",") else " ") ~ qualifier if (qualifier and not support) else "") %}
+{% set opener = context.opener if (context.opener is defined and context.opener and " " in context.opener) else "" %}
+{% set lead = OPENERS[context.opener] if (context.opener is defined and context.opener in OPENERS) else "We're delighted to announce" %}
+{% set opener_names_beneficiary = fundraiser and fundraiser in opener %}
+{% set edition_sentence = feats|join(". ") ~ "." %}
+{% set support_sentence = (" Released in support of " ~ fundraiser ~ ".") if (fundraiser and not hook_names_beneficiary) else "" %}
+{% set ns = namespace(n=0) %}
+{% for key, name, send in email_phases(release, artist) %}
+{% if key in ["announce", "live", "last_chance"] %}
+{% set ns.n = ns.n + 1 %}
+{% if ns.n > 1 %}
+
+{% endif %}
+[BROADCAST {{ ns.n }} · {{ "announce" if key == "announce" else ("live" if key == "live" else "last chance") }} · {{ send|ddmmyy }} · {{ release.campaign_code }}]
+{% if key == "announce" %}
+{{ opener if opener else (lead ~ " our " ~ ordinal ~ " collaboration with " ~ collab ~ " – " ~ work_intro ~ support ~ ".") }}
+
+{{ context.hook }}
+
+{{ making }}
+
+{{ edition_sentence }}{{ support_sentence if (opener and not opener_names_beneficiary) else "" }}
+
+{% if draw %}
+Enter the draw for a chance to collect. Closes at {{ release.closes_at|uktime }} on {{ release.closes_at|ukdate }}. Enter via the link in bio.
+{% else %}
+The edition will be available to collect for {{ release.window }} only, starting at {{ launch_line }}.
+
+Link in bio to get updates.
+{% endif %}
+{% elif key == "live" %}
+Our {{ ordinal }} collaboration with {{ collab }} is now available to collect for {{ release.window }} only – {{ work_intro }}{{ support }}.
+
+{{ context.hook }}
+
+{{ making }}
+
+{{ edition_sentence }}{{ support_sentence }}
+
+The opportunity to collect an edition ends at {{ close_line }}. Link in bio to add {{ a_unit if plural else work }} to your collection.
+{% else %}
+{% if draw %}
+This is your final opportunity to enter the draw for {{ work }}, {{ cp }} by {{ artist.name }}.
+
+{{ context.hook }}
+
+For a chance to collect, enter the draw via the link in bio. The draw closes at {{ close_line }}.
+{% else %}
+It's now or never for our {{ ordinal }} collaboration with {{ collab }} – {{ cp }} will be available to order until {{ close_line }}.
+
+After this time, the edition size{{ " for each artwork" if plural else "" }} will be confirmed, and the {{ "works" if plural else "work" }} will no longer be available to purchase.
+
+Link in bio to buy {{ a_unit }}.
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}

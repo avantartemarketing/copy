@@ -150,8 +150,11 @@ def _campaign_rows(res):
         title = next((plain(v) for v in pg["properties"].values() if v.get("type") == "title"), "").strip()
         if title:
             saved = _saved_at(pg["properties"].get(state)) if state in pg["properties"] else None
+            props = pg["properties"]
+            find = lambda rx: next((plain(v) for k, v in props.items() if re.search(rx, k, re.I) and plain(v)), "")
             out.append({"id": pg["id"], "name": title, "edited": (pg.get("last_edited_time") or "")[:10],
-                        "has_draft": saved is not None, "saved_at": saved or None})
+                        "has_draft": saved is not None, "saved_at": saved or None,
+                        "dates": {"tease": find(r"^tease date"), "announce": find(r"^announce date"), "launch": find(r"^launch date"), "live": find(r"^live date")}})
     return out
 
 

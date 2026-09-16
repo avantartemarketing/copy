@@ -273,7 +273,7 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 function blankRelease(){
   return {
     facts: {
-      artist:"", collab_with:"", ordinal:"latest", handle:"", x_handle:"", hashtag:"", link:"", artist_voice:"first person",
+      artist:"", collab_with:"", ordinal:"latest", handle:"", x_handle:"", surname:"", link:"", artist_voice:"first person",
       title_1:"", is_series:"no", series_name:"", artworks:1,
       edition_phrase:"", unit:"print",
       mechanic:"timed", window:"one week", launch_at:"", closes_at:"",
@@ -305,7 +305,7 @@ const S = {
   lead: 0,
   facts: {
     artist:"Grayson Perry", collab_with:"Grayson Perry", ordinal:"latest",
-    handle:"alanmeasles", x_handle:"", hashtag:"GraysonPerry", artist_voice:"first person",
+    handle:"alanmeasles", x_handle:"", surname:"", artist_voice:"first person",
     link:"https://avantarte.co/grayson-perry",
     title_1:"The Changeling", is_series:"no", series_name:"", artworks:1,
     edition_phrase:"a new limited edition print", unit:"print",
@@ -349,6 +349,8 @@ function D(){
   const tm  = x => isNaN(x) ? "[time]" : `${String(x.getHours()).padStart(2,"0")}:${String(x.getMinutes()).padStart(2,"0")} UK time`;
   d.draw = f.mechanic === "draw";
   d.named = f.artist + (f.handle ? ` (@${f.handle})` : "");
+  d.surname = (f.surname || "").trim() || ((f.artist || "").trim().split(/\s+/).pop() || "");
+  d.hashtag = (f.artist || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Za-z0-9]/g, "");   // #GraysonPerry, #AiWeiwei
   d.namedX = f.artist + (f.x_handle ? ` (@${f.x_handle})` : "");
   d.collabX = f.collab_with === f.artist ? d.namedX : f.collab_with;
   d.aUnit = ("aeiou".includes((f.unit||"print")[0].toLowerCase()) ? "an " : "a ") + (f.unit||"print");
@@ -452,7 +454,7 @@ function outputs(){
 
   const posts = [
     {n:"Coming soon", ch:"Main", t:P(d.bioTagged||f.bio, `Our ${f.ordinal} collaboration is on the horizon.`, "Link in bio to get updates.")},
-    {n:"Announcement", ch:"Main + Insiders", t:P(announceStatus, H, feat+(d.hookNamesBen?"":ben), preAct, f.hashtag?"#"+f.hashtag:"")},
+    {n:"Announcement", ch:"Main + Insiders", t:P(announceStatus, H, feat+(d.hookNamesBen?"":ben), preAct, d.hashtag?"#"+d.hashtag:"")},
     {n:"Sustain, the making", ch:"Main", t:P(`A closer look at ${d.work}, ${f.edition_phrase} by ${d.named}.`, d.makingTagged, feat+ben, preAct)},
     {n:"Sustain, the artist's words", ch:"Main", t: f.quote ? P(d.quoteLine, `${d.Work}, ${f.edition_phrase} by ${d.named}.`, feat+ben, preAct) : "— no quote given, post skipped —"},
     {n:"Now live", ch:"Main + Insiders", t: d.draw?NA:P(`${d.Work} by ${d.named} is now available to collect, for ${f.window} only.`, feat+ben, openAct)},
@@ -494,7 +496,7 @@ function outputs(){
   const lastA = d.draw ? "There are 24 hours left to enter the draw for" : "Last chance to collect";
   const artistPosts = [
     {n:"Coming soon", t:P(first ? `${cap(mineIG)} is on the horizon: ${f.edition_phrase}${benIG}, launching on ${d.launchDate}.` : `${cap(f.edition_phrase)} by ${f.artist} is on the horizon, created in collaboration with @avant.arte${benIG}, launching on ${d.launchDate}.`, `Link in ${bio} to get updates.`)},
-    {n:"Announcement", t:P(first ? `Announcing ${mineIG} – ${d.work}, ${f.edition_phrase}${d.hookNamesBen ? "" : benIG}.` : `Announcing ${d.work}, ${f.edition_phrase} by ${f.artist}, created in collaboration with @avant.arte${d.hookNamesBen ? "" : benIG}.`, H, editionSentence, preA, f.hashtag ? "#" + f.hashtag : "")},
+    {n:"Announcement", t:P(first ? `Announcing ${mineIG} – ${d.work}, ${f.edition_phrase}${d.hookNamesBen ? "" : benIG}.` : `Announcing ${d.work}, ${f.edition_phrase} by ${f.artist}, created in collaboration with @avant.arte${d.hookNamesBen ? "" : benIG}.`, H, editionSentence, preA, d.hashtag ? "#" + d.hashtag : "")},
     {n:"Sustain", t:P(`A closer look at ${workIG}.`, makingIG, preA)},
     {n:"Now live", t: d.draw ? NA : P(`${cap(workIG)}, is now available to collect for ${f.window} only.`, editionSentence, openA)},
     {n:"Still time", t: d.draw ? NA : P(`There's still time to collect ${workIG}.`, openA)},
@@ -506,6 +508,20 @@ function outputs(){
     {n:"Now live", t: d.draw ? NA : P(`${cap(workX)}, is now available to collect, for ${f.window} only.`, openT)},
     {n:"Still time", t: d.draw ? NA : P(`There's still time to collect ${workX}.`, openT)},
     {n:"Last chance", t:P(`${lastA} ${workX}.`, openT)}
+  ];
+
+  // the broadcast channel: the announcement, now-live and last-chance emails as messages, features as sentences
+  const featSentence = withSupport => d.featLine + ((withSupport && f.beneficiary && !d.hookNamesBen) ? ` Released in support of ${f.beneficiary}.` : "");
+  const broadcast = [
+    {n:"Announcement", t:P(opener, H, d.makingOurs, featSentence(ownOpener() && !d.openerNamesBen),
+      d.draw ? `Enter the draw for a chance to collect. Closes at ${d.closeTime} on ${d.closeDate}. Enter via the link in bio.` : `The edition will be available to collect for ${f.window} only, starting at ${d.launchTime} on ${d.launchDay}, ${d.launchDateDd}.`,
+      d.draw ? "" : "Link in bio to get updates.")},
+    {n:"Now live", t: d.draw ? NA : P(`Our ${f.ordinal} collaboration with ${f.collab_with} is now available to collect for ${f.window} only – ${wi}${d.support}.`, H, d.makingOurs, featSentence(true),
+      `The opportunity to collect an edition ends at ${d.closeTime} on ${d.closeDay}, ${d.closeDateDd}. Link in bio to add ${d.addWhat} to your collection.`)},
+    {n:"Last chance", t: d.draw
+      ? P(`This is your final opportunity to enter the draw for ${d.workEmail}, ${d.collectPhrase} by ${f.artist}.`, H, `For a chance to collect, enter the draw via the link in bio. The draw closes at ${d.closeTime} on ${d.closeDay}, ${d.closeDateDd}.`)
+      : P(`It's now or never for our ${f.ordinal} collaboration with ${f.collab_with} – ${d.collectPhrase} will be available to order until ${d.closeTime} on ${d.closeDay}, ${d.closeDateDd}.`,
+          `After this time, the edition size${d.plural?" for each artwork":""} will be confirmed, and the ${d.plural?"works":"work"} will no longer be available to purchase.`, `Link in bio to buy ${d.aUnit}.`)}
   ];
 
   const greet = "Hi {{ personalization_token('contact.firstname', 'there') }},";
@@ -567,7 +583,7 @@ function outputs(){
       d.draw ? `The edition will be allocated by a randomised draw, which closes at ${d.closeTime} on ${d.closeDate}.`
              : `The edition will be available to collect for ${f.window} only, from ${d.launchTime} on ${d.launchDay}, ${d.launchDateDd}.`))
   ];
-  return {posts, tweets, emails, artistPosts, artistTweets};
+  return {posts, tweets, emails, artistPosts, artistTweets, broadcast};
 }
 
 // where does a block land, and what sits either side of it there?
@@ -594,10 +610,11 @@ function placements(key){
     });
     return hits;
   }
-  scan(o.posts,"Instagram"); scan(o.tweets,"Twitter"); scan(o.emails,"Email"); scan(o.artistPosts,"The artist's Instagram"); scan(o.artistTweets,"The artist's X");
+  scan(o.posts,"Instagram"); scan(o.tweets,"Twitter"); scan(o.emails,"Email"); scan(o.artistPosts,"The artist's Instagram"); scan(o.artistTweets,"The artist's X"); scan(o.broadcast,"Broadcast channel");
   return hits;
 }
 
+const namesArtist = t => { const s = D().surname; return !!s && new RegExp("\\b" + s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b").test(t || ""); };
 // ═══════════════════════════════════════════════════ the rules each fragment is held to
 const HOUSE_PROPER = new Set("Avant Arte Make-Ready UK Insiders Instagram X I I'm I'd I've It's January February March April May June July August September October November December Monday Tuesday Wednesday Thursday Friday Saturday Sunday".split(" "));
 const BANNED = ["don't miss out","miss out","hurry","act now","shop now","last call","elevate","delve","dive into","tapestry of","testament to","journey through","unleash","embark","captivating","mesmerising","breathtaking","stunning","must-have","prestigious","seamless","effortless","cutting-edge","nestled","boasts","showcases","look no further","not only","at the heart of","perfect for","we're thrilled","thrilled to","excited to announce","one-of-a-kind","product","item","drop","raffle","customer"];
@@ -674,8 +691,8 @@ function checks(key, text){
   } else if (artist.split(/\s+/).length > 1 && t.includes(artist))
     out.push({k:"warn", t:`“${artist}” in full. The frame has already named them: surname only.`});
   if (/(?<!\d)\s-\s(?!\d)/.test(t)) out.push({k:"warn", t:"A hyphen as a dash. The house dash is a spaced en dash ( – )."});
-  if (key === "hook" && artist && !String(f.artist_voice || "").startsWith("third") && new RegExp("\\b" + artist.split(/\s+/).pop().replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b").test(t))
-    out.push({k:"warn", t:`Names ${artist.split(/\s+/).pop()}. The artist's own posts carry the hook in the first person, where that reads as someone else speaking. Write it without the name, or set their posts to the third person in the details.`});
+  if (key === "hook" && artist && !String(f.artist_voice || "").startsWith("third") && namesArtist(t))
+    out.push({k:"good", t:`Names ${D().surname}. The artist's own posts will carry the hook in the first person: Claude rewrites it for them at the generate step, for your approval.`});
   t.split(/(?<=[.!?])\s+/).forEach(sn => {
     if ((sn.match(/\s[–—-]\s/g) || []).length >= 2)
       out.push({k:"warn", t:"An aside between two dashes reads as machine-written. Use commas or a new sentence."});
@@ -727,7 +744,7 @@ const crumb = () => { const f=S.facts;
 function render(){
   crumb();
   const o = outputs();
-  $("#nout").textContent = o.posts.length + o.tweets.length + o.emails.length + o.artistPosts.length + o.artistTweets.length;
+  $("#nout").textContent = o.posts.length + o.tweets.length + o.emails.length + o.artistPosts.length + o.artistTweets.length + o.broadcast.length;
   $("#nfacts").textContent = shownFields();
   const pw = pageStats().total; $("#npage").textContent = pw ? pw + " words" : "";
   $("#nwrite").textContent = (3 + D().cardTitles.length) + " fields";
@@ -1011,8 +1028,8 @@ const SCHEMA_PROOF = {type:"object", additionalProperties:false, required:["verd
   verdict:{type:"string", enum:["good","fix"]}, summary:{type:"string"},
   issues:{type:"array", items:{type:"object", additionalProperties:false, required:["where","note","fix"], properties:{where:{type:"string"}, note:{type:"string"}, fix:{type:["string","null"]}}}}}};
 const FRAG = {type:"object", additionalProperties:false, required:["text","from"], properties:{text:{type:["string","null"]}, from:{type:"string"}}};
-const SCHEMA_SUGGEST = {type:"object", additionalProperties:false, required:["hook","making","qualifier","cards","notes"], properties:{
-  hook:FRAG, making:FRAG, qualifier:FRAG,
+const SCHEMA_SUGGEST = {type:"object", additionalProperties:false, required:["hook","making","opener","cards","notes"], properties:{
+  hook:FRAG, making:FRAG, opener:FRAG,
   cards:{type:"array", items:{type:"object", additionalProperties:false, required:["title","text","from"], properties:{title:{type:"string"}, text:{type:["string","null"]}, from:{type:"string"}}}},
   notes:{type:"array", items:{type:"string"}}}};
 async function proofread(k){
@@ -1031,7 +1048,7 @@ WHAT IT IS FOR: ${spec(k).rule}
 EVERY PLACE IT LANDS, with the copy either side of it (the fragment is marked >>>):
 ${ctx}
 ${pageText().trim() ? `\nTHE PRODUCT PAGE${D().artworks>1?"S":""} this release was written from. Every fact in the fragment should be here or in the release details; flag any that is not:\n${pages().map(x => (D().artworks>1 ? "── " + x.title + "\n" : "") + (x.page.description||"").trim()).join("\n\n")}\n` : ""}
-HOUSE RULES: British spelling. The house dash is a spaced en dash, never an em dash and never a hyphen; use one at most in a sentence, and never set an aside between a pair of them, which reads as machine-written. Refer to the artist by surname alone: the full name has already been used before the fragment lands. No exclamation marks and no rhetorical questions. Sentences under 35 words. Times written as "14:00 UK time", dates as "30 April". Never say "we" or "our" inside the fragment; the frame around it supplies those. Every fact must be true of this release: do not invent dates, numbers, places or names.
+HOUSE RULES: British spelling. The house dash is a spaced en dash, never an em dash and never a hyphen; use one at most in a sentence, and never set an aside between a pair of them, which reads as machine-written. Refer to the artist by the surname alone, ${D().surname}: the full name has already been used before the fragment lands. No exclamation marks and no rhetorical questions. Sentences under 35 words. Times written as "14:00 UK time", dates as "30 April". Never say "we" or "our" inside the fragment; the frame around it supplies those. Every fact must be true of this release: do not invent dates, numbers, places or names.
 
 ${k === "opener" ? "Judge two things. First, is it a sound first sentence: the artist named in full, what the edition is, one idea. Second, does it leave the hook something to say, or does it pre-empt the hook's first sentence, which follows it directly." : "Judge two things. First, does the fragment read well on its own? Second, and more important, does it still read well in EACH place above: check especially whether it assumes it is the first thing being read, because in most of these places it is a middle paragraph. Also flag repetition with the copy either side of it."}
 
@@ -1139,13 +1156,12 @@ function renderPageAside(){
   const frag = (key, name, r) => {
     if (!r) return "";
     const text = (r.text || "").trim(), used = text && blk(key).trim() === text;
-    if (!text) return key === "qualifier"
-      ? `<div class="sug none"><h4><span>${esc(name)}</span></h4><div class="chk" data-k="good"><s></s><span>Left blank: ${esc(r.from || "the opener stands on its own")}.</span></div></div>`
-      : `<div class="sug none"><h4><span>${esc(name)}</span></h4><div class="chk" data-k="warn"><s></s><span>${esc(r.from || "Nothing on the page to draw this from.")} Write it by hand in the email.</span></div></div>`;
+    if (!text) return `<div class="sug none"><h4><span>${esc(name)}</span></h4><div class="chk" data-k="warn"><s></s><span>${esc(r.from || "Nothing on the page to draw this from.")} Write it by hand in the email.</span></div></div>`;
+    const lift = (sg.lifts || []).find(([k]) => k === key);
     const warns = checks(key, text).filter(c => c.k === "warn");
     return `<div class="sug${used?" used":""}"><h4><span>${esc(name)}</span><button class="mini" data-use="${key}"${used?" disabled":""}>${used?"In the email":"Use"}</button></h4>
       <div class="q">${esc(text)}</div>
-      ${r.from ? `<div class="src">${esc(r.from)}</div>` : ""}
+      ${r.from ? `<div class="src">${esc(r.from)}</div>` : ""}${lift ? `<div class="chk" data-k="warn"><s></s><span>Lifts ${lift[1]} words in a row from the page. Ask again, or rewrite it in the email.</span></div>` : ""}
       ${warns.map(c=>`<div class="chk" data-k="warn"><s></s><span>${esc(c.t)}</span></div>`).join("")}</div>`;
   };
   let body;
@@ -1161,7 +1177,7 @@ function renderPageAside(){
   else if (sg.err) body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>Nothing came back</h2><p class="rule">${esc(sg.err)}</p>`;
   else {
     const r = sg.res || {}, cards = r.cards || [];
-    const all = [["hook","Hook",r.hook],["making","Making",r.making],["qualifier","Opener, a few words",r.qualifier],
+    const all = [["opener","Opener, the first sentence",r.opener],["hook","Hook",r.hook],["making","Making",r.making],
                  ...d.cardKeys.map((k,i)=>[k, "Card · " + d.cardTitles[i], cards[+k.slice(5)-1]])];
     const usable = all.filter(([k,,x]) => x && (x.text||"").trim() && blk(k).trim() !== x.text.trim());
     body = `<span class="lbl">From the page${n>1?"s":""}</span><h2>Suggested</h2>
@@ -1177,13 +1193,12 @@ function renderPageAside(){
     S.blocks[key] = r.text.trim(); S.from[key] = "page"; S.ai[key] = undefined; touch();
   };
   $("#aside").querySelectorAll("[data-use]").forEach(b => b.onclick = () => { use(b.dataset.use); renderPageAside(); });
-  const ua = $("#useall"); if (ua) ua.onclick = () => { ["hook","making","qualifier",...D().cardKeys].forEach(use); renderPageAside(); };
+  const ua = $("#useall"); if (ua) ua.onclick = () => { ["opener","hook","making",...D().cardKeys].forEach(use); renderPageAside(); };
   const go = $("#goemail"); if (go) go.onclick = () => { S.view = "write"; S.focus = "hook"; render(); };
 }
 // the prompt is built apart from the call, so it can be read without calling
 function suggestPrompt(){
-  const f = S.facts, d = D(), all = pages(), n = d.artworks;
-  const bald = !SPEC.openerCarries().length && !d.support;
+  const f = S.facts, d = D(), all = pages(), n = d.artworks, first = !String(f.artist_voice || "").startsWith("third");
   const mediums = new Set(all.map(x => (x.page.medium || "").trim()).filter(Boolean));
   const pageBlock = all.map(x => {
     const same = x.i > 0 && paras(x.page.description).join("\n\n") === paras(pageOf(0).description).join("\n\n");
@@ -1203,24 +1218,44 @@ THE RELEASE:
 - edition phrase: ${f.edition_phrase}
 - mechanic: ${d.draw ? "allocated by draw" : "timed, " + f.window}${f.beneficiary ? "\n- released in support of " + f.beneficiary : ""}
 
-WRITE, in British English, plain prose, no markdown, no quotation marks around the text:
-1. hook: ${SPEC.hook.rule} One hook for the whole release. Do not open with a rhetorical question or a lede that assumes it is read first.
-2. making: ${SPEC.making.rule} One line for the whole release. Write "printmakers at Make-Ready" exactly if the pages say Make-Ready; the system adds "our". If neither the pages nor the medium descriptions say how the work was physically made, return null.${mediums.size > 1 ? ` The mediums differ between artworks (${[...mediums].map(m => '"' + m + '"').join("; ")}), so do not state one technique as if it applied to all: say only what is true of every artwork, or return null and say why.` : ""}
-3. cards: one line per artwork, in the order given, each drawn from that artwork's own page and SEO line. ${SPEC.card.rule}${n > 1 ? " Where an artwork's page is identical to artwork 1's, return null for its text: nothing on the page distinguishes it, and say so in \"from\"." : ""}
-4. qualifier: ${bald ? "the opener reads “… – " + f.edition_phrase + "” with nothing after it, so add a few words about the work (at most ten, a phrase not a sentence, no full stop, no artist name)." : "return null: the opener already names the work or what it supports."}
+WRITE, in British English, plain prose, no markdown, no quotation marks around the text. These are fragments for emails and posts, not a page: they must be shorter than the page and must not repeat its sentences. Restate every idea in sentences of your own; never lift a sentence, or most of one, from the page. Vary the shape: do not open the way the page opens, and do not follow the page's order.
+1. hook: two sentences, 25 to 45 words in all, on the work. ${first ? "Do not name the artist at all: the artist's own posts carry this hook in the first person, so write it about the work, with the work or its subject as the subject of each sentence. " : "Name the artist once at most, by the surname alone (" + d.surname + "). "}Open on one of these, whichever the page supports best and the page itself does not open on: what happens in the work; what it was made from or how; where it comes from, a series, a year, a place. It must read as well in the middle of an email as at the top of a post, so no lede that assumes it is read first, and no rhetorical question.
+2. making: one sentence, under 30 words, on how the edition was physically made. Write "printmakers at Make-Ready" exactly if the pages say Make-Ready; the system adds "our". If neither the pages nor the medium descriptions say how the work was physically made, return null.${mediums.size > 1 ? ` The mediums differ between artworks (${[...mediums].map(m => '"' + m + '"').join("; ")}), so do not state one technique as if it applied to all: say only what is true of every artwork, or return null and say why.` : ""}
+3. cards: one line per artwork, 15 to 25 words, in the order given, each drawn from that artwork's own page. ${SPEC.card.rule}${n > 1 ? " Where an artwork's page is identical to artwork 1's, return null for its text: nothing on the page distinguishes it, and say so in \"from\"." : ""}
+4. opener: the announcement email's first sentence, whole, 22 to 30 words, ending in a full stop. It must name the artist in full, ${f.artist}, and say what the edition is, using this edition phrase as it is: "${f.edition_phrase}"${f.beneficiary ? `, and that it is released in support of ${f.beneficiary}` : ""}. One idea of its own, different from the hook's first sentence, which follows it directly. Any of these shapes: "We're delighted to announce our ${f.ordinal} collaboration with ${f.collab_with} – ‘${d.cardTitles[0] || "the work"}’, ${f.edition_phrase}, [a few words]."; "In our ${f.ordinal} collaboration, ${f.artist} presents ‘${d.cardTitles[0] || "the work"}’, ${f.edition_phrase}, [a few words]."; "[What happens in the work] in ${f.edition_phrase} by ${f.artist}."${d.support ? " Where the shape does not end with the beneficiary, add it as the clause “, released in support of " + f.beneficiary + "”." : ""}
 
-HOUSE RULES: British spelling. The house dash is a spaced en dash, never an em dash and never a hyphen; use one at most in a sentence, and never set an aside between a pair of them, which reads as machine-written. Refer to the artist by surname alone (single-name artists as they are): the full name has already been used by the frame before any fragment lands. No exclamation marks and no rhetorical questions. Sentences under 35 words. Never say "we" or "our" inside a fragment. Never write "limited-edition" with a hyphen.
+HOUSE RULES: British spelling. The house dash is a spaced en dash, never an em dash and never a hyphen; use one at most in a sentence, and never set an aside between a pair of them, which reads as machine-written. After the opener, refer to the artist by the surname alone, ${d.surname}. No exclamation marks and no rhetorical questions. Sentences under 35 words. Never say "we" or "our" inside the hook, the making line or a card line; the opener may. Never write "limited-edition" with a hyphen.${S.suggest && S.suggest.retry ? "\n\nYOUR LAST DRAFT COPIED SENTENCES FROM THE PAGE. This time every sentence must be new: different words, different order, shorter." : ""}
 
 For each, "from" is a short phrase saying where it came from, e.g. "artwork 2, paragraph 2" or "the medium description", or, when text is null, why nothing could be written.
 
 Reply with JSON only:
-{"hook":{"text":string|null,"from":string},"making":{"text":string|null,"from":string},"qualifier":{"text":string|null,"from":string},"cards":[{"title":string,"text":string|null,"from":string}],"notes":[string]}`;
+{"hook":{"text":string|null,"from":string},"making":{"text":string|null,"from":string},"opener":{"text":string|null,"from":string},"cards":[{"title":string,"text":string|null,"from":string}],"notes":[string]}`;
+}
+// the longest run of words a fragment shares with the page, so a copied sentence is caught
+function lifted(text){
+  const W = s => (s || "").toLowerCase().replace(/[^\w\s'’]/g, " ").split(/\s+/).filter(Boolean);
+  const a = W(text), b = W(pageText() + " " + pages().map(x => x.page.medium || "").join(" ")); if (!a.length || !b.length) return 0;
+  const pos = new Map(); b.forEach((w, i) => { (pos.get(w) || pos.set(w, []).get(w)).push(i); });
+  let best = 0;
+  for (let i = 0; i < a.length; i++) for (const j of (pos.get(a[i]) || [])) { let k = 0; while (i + k < a.length && j + k < b.length && a[i + k] === b[j + k]) k++; if (k > best) best = k; }
+  return best;
+}
+const LIFT = 10;                                         // this many words in a row is a copied sentence, not a restatement
+function liftedIn(res){
+  const out = [];
+  [["hook", res.hook], ["making", res.making], ["opener", res.opener], ...(res.cards || []).map((c, i) => ["card_" + (i + 1), c])].forEach(([k, r]) => { const n = r && r.text ? lifted(r.text) : 0; if (n >= LIFT) out.push([k, n]); });
+  return out;
 }
 async function suggest(){
   S.suggest = {busy:true}; renderPage(); renderPageAside();
   try{
-    const res = await aiJSON(suggestPrompt(), SCHEMA_SUGGEST);
-    S.suggest = {res};
+    let res = await aiJSON(suggestPrompt(), SCHEMA_SUGGEST), lifts = liftedIn(res);
+    if (lifts.length) {                                  // once more, told what went wrong
+      S.suggest = {busy:true, retry:true}; renderPageAside();
+      try { const again = await aiJSON(suggestPrompt(), SCHEMA_SUGGEST); const l2 = liftedIn(again); if (l2.length <= lifts.length) { res = again; lifts = l2; } } catch (_) {}
+    }
+    [res.hook, res.making, res.opener, ...(res.cards || [])].forEach(r => { if (r && r.text) r.text = fixDashes(r.text); });
+    S.suggest = {res, lifts};
   }catch(e){
     S.suggest = {err: AI_ERR(e) + " The pages are unchanged."};
   }
@@ -1257,7 +1292,7 @@ const FORM = [
     ["handle","Instagram handle","text","Without the @"],
     ["x_handle","X handle","text","Leave blank if none"],
     ["artist_voice","Their own posts","select","first person|third person"],
-    ["hashtag","Hashtag","text","Announcement post only"],
+    ["surname","Surname","text","Blank means the last word; Ai for Ai Weiwei"],
     ["link","Release link","text","Used in tweets"],
     ["advisor","Advisor","select","Sam|Curtis|Sofiya"]
   ]},
@@ -1410,7 +1445,7 @@ function emailParas(text, page){
   return t.split("\n").map(norm).filter(l => l && !MARK.test(l) && l !== "[BODY]" && l !== "[FEATURES]" && l !== "No body: this one is image-led.");
 }
 function parity(out){
-  const o = outputs(), sets = [["ig-set", o.posts], ["twitter-set", o.tweets], ["email-set", o.emails], ["artist-posts", o.artistPosts], ["artist-tweets", o.artistTweets]];
+  const o = outputs(), sets = [["ig-set", o.posts], ["twitter-set", o.tweets], ["email-set", o.emails], ["artist-posts", o.artistPosts], ["artist-tweets", o.artistTweets], ["broadcast-set", o.broadcast]];
   const diffs = [];
   let n = 0, extra = 0;                              // extra: items only the templates make, shown as theirs
   sets.forEach(([set, mine]) => {
@@ -1440,7 +1475,7 @@ function baseSets(){
   const o = outputs(), srv = SERVED ? S.server.out : null;
   const take = (mine, set) => withServer(mine, set, srv);
   return {posts: take(o.posts, "ig-set"), tweets: take(o.tweets, "twitter-set"), emails: take(o.emails, "email-set"),
-          artistPosts: take(o.artistPosts, "artist-posts"), artistTweets: take(o.artistTweets, "artist-tweets")};
+          artistPosts: take(o.artistPosts, "artist-posts"), artistTweets: take(o.artistTweets, "artist-tweets"), broadcast: take(o.broadcast, "broadcast-set")};
 }
 
 // ---------- the generate step ----------
@@ -1472,6 +1507,47 @@ function genJobs(sets){
   return jobs;
 }
 const jobText = j => j.text.trim();
+const fixDashes = t => (t || "").replace(/\s*—\s*/g, " – ").replace(/(\S)\s*–\s*(\S)/g, (m, a, b) => /\d/.test(a) && /\d/.test(b) ? `${a}–${b}` : `${a} – ${b}`);   // never an em dash; a spaced en dash, unspaced only between numbers
+// the artist's own posts carry the hook in the first person; where it names the artist, it is
+// rewritten for them first, and the artist's tweets are then measured against the rewrite
+function needVoice(sets){
+  const H = S.blocks.hook.trim(); if (!H || String(S.facts.artist_voice || "").startsWith("third") || !namesArtist(H)) return false;
+  if (SERVED && S.campaign && S.plan) return planItems(sets).some(p => p.shape && p.shape.family.startsWith("artist") && p.item && p.item.t.includes(H));
+  return true;
+}
+const voicedHook = () => { const j = S.gen && S.gen.items.find(j => j.kind === "voice" && j.approved); return j ? jobText(j) : null; };
+function voicedSets(sets){
+  const H = S.blocks.hook.trim(), v = voicedHook(); if (!v || !H) return sets;
+  const swap = list => list.map(x => x.t.includes(H) ? Object.assign({}, x, {t: x.t.replace(H, v)}) : x);
+  return Object.assign({}, sets, {artistPosts: swap(sets.artistPosts), artistTweets: swap(sets.artistTweets)});
+}
+const SCHEMA_VOICE = {type:"object", additionalProperties:false, required:["hook"], properties:{hook:{type:"string"}}};
+function voicePrompt(j){
+  const f = S.facts, d = D();
+  return `You are rewriting one hook for Avant Arte, a publisher of limited edition artworks, so that the artist can post it on their own account, in the first person. As it stands it speaks of the artist by name, ${d.surname}, which on the artist's own account reads as someone else speaking.
+
+THE HOOK AS IT STANDS:
+${j.orig}
+${j.last ? `\nTHE VERSION APPROVED LAST TIME, before the hook changed; keep its wording wherever it still holds:\n${j.last}\n` : ""}
+Rewrite it as ${f.artist} would say it: "I" and "my" where the hook says ${d.surname} or "the artist"; where the hook speaks only of the work, leave it as it is. Keep every fact, drop none and add none. Keep it the same length or shorter. British spelling. The house dash is a spaced en dash, one at most; never a pair. No exclamation marks and no rhetorical questions. Do not name the artist.
+
+Reply with JSON only, no other text:
+{"hook":"the hook in the first person"}`;
+}
+function voiceFacts(j){
+  const t = jobText(j), out = [];
+  out.push({need:true, ok:!!t, t:"Something written"});
+  out.push({need:true, ok:!namesArtist(t) && !t.includes(S.facts.artist), t:`Does not name ${D().surname}`});
+  out.push({need:false, ok:/\b(I|my|me|I'm|I’m)\b/.test(t), t:"Speaks in the first person"});
+  out.push({need:false, ok:t.split(/\s+/).length <= j.orig.split(/\s+/).length + 8, t:"No longer than the hook"});
+  return out;
+}
+async function voiceJob(j){
+  j.busy = true; j.err = null; j.approved = false; render();
+  try { const r = await aiJSON(voicePrompt(j), SCHEMA_VOICE); j.ai = fixDashes((r.hook || "").trim()); j.text = j.ai; if (!jobOK(j)) j.err = "The rewrite falls short on a point below. Fix it by hand or ask again."; }
+  catch (e) { j.err = AI_ERR(e) + " Rewrite it by hand below."; }
+  j.busy = false; render();
+}
 // the facts a tweet must still carry once rewritten, and how it reads
 function tweetFacts(j){
   const f = S.facts, d = D(), t = jobText(j), low = t.toLowerCase(), has = s => !!s && low.includes(String(s).toLowerCase());
@@ -1485,6 +1561,9 @@ function tweetFacts(j){
   out.push({need:false, ok:has(time), t:`Gives the time, ${time} UK time`});
   if (f.beneficiary) out.push({need:true, ok:has(f.beneficiary), t:`Names ${f.beneficiary}`});
   out.push({need:true, ok:has(f.link), t:"Carries the link"});
+  out.push({need:true, ok:!t.includes("—"), t:"No em dash"});
+  const frag = t.split(/\n+/).flatMap(l => l.split(/(?<=[.!?])\s+/)).find(sn => /^[A-Z][a-z]+ing\b/.test(sn.trim()) && !/^(Announcing|Introducing|Presenting|Something|Nothing|Everything|Anything|Morning|Evening|Spring|King|Ring|Bring|Sing|Sting|Wing|Swing|Thing)\b/.test(sn.trim()));
+  out.push({need:true, ok:!frag, t: frag ? `A sentence that is only a participle phrase: “${frag.trim().slice(0, 40)}…”. Fold the idea into the first sentence instead` : "No sentence that is only a participle phrase"});
   const n = xLen(t); out.push({need:true, ok:n <= X_LIMIT, t:`${n} of ${X_LIMIT} as X counts them, a link as 23`});
   return out;
 }
@@ -1499,7 +1578,7 @@ function tweetStyle(t){
   if (t.includes("?")) out.push("Question mark: no rhetorical questions.");
   return out;
 }
-const jobOK = j => tweetFacts(j).every(c => c.ok || !c.need);
+const jobOK = j => (j.kind === "voice" ? voiceFacts(j) : tweetFacts(j)).every(c => c.ok || !c.need);
 const SCHEMA_TWEET = {type:"object", additionalProperties:false, required:["tweet"], properties:{tweet:{type:"string"}}};
 function rewritePrompt(j){
   const f = S.facts, d = D(), first = !String(f.artist_voice || "").startsWith("third");
@@ -1513,13 +1592,12 @@ function rewritePrompt(j){
 
 THE TWEET AS IT STANDS:
 ${j.orig}
+${j.last ? `\nTHE VERSION APPROVED LAST TIME, before the copy changed; keep its wording wherever it still holds:\n${j.last}\n` : ""}
+IT MUST STILL SAY, in two lines with a blank line between:
+1. One full sentence: ${titles}, ${f.edition_phrase}, by ${artistX}${f.beneficiary ? `, in support of ${f.beneficiary}` : ""}, with one idea from the hook joined into that same sentence as a relative clause or a closing clause after a comma. Like this: “‘The Princess (Cinderella)’ and ‘The Princess (Belle)’ – a pair of new limited edition prints by Kukwon Woo that explore the fragile boundary between childhood memory and adulthood.” Never put the idea in a sentence of its own, and never as a participle phrase standing alone (“Exploring the fragile boundary…”): that reads as a caption.
+2. How to act: ${act}, ending with this link exactly as given: ${f.link}
 
-IT MUST STILL SAY, in this order, in two or three short lines with a blank line between:
-1. What is announced: ${titles}, ${f.edition_phrase}, by ${artistX}${f.beneficiary ? `, in support of ${f.beneficiary}` : ""}.
-2. One idea from the hook: a clause or one short sentence, in the hook's own words where they fit.
-3. How to act: ${act}, ending with this link exactly as given: ${f.link}
-
-RULES: every fact as given, none added and none dropped. British spelling. The house dash is a spaced en dash, one at most; never a hyphen as a dash and never a pair of dashes round an aside. No exclamation marks and no rhetorical questions. Never "thrilled", "excited", "don't miss out" or "drop". Under ${X_LIMIT} characters with the link counted as 23.
+RULES: every fact as given, none added and none dropped. After the first mention the artist is ${d.surname}. British spelling. The dash is a spaced en dash ( – ), one at most; never an em dash (—), never a hyphen as a dash and never a pair of dashes round an aside. No exclamation marks and no rhetorical questions. Never "thrilled", "excited", "don't miss out" or "drop". Under ${X_LIMIT} characters with the link counted as 23.
 
 Reply with JSON only, no other text:
 {"tweet":"the whole tweet, its lines separated by blank lines"}`;
@@ -1528,36 +1606,61 @@ async function rewriteJob(j){
   j.busy = true; j.err = null; j.approved = false; render();
   try {
     const r = await aiJSON(rewritePrompt(j), SCHEMA_TWEET);
-    j.ai = (r.tweet || "").trim(); j.text = j.ai;
+    j.ai = fixDashes((r.tweet || "").trim()); j.text = j.ai;
     if (!jobOK(j)) j.err = "Claude's rewrite falls short on a point below. Fix it by hand or ask again.";
   } catch (e) {
     j.err = AI_ERR(e) + " Rewrite it by hand below.";
   }
   j.busy = false; render();
 }
+// an earlier approval stands where the job's input has not changed; where it has, the last
+// approved text is offered to Claude as the version to keep close to
+let PREV = [];
+function carry(j){
+  const p = PREV.find(x => (x.kind || "tweet") === (j.kind || "tweet") && x.set === j.set && x.name === j.name);
+  if (!p || !p.approved) return false;
+  if (p.orig === j.orig) { Object.assign(j, {text: p.text, ai: p.ai, approved: true}); return true; }
+  j.last = p.text; return false;
+}
 async function generate(){
+  PREV = S.gen ? S.gen.items.slice() : [];
   S.gen = {stamp: genStamp(), busy: true, at: new Date(), items: [], done: false, step: SERVED ? "Rendering the templates…" : "Assembling…"};
   render();
   if (SERVED) await serverRender();
-  const jobs = genJobs(baseSets());
-  S.gen.items = jobs;
-  if (!jobs.length) { S.gen.busy = false; S.gen.done = true; render(); return; }
-  await Promise.all(jobs.map(rewriteJob));
-  S.gen.busy = false; render();
+  const sets = baseSets();
+  if (needVoice(sets)) {                               // round one: the hook in the artist's voice; the tweets follow its approval
+    const H = S.blocks.hook.trim();
+    const j = {kind: "voice", set: "voice", channel: "The artist's posts", name: "The hook, in the first person", orig: H, len: H.length, text: H, ai: null, approved: false, err: null, busy: false};
+    S.gen.items = [j]; S.gen.busy = false;
+    if (carry(j)) { await tweetRound(); return; }
+    await voiceJob(j);
+    return;
+  }
+  await tweetRound();
+}
+// round two: every tweet the plan uses that runs over, measured with the artist's hook in place
+async function tweetRound(){
+  const jobs = genJobs(voicedSets(baseSets()));
+  S.gen.items = S.gen.items.filter(j => j.kind === "voice").concat(jobs);
+  const fresh = jobs.filter(j => !carry(j));
+  if (S.gen.items.every(j => j.approved)) { S.gen.busy = false; S.gen.done = true; persist(); render(); return; }
+  S.gen.busy = false;
+  await Promise.all(fresh.map(rewriteJob));
+  render();
 }
 // the sets as they will go out: the templates' text with each approved rewrite in place
 function finalSets(){
-  const b = baseSets();
+  const b = voicedSets(baseSets());
   const apply = (list, set) => list.map(x => { const j = genReady() ? S.gen.items.find(j => j.set === set && j.name === x.n) : null; return j ? Object.assign({}, x, {t: jobText(j)}) : x; });
-  return {posts: b.posts, tweets: apply(b.tweets, "tweets"), emails: b.emails, artistPosts: b.artistPosts, artistTweets: apply(b.artistTweets, "artistTweets")};
+  return {posts: b.posts, tweets: apply(b.tweets, "tweets"), emails: b.emails, artistPosts: b.artistPosts, artistTweets: apply(b.artistTweets, "artistTweets"), broadcast: b.broadcast};
 }
 
 function renderReview(){
   const jobs = S.gen.items;
   const rows = jobs.map((j, i) => {
-    const facts = j.busy ? [] : tweetFacts(j), style = j.busy ? [] : tweetStyle(jobText(j)), ok = !j.busy && jobOK(j);
+    const facts = j.busy ? [] : (j.kind === "voice" ? voiceFacts(j) : tweetFacts(j)), style = j.busy ? [] : tweetStyle(jobText(j)), ok = !j.busy && jobOK(j);
     return `<div class="sheet gen">
-      <div class="genhead"><b>${esc(j.channel)} · ${esc(j.name)}</b><span class="note" style="margin:0">${j.len} characters as X counts them, against ${X_LIMIT}.</span></div>
+      <div class="genhead"><b>${esc(j.channel)} · ${esc(j.name)}</b><span class="note" style="margin:0">${j.kind === "voice" ? `Names ${esc(D().surname)}, so the artist's posts and tweets get it in the first person. The tweets follow once this is approved.` : `${j.len} characters as X counts them, against ${X_LIMIT}.`}</span></div>
       <div class="gencols">
         <div><span class="lbl">As written</span><pre>${esc(j.orig)}</pre></div>
         <div><span class="lbl">${j.ai && j.text === j.ai ? "Rewritten by Claude" : j.ai ? "Rewritten by Claude, then edited" : "Rewritten by hand"}</span>
@@ -1573,7 +1676,7 @@ function renderReview(){
     <div class="head">
       <span class="lbl">Then</span>
       <h1>Approve what Claude wrote</h1>
-      <p>${jobs.length === 1 ? "One tweet carries" : jobs.length + " tweets carry"} the hook whole and ${jobs.length === 1 ? "does" : "do"} not fit X's limit. Claude has written ${jobs.length === 1 ? "it" : "each"} again as a tweet; the facts it must keep are checked below, and the words are yours to change. Nothing is filled in until each is approved. Everything else is assembled from what you wrote and needs no approval.</p>
+      <p>${jobs.some(j => j.kind === "voice") ? "The hook names the artist, so their own posts get it in the first person first. " : ""}${jobs.filter(j => j.kind !== "voice").length ? `${jobs.filter(j => j.kind !== "voice").length === 1 ? "One tweet carries" : jobs.filter(j => j.kind !== "voice").length + " tweets carry"} the hook whole and ${jobs.filter(j => j.kind !== "voice").length === 1 ? "does" : "do"} not fit X's limit, so Claude has written ${jobs.filter(j => j.kind !== "voice").length === 1 ? "it" : "each"} again as a tweet. ` : ""}What each must keep is checked below, and the words are yours to change. Nothing is filled in until each is approved. Everything else is assembled from what you wrote and needs no approval.</p>
     </div>
     ${rows}`;
   jobs.forEach((j, i) => {
@@ -1583,8 +1686,8 @@ function renderReview(){
       $(`#facts_${i}`).innerHTML = facts.map(c => `<div class="chk" data-k="${c.ok ? "good" : "warn"}"><s></s><span>${esc(c.t)}${c.ok || c.need ? "" : " (not required)"}</span></div>`).join("") + style.map(w => `<div class="chk" data-k="warn"><s></s><span>${esc(w)}</span></div>`).join("");
       ok.disabled = !jobOK(j); ok.textContent = "Approve";
     };
-    const ok = $(`#ok_${i}`); if (ok) ok.onclick = () => { j.approved = true; if (S.gen.items.every(x => x.approved)) S.gen.done = true; persist(); render(); };
-    const again = $(`#again_${i}`); if (again) again.onclick = () => rewriteJob(j);
+    const ok = $(`#ok_${i}`); if (ok) ok.onclick = () => { j.approved = true; if (j.kind === "voice" && !S.gen.items.some(x => x.kind !== "voice")) { persist(); tweetRound(); return; } if (S.gen.items.every(x => x.approved)) S.gen.done = true; persist(); render(); };
+    const again = $(`#again_${i}`); if (again) again.onclick = () => (j.kind === "voice" ? voiceJob(j) : rewriteJob(j));
   });
 }
 
@@ -1617,7 +1720,7 @@ function renderOut(){
         <p>${inPlan ? planLine : `Assembled from the details and the fragments when you ask: ${o.posts.length} posts, ${used(o.tweets)} tweets and ${used(o.emails)} emails for Avant Arte, and ${used(o.artistPosts)} posts and ${used(o.artistTweets)} tweets for the artist.`}</p>
       </div>
       <div class="sheet" style="padding:18px 22px">
-        ${stale ? `<p class="note" style="margin:0 0 12px">The details or the fragments have changed since the copy was generated at ${fmtTime(S.gen.at)}. Generate it again to bring it up to date.</p>` : ""}
+        ${stale ? `<p class="note" style="margin:0 0 12px">The details or the fragments have changed since the copy was generated at ${fmtTime(S.gen.at)}. Generate it again to bring it up to date: a tweet whose text has not changed keeps its approved rewrite, and one that has is rewritten with the last approved version to hand.</p>` : ""}
         <p class="note" style="margin:0 0 12px">${over ? `${over === 1 ? "One tweet runs" : over + " tweets run"} over X's limit of ${X_LIMIT}, because ${over === 1 ? "it carries" : "they carry"} the hook whole. Claude writes ${over === 1 ? "it" : "each"} again as a tweet, keeping every fact, and you approve the rewrite before anything is filled in. Everything else is assembled, not written.` : "Every tweet fits, so nothing here needs Claude: it is all assembled from what you wrote."}</p>
         <button class="act" id="gen" style="width:auto;padding:9px 16px"${inPlan && (S.planBusy || !S.plan) ? " disabled" : ""}>Generate comms plan copy</button>
       </div>`;
@@ -1636,7 +1739,7 @@ function renderOut(){
   const sets = finalSets(), srv = SERVED ? S.server.out : null, cuts = S.gen.items;
   const cutOK = cuts.every(j => xLen(jobText(j)) <= X_LIMIT);
   const genLine = `<p class="live">Generated at ${fmtTime(S.gen.at)}. ${cuts.length
-      ? cuts.map(j => `${esc(j.channel)} · ${esc(j.name)}: rewritten${j.ai && j.text === j.ai ? " by Claude" : j.ai ? " by Claude, then edited" : " by hand"}, ${j.len} to ${xLen(jobText(j))} characters, approved.`).join(" ")
+      ? cuts.map(j => j.kind === "voice" ? `The hook, in the artist's first person${j.ai && j.text === j.ai ? " by Claude" : j.ai ? " by Claude, then edited" : " by hand"}, approved.` : `${esc(j.channel)} · ${esc(j.name)}: rewritten${j.ai && j.text === j.ai ? " by Claude" : j.ai ? " by Claude, then edited" : " by hand"}, ${j.len} to ${xLen(jobText(j))} characters, approved.`).join(" ")
       : "Nothing needed Claude: every tweet fits."} <button class="act ghost" id="regen" style="width:auto;padding:3px 10px;margin-left:6px;font-size:12px">Generate again</button></p>`;
   const band = !SERVED ? "" : srv
     ? (() => { const pv = parity(srv), warns = srv.warnings.filter(w => !(cutOK && /^tweet of \d+ characters/.test(w)));
@@ -1660,7 +1763,8 @@ function renderOut(){
     ${block("Twitter", "Status line with the X handle, the hook on the announcement, an action line ending in the link.", sets.tweets, "x")}
     ${block("Email", srv ? "Whole emails, with the HubSpot module markers." : "Body copy only. Subject, preview, kicker and headline are on the writing screen.", sets.emails, false)}
     ${block("The artist's Instagram", `In the ${first ? "first person, as most artists post" : "third person, as a studio or an estate posts"}; the voice is set in the details. Avant Arte is tagged, Make-Ready in the sustain and last chance posts, and the edition is one sentence rather than a features list.`, sets.artistPosts, true)}
-    ${block("The artist's X", "Avant Arte named rather than tagged. The announcement carries the hook, cut to fit.", sets.artistTweets, "x")}`;
+    ${block("The artist's X", "Avant Arte named rather than tagged. The announcement carries the hook, cut to fit.", sets.artistTweets, "x")}
+    ${block("Broadcast channel", "The announcement, now-live and last-chance emails as messages: features as sentences, link in bio where the email has a button.", sets.broadcast, true)}`;
   $("#regen").onclick = () => { S.gen = null; generate(); };
 }
 function asideOut(){
@@ -1727,7 +1831,7 @@ function snapshot(){
   return {facts: S.facts, blocks: S.blocks, page: S.page, lead: S.lead, from: S.from || {}, campaign: S.campaign,
           plan: S.plan || null, shapes: S.shapes || {}, keep: S.keep || {}, showAll: !!S.showAll,
           gen: S.gen ? {stamp: S.gen.stamp, at: S.gen.at, done: S.gen.done, fresh: genReady(),
-                        items: S.gen.items.map(j => ({set: j.set, channel: j.channel, name: j.name, orig: j.orig, len: j.len, text: j.text, ai: j.ai, approved: j.approved}))} : null};
+                        items: S.gen.items.map(j => ({kind: j.kind, set: j.set, channel: j.channel, name: j.name, orig: j.orig, len: j.len, text: j.text, ai: j.ai, approved: j.approved, last: j.last}))} : null};
 }
 function restore(snap){
   const b = blankRelease();
@@ -1780,6 +1884,13 @@ function prefillFromName(name){
   if (rest && !S.facts.title_1) S.facts.title_1 = rest;
   if (/\bLE\b/.test(name)) S.facts.mechanic = "draw";
 }
+// the plan's milestone dates: a draw opens at the announcement and closes at the launch; a timed release opens at the launch
+function prefillDates(c){
+  const d = c.dates || {}, at = v => v ? (v.length === 10 ? v + "T14:00" : v.slice(0, 16)) : "";
+  const plus = (v, days) => { const t = new Date(v); if (isNaN(t)) return ""; t.setDate(t.getDate() + days); return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}T${String(t.getHours()).padStart(2, "0")}:${String(t.getMinutes()).padStart(2, "0")}`; };
+  if (S.facts.mechanic === "draw") { if (!S.facts.launch_at && d.announce) S.facts.launch_at = at(d.announce); if (!S.facts.closes_at && d.launch) S.facts.closes_at = at(d.launch); }
+  else { if (!S.facts.launch_at && (d.launch || d.live)) S.facts.launch_at = at(d.launch || d.live); if (!S.facts.closes_at && S.facts.launch_at) S.facts.closes_at = plus(S.facts.launch_at, S.facts.window === "48 hours" ? 2 : 7); }
+}
 async function loadCampaigns(force){
   if (!SERVED) { S.camps = {list: [], err: "Campaigns come from Notion, which the served version reads."}; return S.camps; }
   if (!S.camps) { try { const c = JSON.parse(localStorage.getItem("cg:camps") || "null"); if (c && c.list) S.camps = Object.assign(c, {cached: true}); } catch (_) {} }   // last time's list, at once
@@ -1814,7 +1925,7 @@ async function openCampaign(c){                          // c: {id, name}, or nu
   else {
     if (carry) restore(carry); else Object.assign(S, blankRelease(), {lead: 0, ai: {}, gen: null, server: {}, suggest: null, notion: {}, from: {}});
     S.plan = null; S.shapes = {}; S.keep = {}; S.showAll = false;
-    if (c) prefillFromName(c.name);
+    if (c) { prefillFromName(c.name); prefillDates(c); }
   }
   if (err) S.saved = {status: "error", err};
   if (c) { S.plan = S.plan && S.plan.campaign === c.id ? S.plan : null; loadPlan(true).then(() => { if (S.campaign && S.campaign.id === c.id) render(); }); }
@@ -1862,8 +1973,8 @@ S.keep = S.keep || {};                                   // row id -> keep the c
 S.showAll = S.showAll || false;                          // rows without the Needs copy tick too
 const FAMILY = ch => { const c = (ch || "").toLowerCase().replace(/\s+/g, " ");
   if (/^ig (main|ins) · post/.test(c)) return "ig"; if (c === "twitter") return "twitter"; if (c === "aa email") return "email";
-  if (c === "artist ig · post") return "artist-ig"; if (c === "artist twitter") return "artist-twitter"; return ""; };
-const SETOF = {ig: "posts", twitter: "tweets", email: "emails", "artist-ig": "artistPosts", "artist-twitter": "artistTweets"};
+  if (c === "artist ig · post") return "artist-ig"; if (c === "artist twitter") return "artist-twitter"; if (/broadcast/.test(c)) return "broadcast"; return ""; };
+const SETOF = {ig: "posts", twitter: "tweets", email: "emails", "artist-ig": "artistPosts", "artist-twitter": "artistTweets", broadcast: "broadcast"};
 const SOCIAL = [["coming soon", "Coming soon", ["coming soon"]], ["announce", "Announcement", ["announce"]], ["sustain", "Sustain: the making", ["sustain"]],
                 ["sustain 2", "Sustain: the artist's words", ["sustain, the artist's words"]], ["live", "Now live", ["live"]], ["still time", "Still time", ["still time"]], ["last chance", "Last chance", ["last chance"]]];
 const SHAPES = [
@@ -1871,6 +1982,9 @@ const SHAPES = [
   ...SOCIAL.filter(([k]) => !k.startsWith("sustain")).map(([k, l, n]) => ({key: "twitter:" + k, family: "twitter", label: l, names: n})),
   ...SOCIAL.filter(([k]) => k !== "sustain 2").map(([k, l, n]) => ({key: "artist-ig:" + k, family: "artist-ig", label: l, names: n})),
   ...SOCIAL.filter(([k]) => !k.startsWith("sustain")).map(([k, l, n]) => ({key: "artist-twitter:" + k, family: "artist-twitter", label: l, names: n})),
+  {key: "broadcast:announce", family: "broadcast", label: "Announcement, as a message", names: ["announce"]},
+  {key: "broadcast:live", family: "broadcast", label: "Now live, as a message", names: ["live"]},
+  {key: "broadcast:last chance", family: "broadcast", label: "Last chance, as a message", names: ["last chance"]},
   {key: "email:announce", family: "email", label: "Announcement", names: ["Announcement (TL Non-flow)", "Announcement (LE)"]},
   {key: "email:welcome", family: "email", label: "Welcome", names: ["Welcome (TL Flow)"]},
   {key: "email:insiders", family: "email", label: "Early access for Insiders", names: ["Early Access (TL Insiders), signed by the advisor", "Early Access (LE Insiders), signed by the advisor"]},
@@ -1965,7 +2079,7 @@ function renderPlan(){
   const sets = finalSets(), items = planItems(sets), rows = visibleRows();
   const written = items.filter(p => p.item && !p.keep).length, byHand = items.filter(p => !p.shape).length, kept = items.filter(p => p.keep).length;
   const cuts = S.gen.items;
-  const genLine = `<p class="live">Generated at ${fmtTime(S.gen.at)}. ${cuts.length ? cuts.map(j => `${esc(j.channel)} · ${esc(j.name)}: rewritten${j.ai && j.text === j.ai ? " by Claude" : j.ai ? " by Claude, then edited" : " by hand"}, ${j.len} to ${xLen(jobText(j))} characters, approved.`).join(" ") : "Nothing needed Claude."}
+  const genLine = `<p class="live">Generated at ${fmtTime(S.gen.at)}. ${cuts.length ? cuts.map(j => j.kind === "voice" ? `The hook, in the artist's first person${j.ai && j.text === j.ai ? " by Claude" : j.ai ? " by Claude, then edited" : " by hand"}, approved.` : `${esc(j.channel)} · ${esc(j.name)}: rewritten${j.ai && j.text === j.ai ? " by Claude" : j.ai ? " by Claude, then edited" : " by hand"}, ${j.len} to ${xLen(jobText(j))} characters, approved.`).join(" ") : "Nothing needed Claude."}
     ${items.length} rows ${planHasNeeds() && !S.showAll ? "need copy" : "in the plan"}: ${written} to write, ${kept} keeping the copy already there, ${byHand} by hand. <button class="act ghost" id="regen" style="width:auto;padding:3px 10px;margin-left:6px;font-size:12px">Generate again</button></p>`;
   const groups = []; items.forEach(p => { const g = groups.find(g => g.channel === p.row.channel); if (g) g.items.push(p); else groups.push({channel: p.row.channel, items: [p]}); });
   const opts = p => { const fam = FAMILY(p.row.channel); const list = SHAPES.filter(s => !fam || s.family === fam);

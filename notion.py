@@ -8,8 +8,14 @@ cannot, the pages are read and filtered here.
     NOTION_PROP_CAMPAIGN   default "Campaign text"
     NOTION_PROP_CHANNEL    default "Channel Name"
     NOTION_PROP_COPY       default "Copy"
+
+NOTION_DATABASE_ID is the plan database's id, or its address. When Notion finds no database by
+it, the id is looked at before giving up: the page it names, if the plan is the one database
+laid out on that page, stands in for it; anything else is an error that says what the id names,
+which databases the integration can see, and so what to set or what to connect.
 """
 import os
+import re
 import time
 
 import requests
@@ -69,15 +75,92 @@ def _prop(name, default):
     return os.environ.get(name, default)
 
 
-_DB = {"at": 0.0, "db": None}
+_DB = {"at": 0.0, "db": None, "id": None}
+_ID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|[0-9a-f]{32}", re.I)
+
+
+def _id(s):
+    """The id in a setting, which may be the whole address of the plan: the last id before its ?v= view,
+    in the dashed form Notion writes ids in."""
+    found = _ID.findall((s or "").split("?")[0].split("#")[0])
+    if not found:
+        return (s or "").strip()
+    i = found[-1].lower()
+    return i if "-" in i else f"{i[:8]}-{i[8:12]}-{i[12:16]}-{i[16:20]}-{i[20:]}"
 
 
 def database():
     """The plan's definition, cached for a minute: its properties, and where the campaign relation points."""
     if not _DB["db"] or time.time() - _DB["at"] > 60:
-        _DB["db"] = _call("GET", f"/databases/{os.environ['NOTION_DATABASE_ID']}")
-        _DB["at"] = time.time()
+        db_id = _DB["id"] or _id(os.environ["NOTION_DATABASE_ID"])
+        try:
+            db = _call("GET", f"/databases/{db_id}")
+        except NotionError as e:
+            if "404" not in str(e):
+                raise
+            db = _locate(db_id, e)
+        _DB.update(db=db, id=db["id"], at=time.time())
     return _DB["db"]
+
+
+def _try(method, path, **kw):
+    """A call whose refusal is itself an answer: None where Notion will not serve it."""
+    try:
+        return _call(method, path, **kw)
+    except NotionError:
+        return None
+
+
+def _blocks(block_id, depth=0):
+    """The blocks on a page, into its columns and toggles but no further: enough to find a database laid out on it."""
+    cursor = None
+    while True:
+        res = _try("GET", f"/blocks/{block_id}/children?page_size=100" + (f"&start_cursor={cursor}" if cursor else ""))
+        if not res:
+            return
+        for b in res.get("results", []):
+            yield b
+            if depth < 2 and b.get("has_children") and b.get("type") in ("column_list", "column", "toggle", "callout", "synced_block"):
+                yield from _blocks(b["id"], depth + 1)
+        if not res.get("has_more"):
+            return
+        cursor = res.get("next_cursor")
+
+
+def _visible():
+    """The databases the integration has been connected to, as (title, id)."""
+    res = _try("POST", "/search", json={"filter": {"property": "object", "value": "database"}, "page_size": 100}) or {}
+    return [("".join(t.get("plain_text", "") for t in d.get("title") or []).strip() or "untitled", d["id"])
+            for d in res.get("results", []) if d.get("object") == "database"]
+
+
+def _title(page):
+    return next((plain(v) for v in (page.get("properties") or {}).values() if v.get("type") == "title"), "").strip() or "untitled"
+
+
+def _locate(given, err):
+    """Notion found no database by the configured id. The plan on the page the id names is used in its
+    place; anything else is an error that says what the id names and what the integration can see."""
+    page = _try("GET", f"/pages/{given}")
+    seen = _visible()
+    sees = (f" It can see {len(seen)} database{'s' if len(seen) != 1 else ''}: " + "; ".join(f"“{t}” {i}" for t, i in seen) + ".") if seen else ""
+    if page:
+        parent = page.get("parent") or {}
+        if parent.get("type") == "database_id":
+            raise NotionError(f"{err} That id is the row “{_title(page)}” of the database {parent['database_id']}; set NOTION_DATABASE_ID to that.")
+        dbs = [b for b in _blocks(given) if b.get("type") == "child_database"]
+        if len(dbs) == 1:
+            return _call("GET", f"/databases/{dbs[0]['id']}")
+        if dbs:
+            raise NotionError(f"{err} That id is the page “{_title(page)}”, which holds {len(dbs)} databases; set NOTION_DATABASE_ID to the plan's: "
+                              + "; ".join(f"“{(b.get('child_database') or {}).get('title') or 'untitled'}” {b['id']}" for b in dbs) + ".")
+        raise NotionError(f"{err} That id is the page “{_title(page)}”, not a database, and none is laid out on it. If the plan there is a linked "
+                          f"view of a database, open the plan as its own page and set NOTION_DATABASE_ID to the 32 characters before ?v= in its address.{sees}")
+    if seen:
+        raise NotionError(f"{err} Nothing the integration can see has that id.{sees} Either connect the plan to the integration in Notion "
+                          "(··· at the top right of the plan, then Connections) or set NOTION_DATABASE_ID to the plan's id from that list.")
+    raise NotionError(f"{err} The integration has not been connected to any database. In Notion, open the plan, choose ··· at the top right, "
+                      "then Connections, and add the integration; then do the same for the campaigns database its Campaign column points to.")
 
 
 def schema():
@@ -184,7 +267,7 @@ def rows_for_campaign(campaign="", campaign_id=""):
         if cursor:
             body["start_cursor"] = cursor
         try:
-            res = _call("POST", f"/databases/{os.environ['NOTION_DATABASE_ID']}/query", json=body)
+            res = _call("POST", f"/databases/{database()['id']}/query", json=body)
         except NotionError as e:
             # a rollup of a title, say, refuses the text filter: read the rows and filter here instead
             if flt and not campaign_id and "400" in str(e) and not cursor:

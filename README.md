@@ -313,12 +313,20 @@ the variables it declares:
 
 ```
 ANTHROPIC_API_KEY    for the two AI buttons; without it they say so and the checks still run
-NOTION_TOKEN         an internal integration; connect it to the comms plan database in Notion,
-                     and to the campaigns database the plan's Campaign column points to
-NOTION_DATABASE_ID   the database's id, the 32 characters in its URL
+NOTION_TOKEN         an internal integration, made in the plan's own workspace; connect it to
+                     the comms plan database in Notion (··· at the top right, Connections) and
+                     to the campaigns database the plan's Campaign column points to
+NOTION_DATABASE_ID   the plan database's id: open the plan as its own page and take the 32
+                     characters before ?v= in the address, or paste the address whole. The page
+                     the plan sits on also works when the plan is the one database laid out on
+                     it; the id of a linked view of the plan does not
 APP_PASSWORD         optional; if set, the whole app asks for it (any username)
 CLAUDE_MODEL         optional, default claude-opus-5
 ```
+
+If Notion cannot find a database by the id, the panel's error says what the id does name (a page,
+a row, a linked view) and which databases the integration has been connected to, so the fix is
+either the id to set or the database to connect.
 
 The plan's property names and types are read from the database rather than assumed. The
 defaults are "Campaign text" for the campaign, "Channel Name" for the channel and "Copy" for

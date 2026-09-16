@@ -384,7 +384,12 @@ kept in the browser only. Each campaign has its own address, `/c/<id>/<name>`, w
 after the `#`, so a refresh or a shared link opens that campaign on that screen rather than
 whatever was open last; the root is the list of campaigns, and the browser's back button steps
 between them. After a refresh the templates run on the server once more before the rows can be
-written, and the Notion panel says so while it waits. Two people in the same campaign overwrite each other: the later save
+written, and the Notion panel says so while it waits. Whenever the page is waiting on Notion, the
+server or Claude for more than a moment, a holding card sits over the page saying what it is
+waiting for: opening a campaign, reading the campaigns or the plan's rows, rendering the
+templates, Claude writing, or writing rows into Copy one at a time. It stays up half a second
+once shown, so a quick answer never flashes it, and after twelve seconds it adds that it is still
+working. Two people in the same campaign overwrite each other: the later save
 wins.
 
 `render.yaml` describes the service. On Render, create a Blueprint from this repository and set

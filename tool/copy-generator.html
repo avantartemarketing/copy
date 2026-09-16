@@ -240,7 +240,18 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
   .meta{grid-template-columns:1fr;gap:0 0}
   .meta dt{padding-top:9px}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* the holding card: up while the page waits on Notion, the server or Claude */
+#hold{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(251,250,247,.6);background:color-mix(in srgb,var(--paper) 60%,transparent);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);animation:holdin .18s ease-out}
+#hold[hidden]{display:none}
+.holdcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px 28px 20px;min-width:260px;max-width:440px;box-shadow:0 12px 40px rgba(0,0,0,.14);text-align:center}
+.holdcard p{margin:14px 0 0;font-size:13.5px;color:var(--ink)}
+.holdcard p.note{margin-top:6px;font-size:12px;color:var(--ink-faint)}
+.pulse{display:flex;gap:9px;justify-content:center;height:12px;align-items:center}
+.pulse i{width:9px;height:9px;border-radius:50%;background:var(--accent);opacity:.25;animation:pulse 1.2s ease-in-out infinite}
+.pulse i:nth-child(2){animation-delay:.2s}.pulse i:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+@keyframes holdin{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.pulse i{opacity:.7}}
 </style>
 
 <header class="top">
@@ -263,6 +274,7 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
   <main id="main"></main>
   <aside><div id="aside"></div></aside>
 </div>
+<div id="hold" hidden role="status" aria-live="polite"><div class="holdcard"><div class="pulse"><i></i><i></i><i></i></div><p id="holdtext"></p><p class="note" id="holdmore" hidden>Still working.</p></div></div>
 
 <script>
 // ═══════════════════════════════════════════════════ state
@@ -1009,6 +1021,29 @@ function renderAI(r){
 // server, which holds the key. The prompt and the JSON shape are the same either way.
 const HTTP = location.protocol.startsWith("http");
 let SERVED = false;                                  // true once /api/health has answered: app.py is serving the page
+// ---------- the holding card: up whenever the page is waiting on Notion, the server or Claude ----------
+// It appears only once a wait has run a quarter of a second, and stays up half a second once
+// shown, so a quick answer never flashes it. Every wait releases it when it settles, error or not.
+const HOLD = {jobs: new Map(), n: 0, t: null, shownAt: 0, still: null};
+function hold(label){
+  const id = ++HOLD.n; HOLD.jobs.set(id, label); holdSync();
+  return () => { HOLD.jobs.delete(id); holdSync(); };
+}
+async function holding(label, fn){ const done = hold(label); try { return await fn(); } finally { done(); } }
+function holdSync(){
+  const el = $("#hold"); if (!el) return;
+  if (HOLD.jobs.size) {
+    const labels = [...HOLD.jobs.values()]; $("#holdtext").textContent = labels[labels.length - 1];
+    if (el.hidden && !HOLD.t) HOLD.t = setTimeout(() => {
+      HOLD.t = null; if (!HOLD.jobs.size) return;
+      el.hidden = false; HOLD.shownAt = Date.now(); $("#holdmore").hidden = true;
+      clearTimeout(HOLD.still); HOLD.still = setTimeout(() => { if (!el.hidden) $("#holdmore").hidden = false; }, 12000);
+    }, 250);
+  } else {
+    clearTimeout(HOLD.t); HOLD.t = null;
+    if (!el.hidden) setTimeout(() => { if (!HOLD.jobs.size) { el.hidden = true; clearTimeout(HOLD.still); } }, Math.max(0, 500 - (Date.now() - HOLD.shownAt)));
+  }
+}
 async function aiJSON(prompt, schema){
   if (typeof claude !== "undefined") {
     const sample = await claude.use("sample");
@@ -1034,6 +1069,7 @@ const SCHEMA_SUGGEST = {type:"object", additionalProperties:false, required:["ho
   notes:{type:"array", items:{type:"string"}}}};
 async function proofread(k){
   S.ai[k] = {busy:true}; renderAside();
+  const done = hold(`Claude is reading the ${spec(k).name} in every place it lands…`);
   try{
     const hits = placements(k);
     const ctx = hits.map((h,i)=>`${i+1}. ${h.kind} · ${h.name}\n${h.before?h.before+"\n\n":""}>>> ${h.line}\n${h.after?"\n"+h.after:""}`).join("\n\n");
@@ -1061,7 +1097,7 @@ Reply with JSON only, no other text:
   }catch(e){
     S.ai[k] = {err: AI_ERR(e) + " The mechanical checks above still apply."};
   }
-  renderAside();
+  done(); renderAside();
 }
 
 // ---------- the product pages: one per artwork, as on the site, and the source the email is suggested from ----------
@@ -1248,6 +1284,7 @@ function liftedIn(res){
 }
 async function suggest(){
   S.suggest = {busy:true}; renderPage(); renderPageAside();
+  const done = hold("Claude is reading the product page and writing suggestions…");
   try{
     let res = await aiJSON(suggestPrompt(), SCHEMA_SUGGEST), lifts = liftedIn(res);
     if (lifts.length) {                                  // once more, told what went wrong
@@ -1259,7 +1296,7 @@ async function suggest(){
   }catch(e){
     S.suggest = {err: AI_ERR(e) + " The pages are unchanged."};
   }
-  renderPage(); renderPageAside();
+  done(); renderPage(); renderPageAside();
 }
 
 // ---------- details ----------
@@ -1409,6 +1446,7 @@ async function serverRender(){
   const stamp = JSON.stringify({f:S.facts, b:S.blocks, p:S.page, l:S.lead, d: planDates()});
   if (S.server.stamp === stamp && S.server.out) return S.server.out;
   S.server.busy = true;
+  const done = hold("Rendering the templates on the server…");
   try {
     const r = await fetch("/api/render", {method:"POST", headers:{"content-type":"application/json"},
       body: JSON.stringify({facts:S.facts, blocks:S.blocks, page:S.page, lead:S.lead, opener:openerText(), dates:planDates()})});
@@ -1416,6 +1454,7 @@ async function serverRender(){
     if (!r.ok) throw new Error(j.error || r.statusText);
     S.server = {stamp, out: j, busy:false};
   } catch (e) { S.server = {stamp, err: String(e.message || e), busy:false}; }
+  finally { done(); }
   return S.server.out;
 }
 let HEALTH;                                          // the one probe, shared
@@ -1651,7 +1690,7 @@ async function generate(mode){
     const j = {kind: "voice", set: "voice", channel: "The artist's posts", name: "The hook, in the first person", orig: H, len: H.length, text: H, ai: null, approved: false, err: null, busy: false};
     S.gen.items = [j]; S.gen.busy = false;
     if (carry(j)) { await tweetRound(); return; }
-    await voiceJob(j);
+    await holding("Claude is writing the hook in the artist's voice…", () => voiceJob(j));
     return;
   }
   await tweetRound();
@@ -1663,7 +1702,7 @@ async function tweetRound(){
   const fresh = jobs.filter(j => !carry(j));
   if (S.gen.items.every(j => j.approved)) { S.gen.busy = false; S.gen.done = true; persist(); render(); return; }
   S.gen.busy = false;
-  await Promise.all(fresh.map(rewriteJob));
+  await holding(fresh.length === 1 ? "Claude is writing the tweet…" : `Claude is writing ${fresh.length} tweets…`, () => Promise.all(fresh.map(rewriteJob)));
   render();
 }
 // after a reload the approved copy is back before the server has rendered it in this browser; the
@@ -1694,7 +1733,7 @@ function wireGenLine(){
 // one rewrite again on its own: a fresh take, with the approved version a click away
 function redoOne(j){
   Object.assign(j, {last: j.text, anchor: false, why: null, kept: false, approved: false, err: null}); S.gen.done = false; persist();
-  return j.kind === "voice" ? voiceJob(j) : rewriteJob(j);
+  return holding("Claude is writing it again…", () => j.kind === "voice" ? voiceJob(j) : rewriteJob(j));
 }
 
 function renderReview(){
@@ -1731,7 +1770,7 @@ function renderReview(){
       ok.disabled = !jobOK(j); ok.textContent = "Approve";
     };
     const ok = $(`#ok_${i}`); if (ok) ok.onclick = () => { j.approved = true; if (j.kind === "voice" && !S.gen.items.some(x => x.kind !== "voice")) { persist(); tweetRound(); return; } if (S.gen.items.every(x => x.approved)) S.gen.done = true; persist(); render(); };
-    const again = $(`#again_${i}`); if (again) again.onclick = () => (j.kind === "voice" ? voiceJob(j) : rewriteJob(j));
+    const again = $(`#again_${i}`); if (again) again.onclick = () => holding("Claude is writing it again…", () => j.kind === "voice" ? voiceJob(j) : rewriteJob(j));
     const lastB = $(`#last_${i}`); if (lastB) lastB.onclick = () => { j.text = j.last; j.approved = false; j.err = null; render(); };
   });
 }
@@ -1859,15 +1898,17 @@ async function notionPanel(){
   </section>`;
   const panel = $("#aside .panel"); if (!panel) return;
   const old = $("#notion"); const wrap = old || document.createElement("div"); wrap.id = "notion"; wrap.innerHTML = html; if (!old) panel.appendChild(wrap);
-  const rf = $("#nrefresh"); if (rf) rf.onclick = async () => { await loadPlan(true); render(); };
+  const rf = $("#nrefresh"); if (rf) rf.onclick = async () => { await holding("Reading the plan's rows from Notion…", () => loadPlan(true)); render(); };
   const rp = $("#nreplace"); if (rp) rp.onclick = () => { kept.forEach(p => S.keep[p.row.id] = false); persist(); render(); };
   const push = $("#npush"); if (push) push.onclick = async () => {
     N.busy = true; N.err = null; notionPanel();
+    const done = hold(`Writing ${toWrite.length === 1 ? "one row" : toWrite.length + " rows"} into Copy, one row at a time…`);
     try { const r = await fetch("/api/notion/write", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({rows: toWrite.map(x => ({id: x.id, text: x.text}))})});
           const j = await r.json(); if (!r.ok) throw new Error(j.error); N.result = j;
           S.wrote = S.wrote || {}; toWrite.forEach(x => { if ((j.written || []).includes(x.id)) S.wrote[x.id] = hashText(x.text); }); }
     catch (e) { N.err = String(e.message || e); }
-    N.busy = false; persist(); await loadPlan(true); render();                          // the rows again, now carrying the copy
+    finally { done(); }
+    N.busy = false; persist(); await holding("Reading the rows again…", () => loadPlan(true)); render();                          // the rows again, now carrying the copy
   };
   async function check(){
     N.busy = true; N.err = null; notionPanel();
@@ -1956,8 +1997,10 @@ async function loadCampaigns(force){
   if (S.camps && S.camps.list && !force && !S.camps.cached) return S.camps;
   const had = S.camps;
   if (had) { had.loading = true; if (S.view === "campaigns") renderCampaigns(); }
+  const done = had && had.list ? null : hold("Reading the campaigns from Notion…");
   try { const r = await fetch("/api/notion/campaigns" + (force ? "?force=1" : "")); const j = await r.json(); S.camps = r.ok ? {list: j.campaigns, took: j.took} : (had ? Object.assign(had, {err: j.error, loading: false, cached: false}) : {list: [], err: j.error}); }
   catch (e) { S.camps = had ? Object.assign(had, {err: String(e.message || e), loading: false, cached: false}) : {list: [], err: String(e.message || e)}; }
+  if (done) done();
   try { if (S.camps.list && S.camps.list.length) localStorage.setItem("cg:camps", JSON.stringify({list: S.camps.list})); } catch (_) {}
   return S.camps;
 }
@@ -1971,7 +2014,10 @@ async function searchCampaigns(q){                       // the list holds the h
     if (S.view === "campaigns" && (S.campQ || "").toLowerCase() === q) renderCampaigns();
   }, 400);
 }
-async function openCampaign(c, nav){                     // c: {id, name}, or null for a release kept only here; nav "replace" when the address led here
+function openCampaign(c, nav){                           // c: {id, name}, or null for a release kept only here; nav "replace" when the address led here
+  return holding(c ? `Opening ${c.name}…` : "Opening the release kept here…", () => openCampaignNow(c, nav));
+}
+async function openCampaignNow(c, nav){
   if (S.saved && S.saved.status === "pending") await saveRemote();
   const carry = (!S.campaign && hasContent()) ? snapshot() : null;   // work begun outside a campaign travels into an empty one
   let snap = null, err = null;
@@ -2012,9 +2058,11 @@ async function campaignByID(id){
   if (!S.camps) { try { const c = JSON.parse(localStorage.getItem("cg:camps") || "null"); if (c && c.list) S.camps = Object.assign(c, {cached: true}); } catch (_) {} }
   let c = find(); if (c) return c;
   const local = localGet(id); if (local && local.campaign && local.campaign.id === id) return local.campaign;
-  await loadCampaigns(); c = find(); if (c) return c;
-  try { const r = await fetch(`/api/notion/draft/${encodeURIComponent(id)}`); const j = await r.json(); if (r.ok && j.state && j.state.campaign && j.state.campaign.id === id) return j.state.campaign; } catch (_) {}
-  return null;
+  return holding("Finding the campaign…", async () => {
+    await loadCampaigns(); c = find(); if (c) return c;
+    try { const r = await fetch(`/api/notion/draft/${encodeURIComponent(id)}`); const j = await r.json(); if (r.ok && j.state && j.state.campaign && j.state.campaign.id === id) return j.state.campaign; } catch (_) {}
+    return null;
+  });
 }
 // what the address names: a campaign on a screen, the release kept in this browser, or the campaigns to choose from
 async function route(){

@@ -1548,11 +1548,19 @@ async function voiceJob(j){
   catch (e) { j.err = AI_ERR(e) + " Rewrite it by hand below."; }
   j.busy = false; render();
 }
+// how the tweet as written opens, before the first title: "Announcing", which the rewrite keeps
+function tweetLead(orig){
+  const first = (orig || "").split("\n")[0], before = first.split(/[‘“]/)[0].trim();
+  if (!before || !/^[A-Z]/.test(before)) return "";
+  const words = before.replace(/[,:–-]+$/, "").trim().split(/\s+/);
+  return words.length <= 3 ? words.join(" ") : words[0];
+}
 // the facts a tweet must still carry once rewritten, and how it reads
 function tweetFacts(j){
   const f = S.facts, d = D(), t = jobText(j), low = t.toLowerCase(), has = s => !!s && low.includes(String(s).toLowerCase());
-  const titles = d.series ? [f.series_name] : d.cardTitles;
-  const out = titles.map(x => ({need:true, ok:has(x), t:`Names ‘${x}’`}));
+  const titles = d.series ? [f.series_name] : d.cardTitles, lead = tweetLead(j.orig);
+  const out = lead ? [{need:true, ok:t.startsWith(lead), t:`Begins “${lead}”, as the tweet as written does`}] : [];
+  titles.forEach(x => out.push({need:true, ok:has(x), t:`Names ‘${x}’`}));
   if (j.set === "artistTweets" && !String(f.artist_voice || "").startsWith("third")) out.push({need:false, ok:/\b(my|I)\b/.test(t), t:"In the artist's first person"});
   else out.push({need:true, ok:has(f.artist), t:`Names ${f.artist}`});
   out.push({need:true, ok:/limited edition/.test(low), t:"Says it is a limited edition"});
@@ -1588,13 +1596,17 @@ function rewritePrompt(j){
   const who = j.set === "artistTweets"
     ? (first ? `It is the artist's own tweet, in the first person ("my collaboration with Avant Arte"), Avant Arte named and not tagged.` : `It is posted by the artist's studio or estate, in the third person, Avant Arte named and not tagged.`)
     : `It is Avant Arte's own tweet.`;
+  const lead = tweetLead(j.orig), mine = j.set === "artistTweets" && first;
+  const example = mine
+    ? `“Announcing my new limited edition prints with Avant Arte – ‘The Princess (Cinderella)’ and ‘The Princess (Belle)’, a pair that explore the fragile boundary between childhood memory and adulthood.”`
+    : `“Announcing ‘The Princess (Cinderella)’ and ‘The Princess (Belle)’, a pair of new limited edition prints by Kukwon Woo that explore the fragile boundary between childhood memory and adulthood.”`;
   return `You are rewriting one tweet for Avant Arte, a publisher of limited edition artworks, so that it fits X's limit of ${X_LIMIT} characters, a link counting as 23. As it stands it runs to ${j.len}. Write it whole, as a tweet reads, not as the longer text with pieces cut out. ${who}
 
 THE TWEET AS IT STANDS:
 ${j.orig}
 ${j.last && j.anchor ? `\nTHE VERSION APPROVED LAST TIME, before the copy changed; keep its wording wherever it still holds:\n${j.last}\n` : ""}
 IT MUST STILL SAY, in two lines with a blank line between:
-1. One full sentence: ${titles}, ${f.edition_phrase}, by ${artistX}${f.beneficiary ? `, in support of ${f.beneficiary}` : ""}, with one idea from the hook joined into that same sentence as a relative clause or a closing clause after a comma. Like this: “‘The Princess (Cinderella)’ and ‘The Princess (Belle)’ – a pair of new limited edition prints by Kukwon Woo that explore the fragile boundary between childhood memory and adulthood.” Never put the idea in a sentence of its own, and never as a participle phrase standing alone (“Exploring the fragile boundary…”): that reads as a caption.
+1. One full sentence${lead ? ` that begins “${lead}”, exactly as the tweet as written begins,` : ""} naming ${titles}, ${f.edition_phrase}, by ${artistX}${f.beneficiary ? `, in support of ${f.beneficiary}` : ""}, with one idea from the hook joined into that same sentence as a relative clause or a closing clause after a comma. Like this: ${example} Never put the idea in a sentence of its own, and never as a participle phrase standing alone (“Exploring the fragile boundary…”): that reads as a caption.
 2. How to act: ${act}, ending with this link exactly as given: ${f.link}
 
 RULES: every fact as given, none added and none dropped. After the first mention the artist is ${d.surname}. British spelling. The dash is a spaced en dash ( – ), one at most; never an em dash (—), never a hyphen as a dash and never a pair of dashes round an aside. No exclamation marks and no rhetorical questions. Never "thrilled", "excited", "don't miss out" or "drop". Under ${X_LIMIT} characters with the link counted as 23.
@@ -1684,11 +1696,12 @@ function renderReview(){
   const rows = jobs.map((j, i) => {
     const facts = j.busy ? [] : (j.kind === "voice" ? voiceFacts(j) : tweetFacts(j)), style = j.busy ? [] : tweetStyle(jobText(j)), ok = !j.busy && jobOK(j);
     return `<div class="sheet gen">
-      <div class="genhead"><b>${esc(j.channel)} · ${esc(j.name)}</b><span class="note" style="margin:0">${j.kind === "voice" ? `Names ${esc(D().surname)}, so the artist's posts and tweets get it in the first person.${jobs.some(x => x.kind !== "voice") ? "" : " The tweets follow once this is approved."}` : `${j.len} characters as X counts them, against ${X_LIMIT}.`}${j.why ? ` Approved before, but that version now falls short: ${esc(j.why.join("; "))}.` : j.last && j.anchor && !j.approved ? " Written close to the version approved before." : ""}</span></div>
+      <div class="genhead"><b>${esc(j.channel)} · ${esc(j.name)}</b><span class="note" style="margin:0">${j.kind === "voice" ? `Names ${esc(D().surname)}, so the artist's posts and tweets get it in the first person.${jobs.some(x => x.kind !== "voice") ? "" : " The tweets follow once this is approved."}` : `As written, ${j.len} characters as X counts them, against ${X_LIMIT}.`}${j.why ? ` Approved before, but that version now falls short: ${esc(j.why.join("; "))}.` : j.last && j.anchor && !j.approved ? " Written close to the version approved before." : ""}</span></div>
       <div class="gencols">
         <div><span class="lbl">As written</span><pre>${esc(j.orig)}</pre></div>
         <div><span class="lbl">${j.last && j.text === j.last ? "The version approved before" : j.ai && j.text === j.ai ? "Rewritten by Claude" : j.ai ? "Rewritten by Claude, then edited" : "Rewritten by hand"}</span>
           ${j.busy ? `<p class="note">Claude is rewriting it…</p>` : `<textarea id="cut_${i}" rows="7">${esc(j.text)}</textarea>
+          ${j.kind === "voice" ? "" : `<p class="count${xLen(jobText(j)) > X_LIMIT ? " over" : ""}" id="count_${i}">${xLen(jobText(j))} of ${X_LIMIT} as X counts them, a link as 23</p>`}
           <div id="facts_${i}">${facts.map(c => `<div class="chk" data-k="${c.ok ? "good" : "warn"}"><s></s><span>${esc(c.t)}${c.ok || c.need ? "" : " (not required)"}</span></div>`).join("")}${style.map(w => `<div class="chk" data-k="warn"><s></s><span>${esc(w)}</span></div>`).join("")}</div>
           ${j.err ? `<p class="note">${esc(j.err)}</p>` : ""}`}
         </div>
@@ -1707,6 +1720,7 @@ function renderReview(){
     const ta = $(`#cut_${i}`); if (ta) ta.oninput = e => {
       j.text = e.target.value; j.approved = false;
       const facts = j.kind === "voice" ? voiceFacts(j) : tweetFacts(j), style = tweetStyle(jobText(j)), ok = $(`#ok_${i}`);
+      const cnt = $(`#count_${i}`); if (cnt) { const n = xLen(j.text); cnt.textContent = `${n} of ${X_LIMIT} as X counts them, a link as 23`; cnt.classList.toggle("over", n > X_LIMIT); }
       $(`#facts_${i}`).innerHTML = facts.map(c => `<div class="chk" data-k="${c.ok ? "good" : "warn"}"><s></s><span>${esc(c.t)}${c.ok || c.need ? "" : " (not required)"}</span></div>`).join("") + style.map(w => `<div class="chk" data-k="warn"><s></s><span>${esc(w)}</span></div>`).join("");
       ok.disabled = !jobOK(j); ok.textContent = "Approve";
     };
@@ -1825,17 +1839,20 @@ async function notionPanel(){
   if (!S.campaign) { const w = $("#notion"); if (w) w.remove(); return; }
   const srv = S.server.out, pi = S.plan ? planItems(finalSets()) : [];
   const toWrite = pi.filter(p => p.item && !p.keep && !rowSame(p)).map(p => ({id: p.row.id, text: p.text, label: rowLabel(p.row)})), already = pi.filter(p => p.item && !p.keep && rowSame(p)).length;
+  const kept = pi.filter(p => p.item && p.keep && !rowSame(p));
   const html = `<section><h3>Notion</h3>
     <p class="note">The rows of <b>${esc(S.campaign.name)}</b>${S.plan ? `, read ${esc((S.plan.at || "").slice(11, 16))}` : ""}. <button class="act ghost" id="nrefresh" style="width:auto;padding:2px 8px;font-size:11.5px"${S.planBusy ? " disabled" : ""}>Read again</button></p>
     ${N.err ? `<p class="note">${esc(N.err)}</p>` : ""}
     ${S.plan ? `<button class="act" id="npush"${(N.busy || !srv || !toWrite.length) ? " disabled" : ""}>${toWrite.length ? `Write ${toWrite.length} row${toWrite.length === 1 ? "" : "s"} into Copy` : "Nothing to write"}</button>
-      <p class="note">${toWrite.length ? `Each row gets the copy shown for it on the left.${already ? ` ${already === 1 ? "One row already carries" : already + " rows already carry"} the same copy and ${already === 1 ? "is" : "are"} left alone.` : ""} Rows keeping their own copy, and rows by hand, are not touched.` : "Every row the tool writes already carries the copy shown for it."}</p>` : ""}
+      <p class="note">${toWrite.length ? `Each row gets the copy shown for it on the left.${already ? ` ${already === 1 ? "One row already carries" : already + " rows already carry"} the same copy and ${already === 1 ? "is" : "are"} left alone.` : ""} Rows keeping their own copy, and rows by hand, are not touched.` : "Every row the tool writes already carries the copy shown for it."}</p>
+      ${kept.length ? `<p class="note">${kept.length === 1 ? "One row keeps" : kept.length + " rows keep"} the copy already in Notion, the tool's version shown beside it; Replace on the row swaps one. <button class="act ghost" id="nreplace" style="width:auto;padding:2px 8px;font-size:11.5px">Replace ${kept.length === 1 ? "it" : "them all"} with the tool's</button></p>` : ""}` : ""}
     ${N.result ? `<p class="note">Written: ${N.result.written.length}.${N.result.failed.length ? ` Failed: ${N.result.failed.length}.` : ""}</p>
       ${N.result.failed.length ? `<details class="out"><summary><b>What failed</b></summary><pre>${esc(N.result.failed.map(f => f.error).join("\n"))}</pre></details>` : ""}` : ""}
   </section>`;
   const panel = $("#aside .panel"); if (!panel) return;
   const old = $("#notion"); const wrap = old || document.createElement("div"); wrap.id = "notion"; wrap.innerHTML = html; if (!old) panel.appendChild(wrap);
   const rf = $("#nrefresh"); if (rf) rf.onclick = async () => { await loadPlan(true); render(); };
+  const rp = $("#nreplace"); if (rp) rp.onclick = () => { kept.forEach(p => S.keep[p.row.id] = false); persist(); render(); };
   const push = $("#npush"); if (push) push.onclick = async () => {
     N.busy = true; N.err = null; notionPanel();
     try { const r = await fetch("/api/notion/write", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({rows: toWrite.map(x => ({id: x.id, text: x.text}))})});
@@ -2132,6 +2149,7 @@ function renderPlan(){
     : p.row.copy ? `<div class="gencols"><div><span class="lbl">In the row now${p.keep ? ", kept" : ""}</span><pre>${esc(p.row.copy)}</pre></div><div><span class="lbl">The tool's${p.keep ? "" : ", to be written"}</span><pre>${esc(p.text)}</pre></div></div>
         <div class="genact"><button class="act ghost keep" data-row="${esc(p.row.id)}">${p.keep ? "Use the tool's version instead" : "Keep the plan's copy"}</button></div>`
     : `<pre>${esc(p.text)}</pre>`;
+  const open = new Set([...document.querySelectorAll("#main details[data-row][open]")].map(d => d.dataset.row));
   $("#main").innerHTML = `
     <div class="head">
       <span class="lbl">Then</span>
@@ -2142,13 +2160,14 @@ function renderPlan(){
     ${S.planErr ? `<p class="live">The rows could not be read: ${esc(S.planErr)}</p>` : ""}
     ${planHasNeeds() && !rows.length ? `<p class="live">No row in this campaign is ticked as needing copy. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Show every row</button></p>` : ""}
     ${groups.map(g => `<div class="groupline"><span class="lbl">${esc(g.channel)}</span></div>
-      ${g.items.map(p => `<details class="out"${p.row.copy && p.shape && p.item ? "" : ""}><summary><b>${esc(p.row.name)}</b>${p.row.live_date ? `<span class="note">${esc(p.row.live_date.slice(0, 10))}</span>` : ""}${p.row.copy ? `<span class="note">${rowSame(p) ? "already in the row" : p.keep ? "keeps its copy" : "will be replaced"}</span>` : ""}<i>${p.item ? (SETOF[p.shape.family] === "tweets" || SETOF[p.shape.family] === "artistTweets" ? xLen(p.text) + " on X" : p.text.length + " chars") : ""}</i></summary>
+      ${g.items.map(p => `<details class="out" data-row="${esc(p.row.id)}"><summary><b>${esc(p.row.name)}</b>${p.row.live_date ? `<span class="note">${esc(p.row.live_date.slice(0, 10))}</span>` : ""}${p.row.copy ? `<span class="note">${rowSame(p) ? "already in the row" : p.keep ? "keeps its copy" : "will be replaced"}</span>${p.item && !rowSame(p) ? `<button class="act ghost keep" data-row="${esc(p.row.id)}" style="width:auto;padding:1px 8px;margin:0 0 0 4px;font-size:11.5px">${p.keep ? "Replace" : "Keep"}</button>` : ""}` : ""}<i>${p.item ? (SETOF[p.shape.family] === "tweets" || SETOF[p.shape.family] === "artistTweets" ? xLen(p.text) + " on X" : p.text.length + " chars") : ""}</i></summary>
         <div class="rowbar"><span class="lbl">Shape</span>${opts(p)}</div>${body(p)}</details>`).join("")}`).join("")}
     ${planHasNeeds() && rows.length ? `<p class="note" style="margin-top:18px">${S.showAll ? `Showing every row. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Only rows that need copy</button>` : `Rows without the Needs copy tick are hidden. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Show every row</button>`}</p>` : ""}`;
+  open.forEach(id => { const d = $("#main").querySelector(`details[data-row="${CSS.escape(id)}"]`); if (d) d.open = true; });
   wireGenLine();
   const sa = $("#showall"); if (sa) sa.onclick = () => { S.showAll = !S.showAll; afterShapeChange(); persist(); render(); };
   $("#main").querySelectorAll("select.shape").forEach(el => el.onchange = e => { S.shapes[el.dataset.row] = e.target.value; afterShapeChange(); persist(); render(); });
-  $("#main").querySelectorAll("button.keep").forEach(el => el.onclick = () => { const p = items.find(p => p.row.id === el.dataset.row); S.keep[el.dataset.row] = p ? !p.keep : false; persist(); render(); });
+  $("#main").querySelectorAll("button.keep").forEach(el => el.onclick = e => { e.preventDefault(); e.stopPropagation(); const p = items.find(p => p.row.id === el.dataset.row); S.keep[el.dataset.row] = p ? !p.keep : false; persist(); render(); });
 }
 
 // ═══════════════════════════════════════════════════ boot

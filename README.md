@@ -362,8 +362,15 @@ copy costs no approvals at all, and putting it into the plan is one press.
 **Writing touches only what changed.** A row already carrying the copy the tool would write is
 left alone, and the Write button counts only the rows whose copy differs. A row whose copy the
 tool wrote earlier is replaced when the tool's copy changes; a row whose copy someone wrote or
-edited in Notion is kept, shown beside the tool's version, until the writer swaps it. The draft
-remembers what the tool wrote, so this holds for anyone who opens the campaign.
+edited in Notion is kept, shown beside the tool's version, until the writer swaps it. Each row's
+line says which it is, with Replace or Keep beside it, and the Notion panel can replace every
+kept row at once. The draft remembers what the tool wrote, so this holds for anyone who opens the
+campaign; rows written before the tool kept that record look like someone else's copy the first
+time round, so they are kept until replaced once.
+
+**A rewritten tweet opens as the tweet did.** The announcement as written begins "Announcing",
+and the rewrite must too; the checklist says so, and the count beside the box updates as you
+type, turning amber over 280.
 
 **Campaigns and drafts.** Served, the page opens on the plan's campaigns, read from the campaigns
 database the plan's Campaign column points to, most recently edited first. Choose one and the

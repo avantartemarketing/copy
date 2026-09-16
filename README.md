@@ -241,6 +241,23 @@ hook on the announcement only, the beneficiary named once, and an action line th
 release's link. No features line, no hashtag, no bio. The workbook and the templates carry the
 same lines.
 
+**The opener can be written whole.** The archive's announcements open with a framed sentence 49
+times in 58: a lead ("We're delighted to announce our latest collaboration with"), the work and the
+edition phrase, a few words from the writer, and what it supports. One in ten opens on the artwork
+instead: "Surveillance and defiance bubble to the surface in a new limited edition silkscreen print
+by Ai Weiwei." The tool offers both. The lead menu has three more entries, "The artist presents",
+"An image first" and "In your own words", and choosing one turns the opener into a single field
+holding that shape, blanks marked in square brackets, for the writer to finish. What that does to
+the system: the first sentence stops being house copy and becomes a fourth fragment, held to the
+same discipline as the hook, checked as it is typed (the artist in full, since this is the first
+mention; the words "limited edition"; one sentence; no blank left), proofread by Claude with one
+extra question, whether it pre-empts the hook that follows it, and never reused. The four other
+emails that carry the work intro, Now Live, the Insiders and Early Access emails and the Monthly
+Preview, keep the framed line, so their guarantees hold and the qualifier keeps its job there. A
+written opener that leaves out the beneficiary hands that line to the features list. Clearing the
+field goes back to the frame. The templates take `context.opener`, the workbook an `opener` cell,
+and the page sends the sentence it shows, framed or written, so the server renders the same line.
+
 **The announcement tweet never fits.** The hook is two or three sentences and X allows 280
 characters, a link counting as 23, so every announcement tweet in every brief runs over, by 140
 to 300 characters. The archive's own announcement tweets carried one hook sentence at most, and

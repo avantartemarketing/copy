@@ -39,7 +39,7 @@ def from_brief(path):
         beneficiary=g(rel, "fundraiser"), beneficiary_handle=g(rel, "beneficiary_handle"), advisor=g(rel, "advisor", "Sam"),
         early_access_code=g(rel, "early_access_code", "000-000"), framing_code=g(rel, "framing_code"), framing_percent=int(g(rel, "framing_percent", 10)),
         feature_1=feats[0], feature_2=feats[1], feature_3=feats[2], feature_4=feats[3], feature_5=feats[4],
-        bio=g(ctx, "artist_bio"), hook=ctx["hook"], making=ctx["making"], quote=g(art, "quote"), qualifier=g(ctx, "qualifier"),
+        bio=g(ctx, "artist_bio"), hook=ctx["hook"], making=ctx["making"], quote=g(art, "quote"), qualifier=g(ctx, "qualifier"), opener=g(ctx, "opener"),
         card_line_1=g(aw[0], "card_line"), card_line_2="" if len(aw) < 2 else g(aw[1], "card_line"), card_line_3="" if len(aw) < 3 else g(aw[2], "card_line"),
     )
 
@@ -101,6 +101,7 @@ frags = [
     ("bio", V["bio"], "2 to 3 sentences on the artist, third person, no handle. Coming Soon post only."),
     ("hook", V["hook"], "2 to 3 sentences about the work. Write it as editorially as you like; the one test is that it must read as well in the middle of an email as at the top of a post. Self-contained, no rhetorical question, the artist by surname only (the frame has used the full name), one dash at most and never a pair. It reaches 16 slots, so it is the one fragment that must stand alone."),
     ("qualifier", V["qualifier"], "a few words after the edition phrase in the email opener, e.g. spanning five decades of the artist's career. Ten words at most, a phrase not a sentence, no we or our, no artist name. Ignored when there is a beneficiary: 'released in support of X' fills the same opening. With several works the title drops out of this line, and that is what it is for."),
+    ("opener", V["opener"], "or the announcement's first sentence written whole, e.g. Surveillance and defiance bubble to the surface in a new limited edition silkscreen print by Ai Weiwei. Blank keeps the framed line. One sentence, the artist in full, the words limited edition. The four other emails keep the framed line either way; if this leaves out the beneficiary, the features list names it."),
     ("making", V["making"], "one sentence on how the edition was made; write 'printmakers at Make-Ready' and the sheet adds 'our'."),
     ("card_line_1", V["card_line_1"], "one sentence on the first work, 15 to 30 words, under its card in six emails. With several works, say something different about each: the edition is described above the cards, so do not call each one a limited edition print."),
     ("card_line_2", V["card_line_2"], "the second titled work; blank otherwise"),
@@ -113,7 +114,7 @@ for k, v, note in frags:
     ws.row_dimensions[row].height = 16 * max(2, math.ceil(len(v) / 80) + v.count("\n")); R[k] = row; row += 1
 row += 1; ws[f"A{row}"] = "Derived (formulas, do not edit)"; ws[f"A{row}"].font = BOLD; row += 1
 B = lambda k: f"$B${R[k]}"
-derived = ["named", "named_x", "collab_x", "a_unit", "work", "Work", "work_email", "Work_email", "work_intro", "support", "tweet_beneficiary", "beneficiary_tagged", "bio_tagged", "hook_names_beneficiary",
+derived = ["named", "named_x", "collab_x", "a_unit", "work", "Work", "work_email", "Work_email", "work_intro", "support", "tweet_beneficiary", "beneficiary_tagged", "bio_tagged", "hook_names_beneficiary", "opener_names_beneficiary",
            "features", "features_list", "features_list_support", "making_ours", "making_ours_tagged",
            "launch_date", "launch_time", "launch_weekday", "launch_date_dd", "close_date", "close_time", "close_weekday", "close_date_dd",
            "collect_phrase", "edition_phrase_cap", "window_cap", "card", "quote_line", "each_artwork", "work_word", "add_what"]
@@ -134,6 +135,7 @@ F = {
  "beneficiary_tagged": f'=IF({B("beneficiary")}="","",{B("beneficiary")}&IF({B("beneficiary_handle")}="",""," (@"&{B("beneficiary_handle")}&")"))',
  "bio_tagged": f'=IF({B("handle")}="",{B("bio")},SUBSTITUTE({B("bio")},{B("artist")},{B("named")},1))',
  "hook_names_beneficiary": f'=IF({B("beneficiary")}="",FALSE,ISNUMBER(SEARCH({B("beneficiary")},{B("hook")})))',
+ "opener_names_beneficiary": f'=IF({B("beneficiary")}="",FALSE,ISNUMBER(SEARCH({B("beneficiary")},{B("opener")})))',
  "features": f'={B("feature_1")}&IF({B("feature_2")}="","",". "&{B("feature_2")})&IF({B("feature_3")}="","",". "&{B("feature_3")})&IF({B("feature_4")}="","",". "&{B("feature_4")})&IF({B("feature_5")}="","",". "&{B("feature_5")})&"."',
  "features_list": f'="· "&{B("feature_1")}&IF({B("feature_2")}="","",{NL}&"· "&{B("feature_2")})&IF({B("feature_3")}="","",{NL}&"· "&{B("feature_3")})&IF({B("feature_4")}="","",{NL}&"· "&{B("feature_4")})&IF({B("feature_5")}="","",{NL}&"· "&{B("feature_5")})',
  "features_list_support": f'={B("features_list")}&IF(OR({B("beneficiary")}="",{B("hook_names_beneficiary")}),"",{NL}&"· Released in support of "&{B("beneficiary")})',
@@ -366,7 +368,7 @@ emails = [
   sel(T("Enter the draw for a chance to collect. Closes ")+"&"+IB("close_date")+'&"."', T("Launching ")+"&"+IB("launch_date")+'&". Register for updates."'),
   sel(T("Enter the draw"), T("Launching ")+"&"+IB("launch_date")),
   sel(IB("Work_email"), IB("Work_email")+'&" by "&'+A),
-  P(LC("email · announce · opener"), hook, IB("making_ours"), IB("features_list"), sel(LC("email · draw line"), P(LC("email · announce · launch line, timed"), LC("email · announce · register line")))),
+  P(f'IF({IB("opener")}="",{LC("email · announce · opener")},{IB("opener")})', hook, IB("making_ours"), f'IF(OR({IB("opener")}="",{IB("opener_names_beneficiary")}),{IB("features_list")},{IB("features_list_support")})', sel(LC("email · draw line"), P(LC("email · announce · launch line, timed"), LC("email · announce · register line")))),
   sel(T("Enter the draw"), T("Discover the collaboration")), card, qline,
   sel(T("Collect ")+"&"+IB("collect_phrase"), T("Launching ")+"&"+IB("launch_date"))),
  ("Welcome (TL Flow)", "timed", "timed", T("Welcome to Avant Arte"), T("Where the art world is more accessible."), E, E,

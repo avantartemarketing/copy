@@ -34,6 +34,9 @@
 {% set support = (", released in support of " ~ fundraiser) if (fundraiser and not hook_names_beneficiary) else "" %}
 {% set feats = edition.features if edition.features is defined and edition.features else ["Signed by the artist", "Individually numbered"] %}
 {% set qualifier = context.qualifier if (context.qualifier is defined and context.qualifier) else "" %}
+{# the announcement's first sentence may be written whole; the four other emails keep the framed work intro #}
+{% set opener = context.opener if (context.opener is defined and context.opener) else "" %}
+{% set opener_names_beneficiary = fundraiser and fundraiser in opener %}
 {# the opener has one opening in it: "released in support of X" fills it when there is a beneficiary #}
 {% set work_intro = (ep if plural else (work ~ ", " ~ ep)) ~ (("" if qualifier.startswith(",") else " ") ~ qualifier if (qualifier and not support) else "") %}
 {% set greeting = "Hi " ~ "{{ personalization_token('contact.firstname', 'there') }}" ~ "," %}
@@ -72,13 +75,13 @@
 [KICKER] {{ "Enter the draw" if draw else "Launching " ~ release.launch_at|ukdate }}
 [HEADLINE] {{ work|cap_first if draw else work|cap_first ~ " by " ~ artist.name }}
 [BODY]
-We're delighted to announce our {{ ordinal }} collaboration with {{ collab }} – {{ work_intro }}{{ support }}.
+{{ opener if opener else ("We're delighted to announce our " ~ ordinal ~ " collaboration with " ~ collab ~ " – " ~ work_intro ~ support ~ ".") }}
 
 {{ context.hook }}
 
 {{ making }}
 
-{{ features(false) }}
+{{ features(opener and not opener_names_beneficiary) }}
 {% if draw %}
 {{ draw_line }}
 {% else %}

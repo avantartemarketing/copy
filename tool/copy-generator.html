@@ -194,6 +194,7 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .out[open]>summary{border-bottom:1px solid var(--line-soft)}
 .out pre{margin:0;padding:16px 18px 20px;font-family:var(--serif);font-size:15px;line-height:1.6;white-space:pre-wrap;word-wrap:break-word;color:var(--ink-soft)}
 .na{color:var(--ink-faint);font-style:italic}
+.fld.op{display:inline}
 .groupline{display:flex;align-items:center;gap:12px;margin:26px 0 12px;max-width:760px}
 .groupline::after{content:"";flex:1;height:1px;background:var(--line)}
 .gen{padding:16px 22px;margin-bottom:14px}
@@ -265,7 +266,7 @@ function blankRelease(){
       f1:"Signed by the artist", f2:"Individually numbered", f3:"Free worldwide shipping", f4:"", f5:"",
       quote:"", bio:""
     },
-    blocks: { qualifier:"", hook:"", making:"", card_1:"", card_2:"", card_3:"" },
+    blocks: { opener:"", qualifier:"", hook:"", making:"", card_1:"", card_2:"", card_3:"" },
     page: { description:"", seo:"", medium:"", authentication:"", more: [] },
     suggest: null,     // Claude's reading of the page, once asked for
     from: {}           // fragment key -> "page" while it is the accepted suggestion, untouched
@@ -353,6 +354,7 @@ function D(){
   d.hookNamesBen = !!(f.beneficiary && S.blocks.hook.toLowerCase().includes(f.beneficiary.toLowerCase()));
   d.support = (f.beneficiary && !d.hookNamesBen) ? `, released in support of ${f.beneficiary}` : "";
   d.benTagged = f.beneficiary ? f.beneficiary + (f.beneficiary_handle ? ` (@${f.beneficiary_handle})` : "") : "";
+  d.openerNamesBen = !!(f.beneficiary && (S.blocks.opener || "").toLowerCase().includes(f.beneficiary.toLowerCase()));
   d.bioTagged = (!f.bio || !f.artist || !f.handle || f.bio.includes("@"+f.handle)) ? (f.bio||"") : f.bio.replace(f.artist, `${f.artist} (@${f.handle})`);
   d.feats = [f.f1,f.f2,f.f3,f.f4,f.f5].filter(Boolean);
   d.featLine = d.feats.join(". ") + ".";
@@ -392,12 +394,20 @@ const LEADS = [
   {name:"Over the moon", note:"The Andy Warhol Foundation, 2026",
    head:d=>`We are over the moon to announce our ${S.facts.ordinal} collaboration with ${S.facts.collab_with} – `},
   {name:"The work first", note:"one announcement in ten opens on the artwork",
-   head:d=>`We're delighted to present `, tail:d=>` by ${S.facts.artist}`}
+   head:d=>`We're delighted to present `, tail:d=>` by ${S.facts.artist}`},
+  // written whole: the shape is a start, and the sentence is then the writer's
+  {name:"The artist presents", note:"written whole, from this shape",
+   shape:d=>`In our ${S.facts.ordinal} collaboration, ${S.facts.artist} presents ${D().workIntro}${d.support}.`},
+  {name:"An image first", note:"written whole: what happens in the work, then the edition",
+   shape:d=>`[What happens in the work] in ${S.facts.edition_phrase} by ${S.facts.artist}${d.support}.`},
+  {name:"In your own words", note:"the framed line as a starting point",
+   shape:d=>openerFramed()}
 ];
+const ownOpener = () => (S.blocks.opener || "").trim();
 // The opener is a fixed frame with one small opening in it. The head and tail are
 // built from the release details and are never editable; the writer's words go between.
 function openerFrame(){
-  const d = D(), L = LEADS[S.lead], lt = L.tail ? L.tail(d) : "";
+  const d = D(), L = LEADS[S.lead].head ? LEADS[S.lead] : LEADS[0], lt = L.tail ? L.tail(d) : "";
   // the sentence has one opening in it. A release that names what it supports
   // fills that opening itself, and the writer's words would be a second clause
   // on the same dash, so the slot is locked and the qualifier goes unused.
@@ -407,7 +417,8 @@ function openerFrame(){
 }
 function qualifier(){ const q = S.blocks.qualifier.trim(); return (q && !D().support) ? " " + q : ""; }
 function workIntro(){ return D().workIntro + qualifier(); }
-function openerText(){ const f = openerFrame(); return f.head + f.mid + (f.slot || qualifier()) + f.tail; }
+function openerFramed(){ const f = openerFrame(); return f.head + f.mid + (f.slot || qualifier()) + f.tail; }
+function openerText(){ return ownOpener() || openerFramed(); }
 
 // ═══════════════════════════════════════════════════ assembly
 function outputs(){
@@ -480,7 +491,7 @@ function outputs(){
   const E = (n, use, t) => ({n, use, t});
   const emails = [
     E("Announcement (TL Non-flow) · Announcement (LE)", "both",
-      P(opener, H, d.makingOurs, d.featList,
+      P(opener, H, d.makingOurs, (ownOpener() && !d.openerNamesBen) ? d.featListSupport : d.featList,
         d.draw ? drawLine : P(`The edition will be available to collect for ${f.window} only, starting at ${d.launchTime} on ${d.launchDay}, ${d.launchDateDd}.`, "Click below to learn more and register for updates."), d.cards)),
     E("Welcome (TL Flow)", "timed", d.draw?NA:P(
       "Welcome {{ personalization_token('contact.firstname', 'to Avant Arte') }}!",
@@ -579,6 +590,8 @@ const SPEC = {
     if (f.beneficiary && !d.hookNamesBen) has.push("what it supports");
     return has;
   },
+  opener:{ name:"Opener", sub:"yours", max:35,
+    rule:"One sentence, written whole: the artist in full, what the edition is, and one idea that the hook then takes further. It lands in the announcement email only." },
   hook:{ name:"Hook", sub:"yours",
     rule:"Two or three sentences on the work, as editorial as you like. It must read as well mid-email as at the top of a post.", max:70 },
   making:{ name:"Making", sub:"yours",
@@ -621,11 +634,19 @@ function checks(key, text){
   if (t.includes("—")) out.push({k:"warn", t:"Em dash. The house dash is a spaced en dash."});
   if (/\w[–—]\w/.test(t) && !/\d[–—]\d/.test(t)) out.push({k:"warn", t:"Unspaced dash."});
   if (t.includes("!")) out.push({k:"warn", t:"Exclamation mark."});
-  if (/\b(we|our|we're)\b/.test(low)) out.push({k:"warn", t:"“we” or “our”. The frame around this supplies those."});
+  if (key !== "opener" && /\b(we|our|we're)\b/.test(low)) out.push({k:"warn", t:"“we” or “our”. The frame around this supplies those."});
   if (/limited-edition/.test(low)) out.push({k:"warn", t:"“limited-edition”: the house form has no hyphen."});
   // the frame names the artist in full before any fragment lands, so inside one it is the surname
   const artist = (f.artist || "").trim();
-  if (artist.split(/\s+/).length > 1 && t.includes(artist))
+  if (key === "opener") {                                 // the first mention: the full name belongs here
+    if (artist && !t.includes(artist)) out.push({k:"warn", t:`Does not name ${artist} in full. This is the first mention.`});
+    if (!/limited edition/.test(low)) out.push({k:"warn", t:"Does not say it is a limited edition."});
+    if (!/[.]$/.test(t)) out.push({k:"warn", t:"Ends without a full stop."});
+    if (t.split(/(?<=[.!?])\s+/).length > 1) out.push({k:"warn", t:"More than one sentence. The hook takes it from here."});
+    if (words > 35) out.push({k:"warn", t:`${words} words. The archive's openers run 22 to 27.`});
+    if (/\[[^\]]*\]/.test(t)) out.push({k:"warn", t:"A blank in square brackets is still to be filled."});
+    if (f.beneficiary && !low.includes(f.beneficiary.toLowerCase())) out.push({k:"good", t: D().hookNamesBen ? `The hook names ${f.beneficiary}.` : `Does not name ${f.beneficiary}, so the features list will say “Released in support of ${f.beneficiary}”.`});
+  } else if (artist.split(/\s+/).length > 1 && t.includes(artist))
     out.push({k:"warn", t:`“${artist}” in full. The frame has already named them: surname only.`});
   if (/(?<!\d)\s-\s(?!\d)/.test(t)) out.push({k:"warn", t:"A hyphen as a dash. The house dash is a spaced en dash ( – )."});
   if (key === "hook" && artist && !String(f.artist_voice || "").startsWith("third") && new RegExp("\\b" + artist.split(/\s+/).pop().replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b").test(t))
@@ -714,13 +735,14 @@ function renderNotReady(need){
 
 // ---------- write: the email, with three fields in it and nothing else editable ----------
 const PH = {
+  opener:"The first sentence, whole: the artist in full, what the edition is, and one idea.",
   qualifier:" + a few words ",
   hook:"Two or three sentences on the work.",
   making:"How was it made? One sentence.",
   card:"A sentence on this work."
 };
 function fld(k){
-  const cls = k==="qualifier" ? " in" : k.startsWith("card_") ? " cd" : "";
+  const cls = k==="qualifier" ? " in" : k.startsWith("card_") ? " cd" : k==="opener" ? " op" : "";
   return `<span class="fld${cls}" contenteditable="true" spellcheck="true" role="textbox"`
        + ` data-k="${k}" data-ph="${esc(PH[k]||PH.card)}" aria-label="${esc(spec(k).name)}">${esc(blk(k))}</span>`;
 }
@@ -757,7 +779,7 @@ function renderWrite(){
       <div class="body">
         <div class="gutter" id="gutter"></div>
         <div class="doc" id="doc">
-          <p data-blk="qualifier">${openerHTML()}</p>
+          <p data-blk="${ownOpener() ? "opener" : "qualifier"}">${openerHTML()}</p>
           <p data-blk="hook">${fld("hook")}</p>
           <p data-blk="making">${fld("making")}</p>
           <ul>${d.feats.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
@@ -783,6 +805,7 @@ function wireFields(root){
   root.querySelectorAll(".fld").forEach(el => {
     el.addEventListener("input", () => onField(el));
     el.addEventListener("focus", () => { S.focus = el.dataset.k; drawGutter(); renderAside(); });
+    if (el.dataset.k === "opener") el.addEventListener("blur", () => setTimeout(() => { if (!ownOpener() && document.querySelector('.fld[data-k="opener"]')) { S.focus = "qualifier"; syncFrame(); renderAside(); } }, 0));
     el.addEventListener("paste", e => {
       e.preventDefault();
       const txt = (e.clipboardData||window.clipboardData).getData("text").replace(/\s+/g," ").trim();
@@ -800,6 +823,7 @@ function wireFields(root){
   });
 }
 function openerHTML(){
+  if (ownOpener()) return fld("opener");
   const fr = openerFrame();
   // the locked slot is still part of the opener row: clicking it opens the panel
   // where the opening wording is chosen
@@ -830,7 +854,19 @@ function onField(el){
 // the opener's frame can move while you type: naming the beneficiary in the hook
 // drops "released in support of" from the opener. Update the locked text, never the field.
 function syncFrame(){
-  const p = document.querySelector('[data-blk="qualifier"]'); if (!p) return;
+  const p = document.querySelector('[data-blk="qualifier"], [data-blk="opener"]'); if (!p) return;
+  const own = !!ownOpener(), isOwn = !!p.querySelector('.fld[data-k="opener"]');
+  if (own !== isOwn) {                                    // written whole, or back to the frame
+    p.dataset.blk = own ? "opener" : "qualifier";
+    p.innerHTML = openerHTML(); wireFields(p); wireLock(p); drawGutter();
+    if (own) caret(p.querySelector(".fld"));
+    return;
+  }
+  if (own) {                                              // another shape chosen: the field takes its text
+    const el = p.querySelector('.fld[data-k="opener"]');
+    if (el && el.textContent !== ownOpener()) el.textContent = ownOpener();
+    return;
+  }
   const fr = openerFrame();
   if (!!p.querySelector(".lock") !== !!fr.slot) {         // the opening changed hands
     p.innerHTML = openerHTML();
@@ -880,9 +916,9 @@ function renderAside(){
     <h2>${sp.name}</h2>
     <p class="rule">${sp.rule}</p>
 
-    ${k === "qualifier" ? `<section><h3>How it opens</h3>
-      ${LEADS.map((L,i)=>`<button class="opt" data-lead="${i}" aria-pressed="${i===S.lead}"><u>${esc(L.note)}</u>${esc(L.head(D()))}…</button>`).join("")}
-      <p class="note">The rest of the sentence is built from the details and travels into four emails.</p>
+    ${(k === "qualifier" || k === "opener") ? `<section><h3>How it opens</h3>
+      ${LEADS.map((L,i)=>`<button class="opt" data-lead="${i}" aria-pressed="${L.shape ? (k === "opener" && i === S.lead) : (k === "qualifier" && i === S.lead)}"><u>${esc(L.note)}</u>${esc(L.head ? L.head(D()) + "…" : L.shape(D()))}</button>`).join("")}
+      <p class="note">${k === "opener" ? "Written whole, it lands in the announcement only. The four other emails keep the framed line, built from the details. Clear it to go back to the frame." : "The rest of the sentence is built from the details and travels into four emails. The last three are written whole."}</p>
     </section>` : ""}
 
     <section><h3>Checks</h3>
@@ -902,7 +938,15 @@ function renderAside(){
   </div>`;
 
   $("#aside").querySelectorAll("[data-lead]").forEach(b => b.onclick = () => {
-    S.lead = +b.dataset.lead; syncFrame(); drawGutter(); renderAside();
+    const i = +b.dataset.lead, L = LEADS[i];
+    if (L.shape) { S.lead = i; S.blocks.opener = L.shape(D()); delete S.from.opener; S.server = {}; S.focus = "opener"; }
+    else { S.lead = i; S.blocks.opener = ""; S.focus = "qualifier"; S.server = {}; }
+    syncFrame(); drawGutter(); renderAside();
+    const el = document.querySelector('.fld[data-k="opener"]');
+    if (el && L.shape) {                                  // select the blank, if the shape has one
+      el.focus(); const t = el.firstChild, a = el.textContent.indexOf("["), z = el.textContent.indexOf("]");
+      if (t && a >= 0 && z > a) { const r = document.createRange(); r.setStart(t, a); r.setEnd(t, z + 1); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(r); }
+    }
   });
   const btn = $("#proof"); if (btn) btn.onclick = () => proofread(k);
 }
@@ -959,7 +1003,7 @@ ${ctx}
 ${pageText().trim() ? `\nTHE PRODUCT PAGE${D().artworks>1?"S":""} this release was written from. Every fact in the fragment should be here or in the release details; flag any that is not:\n${pages().map(x => (D().artworks>1 ? "── " + x.title + "\n" : "") + (x.page.description||"").trim()).join("\n\n")}\n` : ""}
 HOUSE RULES: British spelling. The house dash is a spaced en dash, never an em dash and never a hyphen; use one at most in a sentence, and never set an aside between a pair of them, which reads as machine-written. Refer to the artist by surname alone: the full name has already been used before the fragment lands. No exclamation marks and no rhetorical questions. Sentences under 35 words. Times written as "14:00 UK time", dates as "30 April". Never say "we" or "our" inside the fragment; the frame around it supplies those. Every fact must be true of this release: do not invent dates, numbers, places or names.
 
-Judge two things. First, does the fragment read well on its own? Second, and more important, does it still read well in EACH place above: check especially whether it assumes it is the first thing being read, because in most of these places it is a middle paragraph. Also flag repetition with the copy either side of it.
+${k === "opener" ? "Judge two things. First, is it a sound first sentence: the artist named in full, what the edition is, one idea. Second, does it leave the hook something to say, or does it pre-empt the hook's first sentence, which follows it directly." : "Judge two things. First, does the fragment read well on its own? Second, and more important, does it still read well in EACH place above: check especially whether it assumes it is the first thing being read, because in most of these places it is a middle paragraph. Also flag repetition with the copy either side of it."}
 
 Be sparing. Only report real problems a careful editor would raise. Ignore matters of taste.
 
@@ -1304,7 +1348,7 @@ async function serverRender(){
   S.server.busy = true;
   try {
     const r = await fetch("/api/render", {method:"POST", headers:{"content-type":"application/json"},
-      body: JSON.stringify({facts:S.facts, blocks:S.blocks, page:S.page, lead:S.lead})});
+      body: JSON.stringify({facts:S.facts, blocks:S.blocks, page:S.page, lead:S.lead, opener:openerText()})});
     const j = await r.json();
     if (!r.ok) throw new Error(j.error || r.statusText);
     S.server = {stamp, out: j, busy:false};

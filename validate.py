@@ -17,7 +17,7 @@ import yaml
 
 # The free-text fields. Everything else in the brief is a fact or a menu choice.
 BOUNDED_KEYS = {"hook", "card_line", "subject_hook", "early_access_note", "technique_sentence",
-                "recap", "quote_sentence", "footer", "delay_phrase", "artist_line", "artist_thanks", "artist_bio", "hook_short", "detail", "technique_clause", "making", "qualifier"}
+                "recap", "quote_sentence", "footer", "delay_phrase", "artist_line", "artist_thanks", "artist_bio", "hook_short", "detail", "technique_clause", "making", "qualifier", "opener"}
 
 BANNED = [
     # sales-page urgency the brand has never used
@@ -239,9 +239,9 @@ def validate(text, brief):
         if value.strip() not in text:          # only the slots this email actually uses
             continue
         e, w = check_bounded(name, value, fact_nums, fact_words)
-        # the frame has used the full name before any fragment lands; the bio is the one exception,
-        # since it opens the Coming Soon post and is that first mention
-        if len(artist.split()) > 1 and artist in value and not name.endswith("artist_bio"):
+        # the frame has used the full name before any fragment lands; the bio and the opener are the
+        # exceptions, since each opens its email or post and is that first mention
+        if len(artist.split()) > 1 and artist in value and not name.endswith(("artist_bio", "opener")):
             w.append(f"{name}: “{artist}” in full; the frame has already named them, so the surname alone")
         errors += e
         warnings += w

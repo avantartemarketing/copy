@@ -87,6 +87,7 @@ def brief_from_state(state):
             "artist_bio": g("bio"),
             "hook": (blocks.get("hook") or "").strip(),
             "qualifier": (blocks.get("qualifier") or "").strip(),
+            "opener": (state.get("opener") or "").strip(),
             "making": (blocks.get("making") or "").strip(),
             "facts": page_facts,
         },

@@ -243,6 +243,22 @@ def _client():
     return anthropic.Anthropic()
 
 
+def parse_json(text):
+    """The JSON in a reply: as it is, or inside a code fence, or between the first brace and the last."""
+    for candidate in (text, text.strip().strip("`").removeprefix("json").strip()):
+        try:
+            return json.loads(candidate)
+        except (json.JSONDecodeError, TypeError):
+            pass
+    start, end = text.find("{"), text.rfind("}")
+    if 0 <= start < end:
+        try:
+            return json.loads(text[start:end + 1])
+        except json.JSONDecodeError:
+            pass
+    return None
+
+
 @app.post("/api/claude")
 def api_claude():
     """The page sends the prompt it built and the JSON shape it wants back."""
@@ -253,7 +269,7 @@ def api_claude():
     if not prompt.strip():
         return jsonify(error="Nothing to send."), 400
     import anthropic
-    kwargs = dict(model=MODEL, max_tokens=4000, messages=[{"role": "user", "content": prompt}])
+    kwargs = dict(model=MODEL, max_tokens=8000, messages=[{"role": "user", "content": prompt}])
     if schema:
         kwargs["output_config"] = {"format": {"type": "json_schema", "schema": schema}}
     try:
@@ -265,8 +281,13 @@ def api_claude():
             response = client.messages.create(**kwargs)
         if response.stop_reason == "refusal":
             return jsonify(error="Claude declined this request."), 502
-        text = next((b.text for b in response.content if b.type == "text"), "")
-        data = json.loads(text) if schema else text
+        text = "".join(b.text for b in response.content if getattr(b, "type", "") == "text")
+        if response.stop_reason == "max_tokens":
+            return jsonify(error="Claude's reply was cut off before the end. Try again."), 502
+        data = parse_json(text) if schema else text
+        if schema and data is None:
+            app.logger.warning("Claude's reply was not JSON (%s): %r", response.stop_reason, text[:400])
+            return jsonify(error="Claude's reply was not the JSON asked for. It began: " + (text.strip()[:160] or "(nothing)")), 502
         return jsonify(result=data, usage={"in": response.usage.input_tokens, "out": response.usage.output_tokens})
     except anthropic.AuthenticationError:
         return jsonify(error="The server's Anthropic key was rejected."), 503

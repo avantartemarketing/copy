@@ -138,23 +138,13 @@ class Evaluator:
 
 
 # ----------------------------------------------------------------- normalise both sides to plain lines
-MARK = {"[SUBJECT]": "Subject:", "[PREVIEW]": "Preview:", "[KICKER]": "Kicker:", "[HEADLINE]": "Headline:", "[CTA]": "CTA:", "[CARD]": "Card:", "[FOOTER]": "Footer:"}
-
-
 def lines_of(text):
     return [l.strip() for l in text.replace("\r", "").split("\n") if l.strip()]
 
 
 def template_email_lines(chunk):
-    out, quote = [], None
-    for l in lines_of(chunk):
-        if l.startswith(("[EMAIL", "[BODY]", "[FEATURES]", "[PARAGRAPH]")): continue
-        if l.startswith("[QUOTE ATTRIBUTION]"): out.append(f"Quote: “{quote}” – {l.split('] ', 1)[1]}"); continue
-        if l.startswith("[QUOTE]"): quote = l.split("] ", 1)[1]; continue
-        for k, v in MARK.items():
-            if l.startswith(k): l = v + l[len(k):]; break
-        out.append(l)
-    return out
+    """The templates label each part as the workbook does (Subject:, Preview:, …); only the set's own header line is dropped."""
+    return [l for l in lines_of(chunk) if not l.startswith("[EMAIL")]
 
 
 def excel_email_lines(full):

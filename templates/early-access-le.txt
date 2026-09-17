@@ -4,10 +4,10 @@
   Audience: past purchasers and engaged sign-ups. The framing offer is a HubSpot smart-content block.
 #}
 [INTERNAL NAME] {{ release.early_access_at|ddmmyy }}_CUS_{{ release.campaign_code }} - Early Access (LE)
-[SUBJECT] {{ artist.name }} – Early access 🔓
-[PREVIEW] A first look, plus access to a limited number of pre-orders.
+Subject: {{ artist.name }} – Early access 🔓
+Preview: A first look, plus access to a limited number of pre-orders.
 
-[BODY]
+
 Hi {{ "{{ personalization_token('contact.firstname', 'there') }}" }},
 
 {{ EA_OPENERS[context.early_access_opener] }} our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }}, {{ artworks|titles }}.
@@ -24,15 +24,15 @@ As a welcome gesture, I'd also like to offer you 10% off our in-house framing on
 {% endif %}
 Explore the artwork and place your order via the private link below. Use code {{ release.early_access_code }} to unlock early access.
 
-[CTA] Unlock early access
+CTA: Unlock early access
 
 Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here.
 
 If you have any questions, please don't hesitate to get in touch by replying to this email.
 
 {% for a in artworks %}
-[CARD] {{ a.title }}
+Card: {{ a.title }}
 {{ a.card_line }}
 
 {% endfor %}
-[FOOTER] Especially for you.
+Footer: Especially for you.

@@ -226,6 +226,15 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .out>.gencols{padding:12px 18px 0}
 .out>.gencols pre{padding:6px 0 0}
 .out>.genact{padding:12px 18px 16px;margin:0}
+.email{font-family:var(--serif);font-size:15px;line-height:1.6;color:var(--ink-soft)}
+.email .meta{padding:14px 18px 10px;border-bottom:1px solid var(--line-soft);font-family:var(--sans)}
+.email .ebody{padding:14px 18px 20px}
+.email .ebody p{margin:0 0 1em;white-space:pre-wrap}
+.email .ebody p:last-child{margin-bottom:0}
+.email .em .lbl{display:block;margin-bottom:2px}
+.email .cta{font-family:var(--sans);font-size:13.5px;color:var(--accent)}
+.tok{display:inline-block;padding:0 6px;border:1px dashed var(--accent-line);border-radius:4px;color:var(--accent);font-family:var(--sans);font-size:12px;vertical-align:1px}
+.out>.gencols .email .meta,.out>.gencols .email .ebody{padding-left:0;padding-right:0}
 .rowbar select{width:auto;min-width:22ch;padding:5px 30px 5px 10px;font-size:12.5px;background-position:calc(100% - 15px) 11px,calc(100% - 10px) 11px}
 .act.ghost{background:transparent}
 
@@ -1469,12 +1478,28 @@ function pairUp(mine, srv){
   const pairs = mine.map(x => { const ks = nkeys(x.n); const i = left.findIndex(a => ks.includes(nkey(a.name))); return {x, a: i < 0 ? null : left.splice(i, 1)[0]}; });
   return {pairs, extra: left};
 }
-// the page's email is the body copy; the templates' carries the HubSpot markers around it
-const MARK = /^\[(SUBJECT|PREVIEW|FOOTER|QUOTE|QUOTE ATTRIBUTION|PARAGRAPH)\]/;
-// line by line: a paragraph is one line in both, and the image-led emails are only marker lines
-function emailParas(text, page){
-  const t = page ? text.replace(/^Card: /gm, "[CARD] ").replace(/^Kicker: /gm, "[KICKER] ").replace(/^Headline: /gm, "[HEADLINE] ").replace(/^CTA: /gm, "[CTA] ") : text;
-  return t.split("\n").map(norm).filter(l => l && !MARK.test(l) && l !== "[BODY]" && l !== "[FEATURES]" && l !== "No body: this one is image-led.");
+// the page's email is the body copy; the templates' carries the subject, preview, quote and footer lines around it
+const MARK = /^(Subject|Preview|Footer|Quote): /;
+// line by line: a paragraph is one line in both, and the image-led emails are only labelled lines
+function emailParas(text){
+  return text.split("\n").map(norm).filter(l => l && !MARK.test(l) && l !== "No body: this one is image-led.");
+}
+// an email as it reads: the subject, preview, kicker and headline set off at the top, the body as
+// paragraphs, the CTA, cards, quote and footer labelled, and HubSpot's first-name token shown as one
+const TOKEN = /\{\{\s*personalization_token\('contact\.firstname',\s*'[^']*'\)\s*\}\}/g;
+function emailHTML(text){
+  const tok = t => esc(t).replace(/\uE000/g, '<span class="tok">first name</span>');
+  const lines = (text || "").replace(/\r/g, "").replace(TOKEN, "\uE000").split("\n");
+  const head = []; let i = 0;
+  while (i < lines.length && /^(Subject|Preview|Kicker|Headline): /.test(lines[i])) { head.push(lines[i].match(/^(\w+): (.*)$/)); i++; }
+  const chunks = lines.slice(i).join("\n").replace(/\n(?=(CTA|Card|Quote|Footer): )/g, "\n\n").trim().split(/\n\s*\n/).filter(Boolean);   // a labelled line is a block of its own
+  const para = c => {
+    const m = c.match(/^(CTA|Card|Quote|Footer): ([\s\S]*)$/);
+    if (!m) return `<p>${tok(c)}</p>`;
+    const [first, ...rest] = m[2].split("\n");
+    return `<p class="em ${m[1].toLowerCase()}"><span class="lbl">${m[1]}</span>${m[1] === "Card" ? `<b>${tok(first)}</b>${rest.length ? "\n" + tok(rest.join("\n")) : ""}` : tok(m[2])}</p>`;
+  };
+  return `<div class="email">${head.length ? `<dl class="meta">${head.map(m => `<dt>${m[1]}</dt><dd>${tok(m[2])}</dd>`).join("")}</dl>` : ""}<div class="ebody">${chunks.map(para).join("")}</div></div>`;
 }
 function parity(out){
   const o = outputs(), sets = [["ig-set", o.posts], ["twitter-set", o.tweets], ["email-set", o.emails], ["artist-posts", o.artistPosts], ["artist-tweets", o.artistTweets], ["broadcast-set", o.broadcast]];
@@ -1486,8 +1511,8 @@ function parity(out){
       n++;
       if (!a) { diffs.push(`${set} · ${x.n}: the templates have no item for it`); return; }
       if (set !== "email-set") { if (norm(a.text) !== norm(x.t)) diffs.push(`${set} · ${a.name}: differs from the page's`); return; }
-      const mineP = emailParas(x.t, true), srvP = emailParas(a.text, false), srvSet = new Set(srvP), mineSet = new Set(mineP);
-      const gone = mineP.filter(p => !srvSet.has(p)), added = srvP.filter(p => !mineSet.has(p) && !/^\[(KICKER|HEADLINE|CTA)\]/.test(p));
+      const mineP = emailParas(x.t), srvP = emailParas(a.text), srvSet = new Set(srvP), mineSet = new Set(mineP);
+      const gone = mineP.filter(p => !srvSet.has(p)), added = srvP.filter(p => !mineSet.has(p) && !/^(Kicker|Headline|CTA): /.test(p));
       if (gone.length || added.length) diffs.push(`${set} · ${a.name}: ${gone.map(p => `the page says “${p.slice(0, 60)}…”`).concat(added.map(p => `the templates add “${p.slice(0, 60)}…”`)).join("; ")}`);
     });
     extra += pairUp(mine, out.outputs[set] || []).extra.filter(a => a.text.trim()).length;
@@ -1829,7 +1854,7 @@ function renderOut(){
     : "";
   const first = !String(S.facts.artist_voice || "").startsWith("third");
   const block = (title, list, meta, set) => `<div class="groupline"><span class="lbl">${esc(title)}</span></div>
-    ${list.map(x=>`<details class="out"><summary><b>${esc(x.n)}</b>${x.ch?`<span class="note">${esc(x.ch)}</span>`:""}${x.use?`<span class="note">${esc(x.use)}</span>`:""}<i>${x.t.startsWith("—")?"not used":(meta?(meta==="x"?xLen(x.t)+" on X":x.t.length+" chars"):"")}</i></summary><pre>${x.t.startsWith("—")?`<span class="na">${esc(x.t)}</span>`:esc(x.t)}</pre>${x.t.startsWith("—") ? "" : (b => b ? `<div class="genact">${b}</div>` : "")(redoBtn(set, x))}</details>`).join("")}`;
+    ${list.map(x=>`<details class="out"><summary><b>${esc(x.n)}</b>${x.ch?`<span class="note">${esc(x.ch)}</span>`:""}${x.use?`<span class="note">${esc(x.use)}</span>`:""}<i>${x.t.startsWith("—")?"not used":(meta?(meta==="x"?xLen(x.t)+" on X":x.t.length+" chars"):"")}</i></summary>${x.t.startsWith("—") ? `<pre><span class="na">${esc(x.t)}</span></pre>` : set === "emails" ? emailHTML(x.t) : `<pre>${esc(x.t)}</pre>`}${x.t.startsWith("—") ? "" : (b => b ? `<div class="genact">${b}</div>` : "")(redoBtn(set, x))}</details>`).join("")}`;
   $("#main").innerHTML = `
     <div class="head">
       <span class="lbl">Then</span>
@@ -1838,7 +1863,7 @@ function renderOut(){
     ${band}
     ${block("Instagram", sets.posts, true, "posts")}
     ${block("Twitter", sets.tweets, "x", "tweets")}
-    ${block("Email", sets.emails, false)}
+    ${block("Email", sets.emails, false, "emails")}
     ${block("The artist's Instagram", sets.artistPosts, true, "artistPosts")}
     ${block("The artist's X", sets.artistTweets, "x", "artistTweets")}
     ${block("Broadcast channel", sets.broadcast, true, "broadcast")}`;
@@ -2219,9 +2244,10 @@ function renderPlan(){
     return `<select class="shape" data-row="${esc(p.row.id)}"><option value="">By hand</option>${(fam ? [list] : [SHAPES]).flat().map(s => `<option value="${esc(s.key)}"${p.key === s.key ? " selected" : ""}>${esc(fam ? s.label : s.family + " · " + s.label)}</option>`).join("")}</select>`; };
   const body = p => !p.shape ? `<p class="note" style="margin:0">${FAMILY(p.row.channel) ? "No shape matches this name. Choose one, or write it in Notion." : "No shape for this channel. Choose one, or write it in Notion."}${p.row.copy ? `</p><pre>${esc(p.row.copy)}</pre><p class="note">Already in the row.` : ""}</p>`
     : !p.item ? `<p class="note" style="margin:0">This shape is not used for a ${S.facts.mechanic === "draw" ? "draw" : "timed release"}.</p>`
-    : rowSame(p) ? `<pre>${esc(p.text)}</pre><p class="note">Already in the row.</p>`
-    : p.row.copy ? `<div class="gencols"><div><span class="lbl">In Notion now</span><pre>${esc(p.row.copy)}</pre></div><div><span class="lbl">New</span><pre>${esc(p.text)}</pre></div></div>`
-    : `<pre>${esc(p.text)}</pre>`;
+    : rowSame(p) ? `${show(p, p.text)}<p class="note">Already in the row.</p>`
+    : p.row.copy ? `<div class="gencols"><div><span class="lbl">In Notion now</span>${show(p, p.row.copy)}</div><div><span class="lbl">New</span>${show(p, p.text)}</div></div>`
+    : show(p, p.text);
+  const show = (p, t) => SETOF[p.shape.family] === "emails" ? emailHTML(t) : `<pre>${esc(t)}</pre>`;
   const open = new Set([...document.querySelectorAll("#main details[data-row][open]")].map(d => d.dataset.row));
   $("#main").innerHTML = `
     <div class="head">

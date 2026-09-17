@@ -170,7 +170,7 @@ is marked as locked house text, a frame filled from your facts, or a highlighted
 slot. The validator runs as you type and blocks an email that breaks a rule. Each free-text
 slot has a "Suggest three with Claude" button that sends the slot contract, the facts and
 the published examples, and checks each candidate against the rules before you pick one.
-"Copy for HubSpot" copies the email as plain text with module markers. Edits stay in your
+"Copy for HubSpot" copies the email as plain text, each part on a labelled line. Edits stay in your
 browser; nothing is stored anywhere else. It is a proof of concept: the templates and rules
 in it mirror `templates/` and `validate.py`, and would be maintained in one place in a real
 build.
@@ -310,8 +310,8 @@ python3 tool/build_release_copy.py
 ```
 
 Each rendered file carries the HubSpot internal name in your convention, the subject, the
-preview text, and the body with module boundaries marked (`[KICKER]`, `[BODY]`, `[CTA]`,
-`[CARD]`, `[QUOTE]`, `[FOOTER]`, `[SMART CONTENT]`) so it maps onto your HubSpot template
+preview text, and the body with each part on a labelled line (`Kicker:`, `Headline:`, then the
+body, `CTA:`, `Card:`, `Quote:`, `Footer:`) so it maps onto your HubSpot template
 one block at a time.
 
 **Running it on Render.** `app.py` serves the same page from a small Flask server, so it runs

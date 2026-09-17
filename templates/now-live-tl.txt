@@ -3,13 +3,13 @@
   The automated "Now Live (TL Flow)" for sign-ups is the same copy with a different audience.
 #}
 [INTERNAL NAME] {{ release.launch_at|ddmmyy }}_GEN_{{ release.campaign_code }} - Now Live (TL Non-flow)
-[SUBJECT] {{ artist.name }} – Available now, for {{ release.window }} only
-[PREVIEW] {{ release.window|capitalize }}, starting now.
+Subject: {{ artist.name }} – Available now, for {{ release.window }} only
+Preview: {{ release.window|capitalize }}, starting now.
 
-[KICKER] {{ artist.name }}
-[HEADLINE] {{ release.window|capitalize }}, starting now
+Kicker: {{ artist.name }}
+Headline: {{ release.window|capitalize }}, starting now
 
-[BODY]
+
 Our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} is now available to collect for {{ release.window }} only – {{ edition|edition_phrase }}{% if edition.suffix %} {{ edition.suffix }}{% endif %}, each signed and numbered, with free worldwide shipping.
 
 {{ context.hook }}
@@ -20,11 +20,11 @@ Our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }} is n
 {% endif %}
 The opportunity to collect an edition ends at {{ release.closes_at|uktime }} on {{ release.closes_at|weekday }}, {{ release.closes_at|ukdate_dd }}. Click the link below to add {{ "a print" if artworks|length > 1 or edition.count > 1 else artworks[0].title }} to your collection.
 
-[CTA] Buy now
+CTA: Buy now
 
 {% for a in artworks %}
-[CARD] {{ a.title }}
+Card: {{ a.title }}
 {{ a.card_line }}
 
 {% endfor %}
-[FOOTER] {{ context.footer or "Collect " ~ (edition|collect_phrase) }}
+Footer: {{ context.footer or "Collect " ~ (edition|collect_phrase) }}

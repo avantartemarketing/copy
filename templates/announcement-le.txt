@@ -11,17 +11,17 @@
     VERBATIM  copied from the brief exactly (quotes, titles). Never AI.
 #}
 [INTERNAL NAME] {{ release.launch_at|ddmmyy }}_GEN_{{ release.campaign_code }} - Announcement (LE)
-[SUBJECT] {{ artist.name }} – {{ context.subject_hook }}
-[PREVIEW] Enter the draw for a chance to collect. Closes {{ release.closes_at|ukdate }}.
+Subject: {{ artist.name }} – {{ context.subject_hook }}
+Preview: Enter the draw for a chance to collect. Closes {{ release.closes_at|ukdate }}.
 
-[KICKER] Enter the draw
+Kicker: Enter the draw
 {% if artworks|length == 1 %}
-[HEADLINE] {{ artworks[0].title }}
+Headline: {{ artworks[0].title }}
 {% else %}
-[HEADLINE] A {{ GROUP[artworks|length] }} of {{ edition.unit }}s by {{ artist.name }}
+Headline: A {{ GROUP[artworks|length] }} of {{ edition.unit }}s by {{ artist.name }}
 {% endif %}
 
-[BODY]
+
 {{ OPENERS[context.opener] }} our {{ artist.collaboration_ordinal }} collaboration with {{ artist.collab_with }} – {{ edition|edition_phrase }}.
 
 {{ context.hook }}
@@ -30,16 +30,15 @@
 
 Enter the draw for a chance to collect. Closes at {{ release.closes_at|uktime }} on {{ release.closes_at|ukdate }}.
 
-[CTA] Enter the draw
+CTA: Enter the draw
 
 {% for a in artworks %}
-[CARD] {{ a.title }}
+Card: {{ a.title }}
 {{ a.card_line }}
 
 {% endfor %}
 {% if artist.quote %}
-[QUOTE] {{ artist.quote }}
-[QUOTE ATTRIBUTION] {{ artist.quote_attribution }}
+Quote: “{{ artist.quote }}” – {{ artist.quote_attribution }}
 
 {% endif %}
-[FOOTER] Collect {{ edition|collect_phrase }}
+Footer: Collect {{ edition|collect_phrase }}

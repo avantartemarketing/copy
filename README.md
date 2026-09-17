@@ -341,6 +341,20 @@ page falls back to the whole set. Three more property names can be set if the pl
 `NOTION_PROP_NEEDS` ("Needs copy"), `NOTION_PROP_DATE` ("Live Date") and `NOTION_PROP_PHASE`
 ("Campaign Phase").
 
+**Suggestions come as choices.** "Suggest the email from this page" opens a dialogue rather than
+filling the side panel: three openers, three hooks, three making lines and a line per card, each
+with where on the page it came from and the checks run on it. Use puts one into the email; "Three
+more" asks Claude for three others unlike the ones offered; "Write it myself" goes to that field
+in the email. The three openers follow the three house structures, one each: the classic "We're
+delighted to announce our latest collaboration with X – ‘Title’, a new limited edition print, …";
+"In our latest collaboration, X presents ‘Title’, a new limited edition print…"; and the image
+first, "[What happens in the work] in a new limited edition print by X.", which the email opens
+with the image clause selected, ready to be overwritten. With several works, an opener that names
+the work names all of them; naming one with a plural phrase is flagged. A sibling artwork whose
+page is identical to the first still gets a card line, written from its title to sit beside the
+first card rather than repeat it. "Made at Make-Ready" in the details decides whether the making
+line should say "printmakers at Make-Ready" or must not mention it.
+
 **The broadcast channel**, `templates/broadcast-set.txt`: the announcement, now-live and last-chance
 emails as messages, features as sentences rather than bullets ("Signed by the artist. Individually
 numbered.") and "link in bio" where the email has a button. In a campaign a row on a broadcast

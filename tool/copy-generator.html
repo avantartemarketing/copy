@@ -1966,11 +1966,21 @@ function renderOut(){
 function staleBandHTML(){
   const held = S.gen.items.filter(j => j.approved), heldT = held.filter(j => j.kind !== "voice").length;
   const dis = SERVED && S.campaign && (S.planBusy || !S.plan) ? " disabled" : "";
-  const note = `The details or the email have changed since ${fmtTime(S.gen.at)}, and the copy below follows the changes.` + (heldT
+  const note = `${whatChanged()} since ${fmtTime(S.gen.at)}, and the copy below follows the changes.` + (heldT
     ? ` Generate again to check the approved ${heldT === 1 ? "tweet" : "tweets"} against them, or have Claude write ${heldT === 1 ? "it" : "them"} again.`
     : " Generate again to bring everything up to date.");
   return `<div class="sheet" style="padding:14px 18px;margin-bottom:18px"><p class="note" style="margin:0 0 10px">${note}</p>
     <button class="act" id="gen" style="width:auto;padding:7px 14px;margin:0"${dis}>${heldT ? `Generate again, keeping the approved ${heldT === 1 ? "tweet" : "tweets"}` : "Generate again"}</button>${heldT ? `<button class="act ghost" id="redo" style="width:auto;padding:7px 14px;margin:0 0 0 8px"${dis}>Generate again and redo the tweets</button>` : ""}</div>`;
+}
+function whatChanged(){
+  let then = {}; try { then = JSON.parse(S.gen.stamp) || {}; } catch (_) {}
+  let now = {}; try { now = JSON.parse(genStamp()) || {}; } catch (_) {}
+  const names = {f: "the details", b: "the email", p: "the product page", l: "the opener", d: "the plan's dates"};
+  const moved = Object.keys(names).filter(k => JSON.stringify(then[k]) !== JSON.stringify(now[k])).map(k => names[k]);
+  if (!moved.length) return "Something has changed";
+  const list = moved.length === 1 ? moved[0] : moved.slice(0, -1).join(", ") + " and " + moved[moved.length - 1];
+  const plural = moved.length > 1 || /details|dates/.test(list);
+  return list.charAt(0).toUpperCase() + list.slice(1) + (plural ? " have changed" : " has changed");
 }
 function wireStale(){ const g = $("#gen"); if (g) g.onclick = () => generate("keep"); const rd = $("#redo"); if (rd) rd.onclick = () => generate("redo"); }
 function asideOut(){
@@ -1999,8 +2009,8 @@ async function notionPanel(){
     <p class="note">The rows of <b>${esc(S.campaign.name)}</b>${S.plan ? `, read ${esc((S.plan.at || "").slice(11, 16))}` : ""}. <button class="act ghost" id="nrefresh" style="width:auto;padding:2px 8px;font-size:11.5px"${S.planBusy ? " disabled" : ""}>Read again</button></p>
     ${N.err ? `<p class="note">${esc(N.err)}</p>` : ""}
     ${S.plan && !srv ? `<p class="note">${S.server.err ? `The server could not render this release: ${esc(S.server.err)}` : "Rendering the templates on the server first…"}</p>` : ""}
-    ${S.plan && !genReady() ? `<p class="note">The copy has changed since it was generated. Generate again, above, before writing.</p>` : ""}
-    ${S.plan ? `<button class="act" id="npush"${(N.busy || !srv || !toWrite.length || !genReady()) ? " disabled" : ""}>${toWrite.length ? `Write ${toWrite.length} row${toWrite.length === 1 ? "" : "s"} into Copy` : "Nothing to write"}</button>
+    ${S.plan && !genReady() ? `<p class="note">The copy has changed since it was generated, so writing checks the approved tweets first.</p>` : ""}
+    ${S.plan ? `<button class="act" id="npush"${(N.busy || !srv || !toWrite.length) ? " disabled" : ""}>${toWrite.length ? `Write ${toWrite.length} row${toWrite.length === 1 ? "" : "s"} into Copy` : "Nothing to write"}</button>
       ${kept.length ? `<p class="note">${kept.length === 1 ? "One row keeps its Notion copy." : kept.length + " rows keep their Notion copy."} <button class="act ghost" id="nreplace" style="width:auto;padding:2px 8px;font-size:11.5px">Replace ${kept.length === 1 ? "it" : "them all"}</button></p>` : ""}` : ""}
     ${N.result ? `<p class="note">Written: ${N.result.written.length}.${N.result.failed.length ? ` Failed: ${N.result.failed.length}.` : ""}</p>
       ${N.result.failed.length ? `<details class="out"><summary><b>What failed</b></summary><pre>${esc(N.result.failed.map(f => f.error).join("\n"))}</pre></details>` : ""}` : ""}
@@ -2010,11 +2020,17 @@ async function notionPanel(){
   const rf = $("#nrefresh"); if (rf) rf.onclick = async () => { await holding("Reading the plan's rows from Notion…", () => loadPlan(true)); render(); };
   const rp = $("#nreplace"); if (rp) rp.onclick = () => { kept.forEach(p => S.keep[p.row.id] = false); persist(); render(); };
   const push = $("#npush"); if (push) push.onclick = async () => {
+    if (!genReady()) {                                   // the copy moved on: the approved tweets are checked against it first
+      await generate("keep");
+      if (!(S.gen && S.gen.done && genReady())) return;  // one came back for approval; the review is up, and Write waits
+    }
+    const rows = planItems(finalSets()).filter(p => p.item && !p.keep && !rowSame(p)).map(p => ({id: p.row.id, text: p.text}));
+    if (!rows.length) { render(); return; }
     N.busy = true; N.err = null; notionPanel();
-    const done = hold(`Writing ${toWrite.length === 1 ? "one row" : toWrite.length + " rows"} into Copy, one row at a time…`);
-    try { const r = await fetch("/api/notion/write", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({rows: toWrite.map(x => ({id: x.id, text: x.text}))})});
+    const done = hold(`Writing ${rows.length === 1 ? "one row" : rows.length + " rows"} into Copy, one row at a time…`);
+    try { const r = await fetch("/api/notion/write", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({rows})});
           const j = await r.json(); if (!r.ok) throw new Error(j.error); N.result = j;
-          S.wrote = S.wrote || {}; toWrite.forEach(x => { if ((j.written || []).includes(x.id)) S.wrote[x.id] = hashText(x.text); }); }
+          S.wrote = S.wrote || {}; rows.forEach(x => { if ((j.written || []).includes(x.id)) S.wrote[x.id] = hashText(x.text); }); }
     catch (e) { N.err = String(e.message || e); }
     finally { done(); }
     N.busy = false; persist(); await holding("Reading the rows again…", () => loadPlan(true)); render();                          // the rows again, now carrying the copy

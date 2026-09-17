@@ -64,7 +64,7 @@ ALLOWED_EMAILS = [e.strip().lower() for e in os.environ.get("ALLOWED_EMAILS", ""
 app.secret_key = os.environ.get("SECRET_KEY") or hashlib.sha256(("copy-generator:" + GOOGLE_SECRET + PASSWORD).encode()).hexdigest()
 app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax", SESSION_COOKIE_SECURE=bool(os.environ.get("RENDER")),
                   PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=30))
-OPEN_PATHS = {"/api/health", "/favicon.ico", "/login", "/auth/google", "/auth/callback", "/logout"}
+OPEN_PATHS = {"/api/health", "/favicon.ico", "/favicon.svg", "/login", "/auth/google", "/auth/callback", "/logout"}
 
 
 def signed_in():
@@ -113,17 +113,19 @@ def gate():
 LOGIN_PAGE = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sign in · Copy Generator</title>
+<link rel="icon" type="image/png" sizes="64x64" href="/favicon.ico">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
 :root{--paper:#FBFAF7;--surface:#FFFFFF;--line:#E5E2DA;--ink:#1C1B16;--ink-soft:#6E6B60;--accent:#1F3A5F;--accent-soft:#E7ECF3;--accent-line:#C3D0E2;--warn:#8F4327;--warn-soft:#F8EDE8}
 @media (prefers-color-scheme:dark){:root{--paper:#161512;--surface:#1D1C18;--line:#343229;--ink:#EDEAE1;--ink-soft:#A19D91;--accent:#9BB8DC;--accent-soft:#222B37;--accent-line:#3A4757;--warn:#D99878;--warn-soft:#2E241E}}
 body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--paper);color:var(--ink);font:14px/1.5 "Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:30px 34px 32px;max-width:380px;width:calc(100% - 32px);box-sizing:border-box}
-.mark{font-family:"Newsreader",Georgia,"Times New Roman",serif;font-size:19px;letter-spacing:-.01em}.mark em{font-style:italic;color:var(--accent)}
+.mark{font-family:"Newsreader",Georgia,"Times New Roman",serif;font-size:19px;letter-spacing:-.01em}
 p{color:var(--ink-soft);margin:10px 0 0}
 a.btn{display:block;margin-top:22px;padding:10px 14px;border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--accent);border-radius:7px;text-align:center;text-decoration:none;font-weight:500}
 .err{margin-top:16px;padding:10px 12px;border-radius:7px;background:var(--warn-soft);color:var(--warn)}
 </style></head>
-<body><div class="card"><span class="mark">Copy <em>Generator</em></span>
+<body><div class="card"><span class="mark">Copy Generator</span>
 <p>Sign in with your {{ domains }} Google account.</p>
 {% if error %}<div class="err">{{ error }}</div>{% endif %}
 <a class="btn" href="/auth/google?{{ query }}">Sign in with Google</a>
@@ -204,7 +206,12 @@ def page(cid="", slug=""):
 
 @app.get("/favicon.ico")
 def favicon():
-    return Response(status=204)
+    return send_from_directory(ROOT / "tool", "favicon.png", mimetype="image/png")   # the pen nib; the page carries its own copy
+
+
+@app.get("/favicon.svg")
+def favicon_svg():
+    return send_from_directory(ROOT / "tool", "favicon.svg", mimetype="image/svg+xml")
 
 
 @app.get("/api/health")

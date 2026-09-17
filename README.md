@@ -346,9 +346,11 @@ emails as messages, features as sentences rather than bullets ("Signed by the ar
 numbered.") and "link in bio" where the email has a button. In a campaign a row on a broadcast
 channel takes one of those three shapes.
 
-**Regenerating is a choice.** A change to the details or the fragments makes the generated copy
-stale, and the page then offers two ways back: generate again keeping the approved tweets, or
-generate again and redo them. Keeping them, everything else is written afresh and each approved
+**Regenerating is a choice.** A change to the details or the fragments does not take the
+generated copy away: the screen still shows it, following the change at once, with the approved
+tweets as they were, and a line at the top offers two ways to bring it up to date: generate
+again keeping the approved tweets, or generate again and redo them. Writing into Notion waits
+for one of them. Keeping them, everything else is written afresh and each approved
 tweet stands as it is; one comes back for approval only if a fact it must carry has changed (a
 date, a title, the link), and then Claude writes it again close to the approved version, saying
 which fact moved. Redoing them, Claude writes every tweet again, close to the approved version,

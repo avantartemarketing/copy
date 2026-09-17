@@ -782,7 +782,7 @@ function render(){
   if (S.view === "write") { renderWrite(); renderAside(); }
   else if (S.view === "facts") { renderFacts(); $("#aside").innerHTML = asideFacts(); }
   else if (S.view === "page") { renderPage(); renderPageAside(); }
-  else { renderOut(); $("#aside").innerHTML = missing().length ? asideFacts() : asideOut(); if (!missing().length && genReady()) notionPanel(); }
+  else { renderOut(); $("#aside").innerHTML = missing().length ? asideFacts() : asideOut(); if (!missing().length && S.gen && S.gen.done) notionPanel(); }
 }
 
 // ---------- write: nothing to write against until the frame stands up ----------
@@ -1737,7 +1737,7 @@ function ensureServerRender(){
 // the sets as they will go out: the templates' text with each approved rewrite in place
 function finalSets(){
   const b = voicedSets(baseSets());
-  const apply = (list, set) => list.map(x => { const j = genReady() ? S.gen.items.find(j => j.set === set && j.name === x.n) : null; return j ? Object.assign({}, x, {t: jobText(j)}) : x; });
+  const apply = (list, set) => list.map(x => { const j = S.gen && S.gen.done ? S.gen.items.find(j => j.set === set && j.name === x.n) : null; return j ? Object.assign({}, x, {t: jobText(j)}) : x; });
   return {posts: b.posts, tweets: apply(b.tweets, "tweets"), emails: b.emails, artistPosts: b.artistPosts, artistTweets: apply(b.artistTweets, "artistTweets"), broadcast: b.broadcast};
 }
 // the rewrite behind an item's copy, or the hook in the artist's voice it carries: what "Redo with Claude" asks for again
@@ -1811,8 +1811,8 @@ function renderOut(){
   const o = outputs(), used = l => l.filter(x => !x.t.startsWith("—")).length;
   const stale = S.gen && !S.gen.busy && S.gen.stamp !== genStamp();
   const inPlan = SERVED && S.campaign;
-  // 1. not generated yet, or the inputs have moved on since
-  if (!S.gen || stale) {
+  // 1. not generated yet, or a review overtaken by a change
+  if (!S.gen || (stale && !S.gen.done)) {
     const over = genJobs({tweets: o.tweets, artistTweets: o.artistTweets}).length;
     const held = stale ? S.gen.items.filter(j => j.approved) : [], heldT = held.filter(j => j.kind !== "voice").length, heldV = held.some(j => j.kind === "voice");
     const dis = inPlan && (S.planBusy || !S.plan) ? " disabled" : "";
@@ -1846,9 +1846,11 @@ function renderOut(){
   }
   // 3. the cuts, for approval
   if (!S.gen.done) { renderReview(); return; }
-  // 4. filled in: the plan's rows inside a campaign, the whole set otherwise
+  // 4. filled in: the plan's rows inside a campaign, the whole set otherwise. A change since the
+  // generation shows in the copy at once; the approved rewrites stay, and the choice sits at the top.
+  const changed = stale ? staleBandHTML() : "";
   ensureServerRender();
-  if (inPlan && S.plan) { renderPlan(); return; }
+  if (inPlan && S.plan) { renderPlan(changed); wireStale(); return; }
   const sets = finalSets(), srv = SERVED ? S.server.out : null, cuts = S.gen.items;
   const cutOK = cuts.every(j => xLen(jobText(j)) <= X_LIMIT);
   const band = !SERVED ? "" : srv
@@ -1865,6 +1867,7 @@ function renderOut(){
       <span class="lbl">Then</span>
       <h1>Everything else</h1>
     </div>
+    ${changed}
     ${band}
     ${block("Instagram", sets.posts, true, "posts")}
     ${block("Twitter", sets.tweets, "x", "tweets")}
@@ -1872,8 +1875,19 @@ function renderOut(){
     ${block("The artist's Instagram", sets.artistPosts, true, "artistPosts")}
     ${block("The artist's X", sets.artistTweets, "x", "artistTweets")}
     ${block("Broadcast channel", sets.broadcast, true, "broadcast")}`;
-  wireRedo();
+  wireRedo(); wireStale();
 }
+// the copy has moved on since it was generated: what to do about the approved rewrites
+function staleBandHTML(){
+  const held = S.gen.items.filter(j => j.approved), heldT = held.filter(j => j.kind !== "voice").length;
+  const dis = SERVED && S.campaign && (S.planBusy || !S.plan) ? " disabled" : "";
+  const note = `The details or the email have changed since ${fmtTime(S.gen.at)}, and the copy below follows the changes.` + (heldT
+    ? ` Generate again to check the approved ${heldT === 1 ? "tweet" : "tweets"} against them, or have Claude write ${heldT === 1 ? "it" : "them"} again.`
+    : " Generate again to bring everything up to date.");
+  return `<div class="sheet" style="padding:14px 18px;margin-bottom:18px"><p class="note" style="margin:0 0 10px">${note}</p>
+    <button class="act" id="gen" style="width:auto;padding:7px 14px;margin:0"${dis}>${heldT ? `Generate again, keeping the approved ${heldT === 1 ? "tweet" : "tweets"}` : "Generate again"}</button>${heldT ? `<button class="act ghost" id="redo" style="width:auto;padding:7px 14px;margin:0 0 0 8px"${dis}>Generate again and redo the tweets</button>` : ""}</div>`;
+}
+function wireStale(){ const g = $("#gen"); if (g) g.onclick = () => generate("keep"); const rd = $("#redo"); if (rd) rd.onclick = () => generate("redo"); }
 function asideOut(){
   const o = outputs(), live = o.emails.filter(e=>!e.t.startsWith("—")).length;
   const hand = (S.blocks.qualifier+" "+S.blocks.hook+" "+S.blocks.making).split(/\s+/).filter(Boolean).length;
@@ -1890,7 +1904,7 @@ function asideOut(){
 // ---------- Notion: the plan's campaigns to choose from, its rows for the one chosen, and the copy written into them ----------
 S.notion = S.notion || {};
 async function notionPanel(){
-  const h = await serverHealth(); if (!h || !h.notion || S.view !== "out" || !genReady()) return;
+  const h = await serverHealth(); if (!h || !h.notion || S.view !== "out" || !(S.gen && S.gen.done)) return;
   const f = S.facts, N = S.notion;
   if (!S.campaign) { const w = $("#notion"); if (w) w.remove(); return; }
   const srv = S.server.out, pi = S.plan ? planItems(finalSets()) : [];
@@ -1900,7 +1914,8 @@ async function notionPanel(){
     <p class="note">The rows of <b>${esc(S.campaign.name)}</b>${S.plan ? `, read ${esc((S.plan.at || "").slice(11, 16))}` : ""}. <button class="act ghost" id="nrefresh" style="width:auto;padding:2px 8px;font-size:11.5px"${S.planBusy ? " disabled" : ""}>Read again</button></p>
     ${N.err ? `<p class="note">${esc(N.err)}</p>` : ""}
     ${S.plan && !srv ? `<p class="note">${S.server.err ? `The server could not render this release: ${esc(S.server.err)}` : "Rendering the templates on the server first…"}</p>` : ""}
-    ${S.plan ? `<button class="act" id="npush"${(N.busy || !srv || !toWrite.length) ? " disabled" : ""}>${toWrite.length ? `Write ${toWrite.length} row${toWrite.length === 1 ? "" : "s"} into Copy` : "Nothing to write"}</button>
+    ${S.plan && !genReady() ? `<p class="note">The copy has changed since it was generated. Generate again, above, before writing.</p>` : ""}
+    ${S.plan ? `<button class="act" id="npush"${(N.busy || !srv || !toWrite.length || !genReady()) ? " disabled" : ""}>${toWrite.length ? `Write ${toWrite.length} row${toWrite.length === 1 ? "" : "s"} into Copy` : "Nothing to write"}</button>
       ${kept.length ? `<p class="note">${kept.length === 1 ? "One row keeps its Notion copy." : kept.length + " rows keep their Notion copy."} <button class="act ghost" id="nreplace" style="width:auto;padding:2px 8px;font-size:11.5px">Replace ${kept.length === 1 ? "it" : "them all"}</button></p>` : ""}` : ""}
     ${N.result ? `<p class="note">Written: ${N.result.written.length}.${N.result.failed.length ? ` Failed: ${N.result.failed.length}.` : ""}</p>
       ${N.result.failed.length ? `<details class="out"><summary><b>What failed</b></summary><pre>${esc(N.result.failed.map(f => f.error).join("\n"))}</pre></details>` : ""}` : ""}
@@ -2242,7 +2257,7 @@ function afterShapeChange(){
 }
 function rowLabel(r){ return `${r.channel} · ${r.name}${r.live_date ? " · " + r.live_date.slice(0, 10) : ""}`; }
 // the plan as the screen: each row, its shape, and the copy for it
-function renderPlan(){
+function renderPlan(changed){
   const sets = finalSets(), items = planItems(sets), rows = visibleRows();
   const groups = []; items.forEach(p => { const g = groups.find(g => g.channel === p.row.channel); if (g) g.items.push(p); else groups.push({channel: p.row.channel, items: [p]}); });
   const opts = p => { const fam = FAMILY(p.row.channel); const list = SHAPES.filter(s => !fam || s.family === fam);
@@ -2259,6 +2274,7 @@ function renderPlan(){
       <span class="lbl">Then</span>
       <h1>The plan's copy</h1>
     </div>
+    ${changed || ""}
     ${S.planErr ? `<p class="live">The rows could not be read: ${esc(S.planErr)}</p>` : ""}
     ${planHasNeeds() && !rows.length ? `<p class="live">No row in this campaign is ticked as needing copy. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Show every row</button></p>` : ""}
     ${groups.map(g => `<div class="groupline"><span class="lbl">${esc(g.channel)}</span></div>

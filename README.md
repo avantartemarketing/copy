@@ -430,7 +430,10 @@ an allowed domain, and stays signed in for thirty days; the password is not aske
 up once: in Google Cloud Console, make a project (or use the workspace's), set the OAuth consent
 screen to Internal so only avantarte.com accounts can sign in at all, then create an OAuth client
 of type Web application with the authorised redirect URI `https://<your service>.onrender.com/auth/callback`.
-Put its client id and secret into `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` on Render;
+The sign-in page prints the exact redirect address the app sends, so copy it from there; Google
+insists on an exact match, scheme, host and path. Render's own address is used for it, and
+`PUBLIC_URL` overrides that once the app has a custom domain.
+Put the client id and secret into `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` on Render;
 `ALLOWED_DOMAINS` is avantarte.com unless you say otherwise, and `ALLOWED_EMAILS` lets named
 addresses from other domains in. Someone signed out mid-session is sent to the sign-in page and
 back to the same campaign afterwards. `/logout` signs out; the header has the link.

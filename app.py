@@ -12,6 +12,7 @@ key that stays here, and reads and writes the comms plan in Notion.
     ALLOWED_DOMAINS     the Google accounts allowed in, by domain; default avantarte.com
     ALLOWED_EMAILS      optional, single addresses allowed in from other domains
     SECRET_KEY          signs the sign-in cookie; Render generates one from the blueprint
+    PUBLIC_URL          only with a custom domain: where the app is reached, for Google's redirect
     CLAUDE_MODEL        default claude-fable-5-1
 """
 import datetime
@@ -81,8 +82,14 @@ def safe_next(n):
     return n if n and n.startswith("/") and not n.startswith("//") and "\\" not in n else "/"
 
 
+def public_url():
+    """Where this app is reached from outside: PUBLIC_URL if set (a custom domain), else the address
+    Render gives the service, else what the request says."""
+    return (os.environ.get("PUBLIC_URL") or os.environ.get("RENDER_EXTERNAL_URL") or request.url_root).rstrip("/")
+
+
 def callback_url():
-    return request.url_root.rstrip("/") + "/auth/callback"
+    return public_url() + "/auth/callback"
 
 
 @app.before_request
@@ -115,11 +122,13 @@ body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--
 p{color:var(--ink-soft);margin:10px 0 0}
 a.btn{display:block;margin-top:22px;padding:10px 14px;border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--accent);border-radius:7px;text-align:center;text-decoration:none;font-weight:500}
 .err{margin-top:16px;padding:10px 12px;border-radius:7px;background:var(--warn-soft);color:var(--warn)}
+.tiny{margin-top:18px;font-size:11.5px;color:var(--ink-soft);opacity:.75}.tiny code{font-size:11px;word-break:break-all}
 </style></head>
 <body><div class="card"><span class="mark">Copy <em>Generator</em></span>
 <p>Sign in with your {{ domains }} Google account.</p>
 {% if error %}<div class="err">{{ error }}</div>{% endif %}
 <a class="btn" href="/auth/google?{{ query }}">Sign in with Google</a>
+<p class="tiny">Google must list this redirect address for the app: <code>{{ callback }}</code></p>
 </div></body></html>
 """
 LOGIN_ERRORS = {"domain": "That Google account is not one of ours. Sign in with your work account.",
@@ -135,7 +144,7 @@ def login():
     if signed_in():
         return redirect(nxt)
     return render_template_string(LOGIN_PAGE, error=LOGIN_ERRORS.get(request.args.get("error", ""), ""),
-                                  query=urlencode({"next": nxt}), domains=" or ".join(ALLOWED_DOMAINS))
+                                  query=urlencode({"next": nxt}), domains=" or ".join(ALLOWED_DOMAINS), callback=callback_url())
 
 
 @app.get("/auth/google")

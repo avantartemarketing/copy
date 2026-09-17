@@ -161,7 +161,7 @@ ls = wb.create_sheet("Lines")
 ls["A1"] = "The fixed sentences, with the placeholders they take"; ls["A1"].font = TITLE
 ls["A2"] = "This is the whole system's copy, for the posts, the tweets and the emails. Edit a blue cell to change every future release. Column C fills the placeholders from Inputs."; ls["A2"].font = NOTE
 for c, h in zip("ABC", ["Key", "Line, with placeholders", "Filled from Inputs"]): ls[f"{c}3"] = h; ls[f"{c}3"].font = BOLD; ls[f"{c}3"].fill = GREY
-TOKEN = "{{ personalization_token('contact.firstname', 'there') }}"
+TOKEN = "[name]"
 lines = [
  ("POSTS", None),
  ("post · coming soon · status", "Our {ordinal} collaboration is on the horizon."),
@@ -204,7 +204,7 @@ lines = [
  ("email · announce · launch line, timed", "The edition will be available to collect for {window} only, starting at {launch_time} on {launch_weekday}, {launch_date_dd}."),
  ("email · announce · register line", "Click below to learn more and register for updates."),
  ("EMAILS · welcome (TL flow)", None),
- ("email · welcome · 1", "Welcome {{ personalization_token('contact.firstname', 'to Avant Arte') }}!"),
+ ("email · welcome · 1", "Welcome [name]!"),
  ("email · welcome · 2", "Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems."),
  ("email · welcome · 3", "Our upcoming collaboration with {collab_with} is the latest in this lineage. If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?"),
  ("email · welcome · 4", "Let us know if you have any questions. We're excited to see what you collect."),

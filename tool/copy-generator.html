@@ -233,7 +233,6 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .email .ebody p:last-child{margin-bottom:0}
 .email .em .lbl{display:block;margin-bottom:2px}
 .email .cta{font-family:var(--sans);font-size:13.5px;color:var(--accent)}
-.tok{display:inline-block;padding:0 6px;border:1px dashed var(--accent-line);border-radius:4px;color:var(--accent);font-family:var(--sans);font-size:12px;vertical-align:1px}
 .out>.gencols .email .meta,.out>.gencols .email .ebody{padding-left:0;padding-right:0}
 .rowbar select{width:auto;min-width:22ch;padding:5px 30px 5px 10px;font-size:12.5px;background-position:calc(100% - 15px) 11px,calc(100% - 10px) 11px}
 .act.ghost{background:transparent}
@@ -551,7 +550,7 @@ function outputs(){
           `After this time, the edition size${d.plural?" for each artwork":""} will be confirmed, and the ${d.plural?"works":"work"} will no longer be available to purchase.`, `Link in bio to buy ${d.aUnit}.`)}
   ];
 
-  const greet = "Hi {{ personalization_token('contact.firstname', 'there') }},";
+  const greet = "Hi [name],";
   const questions = "If you have any questions, please don't hesitate to get in touch by replying to this email.";
   const editionNos = "Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here.";
   const drawLine = `Enter the draw for a chance to collect. Closes at ${d.closeTime} on ${d.closeDate}.`;
@@ -562,7 +561,7 @@ function outputs(){
       P(opener, H, d.makingOurs, (ownOpener() && !d.openerNamesBen) ? d.featListSupport : d.featList,
         d.draw ? drawLine : P(`The edition will be available to collect for ${f.window} only, starting at ${d.launchTime} on ${d.launchDay}, ${d.launchDateDd}.`, "Click below to learn more and register for updates."), d.cards)),
     E("Welcome (TL Flow)", "timed", d.draw?NA:P(
-      "Welcome {{ personalization_token('contact.firstname', 'to Avant Arte') }}!",
+      "Welcome [name]!",
       "Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems.",
       `Our upcoming collaboration with ${f.collab_with} is the latest in this lineage. If you're new to collecting art or curious about limited editions, our library of guides is a good place to start. In particular, How to collect art and What is an edition?`,
       "Let us know if you have any questions. We're excited to see what you collect.")),
@@ -1485,11 +1484,10 @@ function emailParas(text){
   return text.split("\n").map(norm).filter(l => l && !MARK.test(l) && l !== "No body: this one is image-led.");
 }
 // an email as it reads: the subject, preview, kicker and headline set off at the top, the body as
-// paragraphs, the CTA, cards, quote and footer labelled, and HubSpot's first-name token shown as one
-const TOKEN = /\{\{\s*personalization_token\('contact\.firstname',\s*'[^']*'\)\s*\}\}/g;
+// paragraphs, the CTA, cards, quote and footer labelled
 function emailHTML(text){
-  const tok = t => esc(t).replace(/\uE000/g, '<span class="tok">first name</span>');
-  const lines = (text || "").replace(/\r/g, "").replace(TOKEN, "\uE000").split("\n");
+  const tok = esc;
+  const lines = (text || "").replace(/\r/g, "").split("\n");
   const head = []; let i = 0;
   while (i < lines.length && /^(Subject|Preview|Kicker|Headline): /.test(lines[i])) { head.push(lines[i].match(/^(\w+): (.*)$/)); i++; }
   const chunks = lines.slice(i).join("\n").replace(/\n(?=(CTA|Card|Quote|Footer): )/g, "\n\n").trim().split(/\n\s*\n/).filter(Boolean);   // a labelled line is a block of its own

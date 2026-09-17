@@ -40,7 +40,7 @@
 {% set opener_names_beneficiary = fundraiser and fundraiser in opener %}
 {# the opener has one opening in it: "released in support of X" fills it when there is a beneficiary #}
 {% set work_intro = (ep if plural else (work ~ ", " ~ ep)) ~ (("" if qualifier.startswith(",") else " ") ~ qualifier if (qualifier and not support) else "") %}
-{% set greeting = "Hi " ~ "{{ personalization_token('contact.firstname', 'there') }}" ~ "," %}
+{% set greeting = "Hi [name]," %}
 {% set questions = "If you have any questions, please don't hesitate to get in touch by replying to this email." %}
 {% set edition_numbers = "Earlier orders will typically receive a lower edition number, with framed editions receiving lower edition numbers than unframed prints. You can read more on how we allocate edition numbers across a release here." %}
 {% macro features(with_support) %}
@@ -98,7 +98,7 @@ Footer: {{ ("Collect " ~ cp) if draw else ("Launching " ~ release.launch_at|ukda
 Subject: Welcome to Avant Arte
 Preview: Where the art world is more accessible.
 
-Welcome {{ "{{ personalization_token('contact.firstname', 'to Avant Arte') }}" }}!
+Welcome [name]!
 
 Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems.
 

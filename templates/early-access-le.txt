@@ -8,7 +8,7 @@ Subject: {{ artist.name }} – Early access 🔓
 Preview: A first look, plus access to a limited number of pre-orders.
 
 
-Hi {{ "{{ personalization_token('contact.firstname', 'there') }}" }},
+Hi [name],
 
 {{ EA_OPENERS[context.early_access_opener] }} our {{ artist.collaboration_ordinal }} collaboration with {{ artist.name }}, {{ artworks|titles }}.
 

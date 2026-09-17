@@ -12,7 +12,7 @@ The edition will be allocated by a randomised draw, which closes at 17:00 UK tim
 Subject: Glenn Ligon – Early access 🔓
 Preview: A first look, plus access to a limited number of pre-orders.
 
-Hi {{ personalization_token('contact.firstname', 'there') }},
+Hi [name],
 
 We're currently preparing the launch of our debut collaboration with Glenn Ligon – two new limited edition silkscreen prints, Untitled (White on White) and Untitled (Black on Black).
 
@@ -40,7 +40,7 @@ Footer: Especially for you.
 Subject: Glenn Ligon – Early access for Insiders 🔓
 Preview: A first look, plus early access to a limited number of pre-orders.
 
-Hi {{ personalization_token('contact.firstname', 'there') }},
+Hi [name],
 
 I'm delighted to share our debut collaboration with Glenn Ligon – two new limited edition silkscreen prints, Untitled (White on White) and Untitled (Black on Black).
 
@@ -123,7 +123,7 @@ Footer: Time is almost up
 [EMAIL 6 · First-time collector survey (LE) · 100926]
 Subject: Congratulations on your first Avant Arte edition
 
-Hi {{ personalization_token('contact.firstname', 'there') }},
+Hi [name],
 
 Thank you for adding our collaboration with Glenn Ligon to your collection. Great choice!
 

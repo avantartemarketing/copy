@@ -32,7 +32,7 @@ Footer: Launching 28 January
 Subject: Welcome to Avant Arte
 Preview: Where the art world is more accessible.
 
-Welcome {{ personalization_token('contact.firstname', 'to Avant Arte') }}!
+Welcome [name]!
 
 Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems.
 
@@ -58,7 +58,7 @@ The edition will be available to collect for one week only, from 14:00 UK time o
 Subject: Ai Weiwei – Early access for Insiders 🔓
 Preview: Collect 24 hours before everyone else.
 
-Hi {{ personalization_token('contact.firstname', 'there') }},
+Hi [name],
 
 I'm delighted to share our latest collaboration with Ai Weiwei – a quartet of new limited edition embroideries, offered individually, in pairs or as a complete quartet.
 
@@ -87,7 +87,7 @@ Footer: 24 hours ahead of the public launch
 Subject: Ai Weiwei – Early access 🔓
 Preview: Collect 24 hours before everyone else.
 
-Hi {{ personalization_token('contact.firstname', 'there') }},
+Hi [name],
 
 Our latest collaboration with Ai Weiwei launches tomorrow at 14:00 UK time and will be available to collect for one week only.
 
@@ -111,7 +111,7 @@ Footer: 24 hours ahead of the public launch
 Subject: Ai Weiwei – Early access for past collectors
 Preview: Order before everyone else.
 
-Hi {{ personalization_token('contact.firstname', 'there') }},
+Hi [name],
 
 Our latest collaboration with Ai Weiwei launches tomorrow at 14:00 UK time and will be available to collect for one week only.
 

@@ -327,7 +327,7 @@ T["early-access-le"]=b=>{const {release:r,artist:a,edition:e,context:c}=b; const
   bl.push(blk("internal",[F(`${ddmmyy(r.early_access_at)}_CUS_${r.campaign_code||"Campaign"} - Early Access (LE)`)]));
   bl.push(blk("subject",[F(a.name||"Artist"),L(" – Early access 🔓")]));
   bl.push(blk("preview",[L("A first look, plus access to a limited number of pre-orders.")]));
-  bl.push(blk("para",[L("Hi {{ personalization_token('contact.firstname', 'there') }},")]));
+  bl.push(blk("para",[L("Hi [name],")]));
   bl.push(blk("para",[L(EA_OPENERS[c.early_access_opener]||EA_OPENERS.preparing),L(" our "),F(a.ordinal),L(" collaboration with "),F(a.name||"Artist"),L(", "),V(titles(b.artworks)),L(".")]));
   bl.push(blk("para",[B(c.early_access_note,"context.early_access_note","early_access_note")]));
   bl.push(blk("para",[L("The edition will launch publicly on "),F(ukdate(r.launch_at)),L(" and will be allocated by a randomised draw; however, for the next "),F(String(r.early_access_hours||48)),L(" hours we're offering a small group of collectors a first look, plus access to a limited number of pre-orders. Based on your order history and the artists you've expressed an interest in, I thought the edition would be a good fit for your collection.")]));

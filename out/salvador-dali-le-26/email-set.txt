@@ -12,7 +12,7 @@ The edition will be allocated by a randomised draw, which closes at 14:00 UK tim
 Subject: Salvador Dalí – Early access 🔓
 Preview: A first look, plus access to a limited number of pre-orders.
 
-Hi {{ personalization_token('contact.firstname', 'there') }},
+Hi [name],
 
 We're currently preparing the launch of our debut collaboration with the Salvador Dalí Estate – three new limited edition prints bringing together some of Dalí's most renowned paintings.
 
@@ -42,7 +42,7 @@ Footer: Especially for you.
 Subject: Salvador Dalí – Early access for Insiders 🔓
 Preview: A first look, plus early access to a limited number of pre-orders.
 
-Hi {{ personalization_token('contact.firstname', 'there') }},
+Hi [name],
 
 I'm delighted to share our debut collaboration with the Salvador Dalí Estate – three new limited edition prints bringing together some of Dalí's most renowned paintings.
 
@@ -129,7 +129,7 @@ Footer: Time is almost up
 [EMAIL 6 · First-time collector survey (LE) · 120926]
 Subject: Congratulations on your first Avant Arte edition
 
-Hi {{ personalization_token('contact.firstname', 'there') }},
+Hi [name],
 
 Thank you for adding our collaboration with the Salvador Dalí Estate to your collection. Great choice!
 

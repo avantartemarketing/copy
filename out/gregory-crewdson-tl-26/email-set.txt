@@ -33,7 +33,7 @@ Footer: Launching 30 June
 Subject: Welcome to Avant Arte
 Preview: Where the art world is more accessible.
 
-Welcome {{ personalization_token('contact.firstname', 'to Avant Arte') }}!
+Welcome [name]!
 
 Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems.
 
@@ -59,7 +59,7 @@ The edition will be available to collect for 48 hours only, from 17:00 UK time o
 Subject: Gregory Crewdson – Early access for Insiders 🔓
 Preview: Collect 24 hours before everyone else.
 
-Hi {{ personalization_token('contact.firstname', 'there') }},
+Hi [name],
 
 I'm delighted to share our latest collaboration with New York-based artist Gregory Crewdson – six new limited edition prints from his iconic Dream House series.
 
@@ -88,7 +88,7 @@ Footer: 24 hours ahead of the public launch
 Subject: Gregory Crewdson – Early access 🔓
 Preview: Collect 24 hours before everyone else.
 
-Hi {{ personalization_token('contact.firstname', 'there') }},
+Hi [name],
 
 Our latest collaboration with New York-based artist Gregory Crewdson launches tomorrow at 17:00 UK time and will be available to collect for 48 hours only.
 
@@ -113,7 +113,7 @@ Footer: 24 hours ahead of the public launch
 Subject: Gregory Crewdson – Early access for past collectors
 Preview: Order before everyone else.
 
-Hi {{ personalization_token('contact.firstname', 'there') }},
+Hi [name],
 
 Our latest collaboration with New York-based artist Gregory Crewdson launches tomorrow at 17:00 UK time and will be available to collect for 48 hours only.
 

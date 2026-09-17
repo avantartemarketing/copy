@@ -8,14 +8,24 @@ key that stays here, and reads and writes the comms plan in Notion.
     NOTION_TOKEN        an internal integration with access to the comms database
     NOTION_DATABASE_ID  the comms plan database
     APP_PASSWORD        if set, the whole app is behind a password (user: any)
+    GOOGLE_CLIENT_ID    with GOOGLE_CLIENT_SECRET: sign in with Google instead of the password
+    ALLOWED_DOMAINS     the Google accounts allowed in, by domain; default avantarte.com
+    ALLOWED_EMAILS      optional, single addresses allowed in from other domains
+    SECRET_KEY          signs the sign-in cookie; Render generates one from the blueprint
     CLAUDE_MODEL        default claude-fable-5-1
 """
+import datetime
+import hashlib
 import json
 import os
 import pathlib
+import secrets
 import time
+from urllib.parse import urlencode
 
-from flask import Flask, Response, jsonify, request, send_from_directory
+import requests
+from flask import Flask, Response, jsonify, redirect, render_template_string, request, send_from_directory, session
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from bridge import brief_from_state, split_set
 from render import render
@@ -38,19 +48,143 @@ def _dotenv(path=ROOT / ".env"):
 
 _dotenv()
 app = Flask(__name__, static_folder=None)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)      # Render ends TLS in front of gunicorn; the app still sees https
 
 MODEL = os.environ.get("CLAUDE_MODEL", "claude-fable-5-1")
 PASSWORD = os.environ.get("APP_PASSWORD", "")
 
+# ---------------------------------------------------------------- who may come in
+# With a Google client, everyone signs in with a Google account on an allowed domain and gets a
+# signed cookie for thirty days. Without one, the password stands, and without that the app is open.
+GOOGLE_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+ALLOWED_DOMAINS = [d.strip().lower() for d in os.environ.get("ALLOWED_DOMAINS", "avantarte.com").split(",") if d.strip()]
+ALLOWED_EMAILS = [e.strip().lower() for e in os.environ.get("ALLOWED_EMAILS", "").split(",") if e.strip()]
+app.secret_key = os.environ.get("SECRET_KEY") or hashlib.sha256(("copy-generator:" + GOOGLE_SECRET + PASSWORD).encode()).hexdigest()
+app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax", SESSION_COOKIE_SECURE=bool(os.environ.get("RENDER")),
+                  PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=30))
+OPEN_PATHS = {"/api/health", "/favicon.ico", "/login", "/auth/google", "/auth/callback", "/logout"}
+
+
+def signed_in():
+    u = session.get("user")
+    return u if isinstance(u, dict) and u.get("email") else None
+
+
+def allowed(email):
+    email = (email or "").lower()
+    return email in ALLOWED_EMAILS or ("@" in email and email.rsplit("@", 1)[1] in ALLOWED_DOMAINS)
+
+
+def safe_next(n):
+    """Only an address on this site: a path, never another host."""
+    return n if n and n.startswith("/") and not n.startswith("//") and "\\" not in n else "/"
+
+
+def callback_url():
+    return request.url_root.rstrip("/") + "/auth/callback"
+
 
 @app.before_request
 def gate():
-    if not PASSWORD or request.path in ("/api/health", "/favicon.ico"):   # Render's health check has no password
+    if request.path in OPEN_PATHS:                                   # Render's health check carries no sign-in
+        return None
+    if GOOGLE_ID:
+        if signed_in():
+            return None
+        if request.path.startswith("/api/"):
+            return jsonify(error="Signed out. Sign in again."), 401
+        return redirect("/login?" + urlencode({"next": request.full_path.rstrip("?")}))
+    if not PASSWORD:
         return None
     auth = request.authorization
     if auth and auth.password == PASSWORD:
         return None
     return Response("Copy Generator", 401, {"WWW-Authenticate": 'Basic realm="Copy Generator"'})
+
+
+LOGIN_PAGE = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign in · Copy Generator</title>
+<style>
+:root{--paper:#FBFAF7;--surface:#FFFFFF;--line:#E5E2DA;--ink:#1C1B16;--ink-soft:#6E6B60;--accent:#1F3A5F;--accent-soft:#E7ECF3;--accent-line:#C3D0E2;--warn:#8F4327;--warn-soft:#F8EDE8}
+@media (prefers-color-scheme:dark){:root{--paper:#161512;--surface:#1D1C18;--line:#343229;--ink:#EDEAE1;--ink-soft:#A19D91;--accent:#9BB8DC;--accent-soft:#222B37;--accent-line:#3A4757;--warn:#D99878;--warn-soft:#2E241E}}
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--paper);color:var(--ink);font:14px/1.5 "Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:30px 34px 32px;max-width:380px;width:calc(100% - 32px);box-sizing:border-box}
+.mark{font-family:"Newsreader",Georgia,"Times New Roman",serif;font-size:19px;letter-spacing:-.01em}.mark em{font-style:italic;color:var(--accent)}
+p{color:var(--ink-soft);margin:10px 0 0}
+a.btn{display:block;margin-top:22px;padding:10px 14px;border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--accent);border-radius:7px;text-align:center;text-decoration:none;font-weight:500}
+.err{margin-top:16px;padding:10px 12px;border-radius:7px;background:var(--warn-soft);color:var(--warn)}
+</style></head>
+<body><div class="card"><span class="mark">Copy <em>Generator</em></span>
+<p>Sign in with your {{ domains }} Google account.</p>
+{% if error %}<div class="err">{{ error }}</div>{% endif %}
+<a class="btn" href="/auth/google?{{ query }}">Sign in with Google</a>
+</div></body></html>
+"""
+LOGIN_ERRORS = {"domain": "That Google account is not one of ours. Sign in with your work account.",
+                "state": "The sign-in did not complete. Try again.",
+                "google": "Google did not sign you in. Try again."}
+
+
+@app.get("/login")
+def login():
+    if not GOOGLE_ID:
+        return redirect("/")
+    nxt = safe_next(request.args.get("next"))
+    if signed_in():
+        return redirect(nxt)
+    return render_template_string(LOGIN_PAGE, error=LOGIN_ERRORS.get(request.args.get("error", ""), ""),
+                                  query=urlencode({"next": nxt}), domains=" or ".join(ALLOWED_DOMAINS))
+
+
+@app.get("/auth/google")
+def auth_google():
+    if not GOOGLE_ID:
+        return redirect("/")
+    state = secrets.token_urlsafe(24)
+    session["oauth_state"] = state
+    session["next"] = safe_next(request.args.get("next"))
+    params = {"client_id": GOOGLE_ID, "redirect_uri": callback_url(), "response_type": "code", "scope": "openid email profile",
+              "state": state, "access_type": "online", "prompt": "select_account"}
+    if len(ALLOWED_DOMAINS) == 1:
+        params["hd"] = ALLOWED_DOMAINS[0]                            # a hint for Google's account chooser; the check is ours
+    return redirect("https://accounts.google.com/o/oauth2/v2/auth?" + urlencode(params))
+
+
+@app.get("/auth/callback")
+def auth_callback():
+    if not GOOGLE_ID:
+        return redirect("/")
+    if request.args.get("error") or not request.args.get("code"):
+        return redirect("/login?error=google")
+    if not request.args.get("state") or request.args.get("state") != session.pop("oauth_state", None):
+        return redirect("/login?error=state")
+    nxt = safe_next(session.pop("next", "/"))
+    try:
+        tok = requests.post("https://oauth2.googleapis.com/token", timeout=15,
+                            data={"code": request.args["code"], "client_id": GOOGLE_ID, "client_secret": GOOGLE_SECRET,
+                                  "redirect_uri": callback_url(), "grant_type": "authorization_code"}).json()
+        if not tok.get("access_token"):
+            raise ValueError(tok.get("error_description") or tok.get("error") or "no token")
+        me = requests.get("https://openidconnect.googleapis.com/v1/userinfo", timeout=15,
+                          headers={"Authorization": "Bearer " + tok["access_token"]}).json()
+    except Exception as e:                                           # noqa: BLE001 - whatever Google said, the answer is the same
+        app.logger.warning("Google sign-in failed: %s", e)
+        return redirect("/login?error=google")
+    email = (me.get("email") or "").lower()
+    if not email or me.get("email_verified") is False or not allowed(email):
+        return redirect("/login?error=domain")
+    session.clear()
+    session.permanent = True
+    session["user"] = {"email": email, "name": me.get("name") or email.split("@")[0]}
+    return redirect(nxt)
+
+
+@app.get("/logout")
+def logout():
+    session.clear()
+    return redirect("/login" if GOOGLE_ID else "/")
 
 
 @app.get("/")
@@ -69,7 +203,8 @@ def favicon():
 @app.get("/api/health")
 def health():
     return jsonify(ok=True, claude=bool(os.environ.get("ANTHROPIC_API_KEY")), notion=notion.configured(), model=MODEL,
-                   commit=os.environ.get("RENDER_GIT_COMMIT", "")[:7])      # which push is live; Render sets it
+                   commit=os.environ.get("RENDER_GIT_COMMIT", "")[:7],      # which push is live; Render sets it
+                   login="google" if GOOGLE_ID else "password" if PASSWORD else "open", user=signed_in())
 
 
 # ------------------------------------------------------------------ the templates, as the page sees them

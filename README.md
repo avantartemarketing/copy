@@ -403,6 +403,10 @@ NOTION_TOKEN         an internal integration; connect it to the comms plan datab
                      which needs a Text property called "Copy generator" for the drafts
 NOTION_DATABASE_ID   the database's id, the 32 characters in its URL
 APP_PASSWORD         optional; if set, the whole app asks for it (any username)
+GOOGLE_CLIENT_ID     with GOOGLE_CLIENT_SECRET: sign in with Google instead; see below
+ALLOWED_DOMAINS      the Google accounts let in, by domain; default avantarte.com
+ALLOWED_EMAILS       optional single addresses from other domains
+SECRET_KEY           signs the sign-in cookie; the blueprint has Render generate one
 CLAUDE_MODEL         optional, default claude-fable-5-1
 ```
 
@@ -420,6 +424,16 @@ where the plan has both, an email that stands for two rows ("Now Live (TL Flow a
 is written to both, and an item with no row is listed rather than written. Nothing is written
 until "Write … rows into Copy" is pressed; it overwrites the rows it names and no others, and a
 row already carrying the same copy is not named.
+
+**Signing in with Google.** With a Google client set, everyone signs in with a Google account on
+an allowed domain, and stays signed in for thirty days; the password is not asked for. To set it
+up once: in Google Cloud Console, make a project (or use the workspace's), set the OAuth consent
+screen to Internal so only avantarte.com accounts can sign in at all, then create an OAuth client
+of type Web application with the authorised redirect URI `https://<your service>.onrender.com/auth/callback`.
+Put its client id and secret into `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` on Render;
+`ALLOWED_DOMAINS` is avantarte.com unless you say otherwise, and `ALLOWED_EMAILS` lets named
+addresses from other domains in. Someone signed out mid-session is sent to the sign-in page and
+back to the same campaign afterwards. `/logout` signs out; the header has the link.
 
 Locally: `pip install -r requirements.txt`, copy `.env.example` to `.env` and fill in what you
 have (nothing is required), then `python3 app.py` and open http://127.0.0.1:8000. `.env` is

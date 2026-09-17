@@ -18,5 +18,13 @@ services:
         sync: false
       - key: APP_PASSWORD
         sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: ALLOWED_DOMAINS
+        value: avantarte.com
+      - key: SECRET_KEY
+        generateValue: true
       - key: CLAUDE_MODEL
         value: claude-fable-5-1

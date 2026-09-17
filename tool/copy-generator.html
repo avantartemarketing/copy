@@ -45,7 +45,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .mark em{font-style:italic;color:var(--accent)}
 .crumb{color:var(--ink-soft);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
 .crumb b{color:var(--ink);font-weight:500}
-.ghost{padding:5px 10px;border:1px solid var(--line);border-radius:6px;font-size:12.5px;color:var(--ink-soft)}
+.ghost{padding:5px 10px;border:1px solid var(--line);border-radius:6px;font-size:12.5px;color:var(--ink-soft);text-decoration:none;background:transparent}
 .ghost:hover{border-color:var(--ink-faint);color:var(--ink)}
 .ghost.arm{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
 #camp{max-width:36ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink);font-weight:500}
@@ -273,6 +273,8 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
   <button class="ghost" id="camp" title="Campaigns">Choose a campaign</button>
   <span class="crumb" id="crumb"></span>
   <span class="saved" id="saved"></span>
+  <span class="saved" id="who" hidden></span>
+  <a class="ghost" id="signout" href="/logout" hidden>Sign out</a>
   <button class="ghost" id="new" title="Start a release outside any campaign">New release</button>
   <button class="ghost" id="theme" title="Switch theme">Theme</button>
 </header>
@@ -1031,6 +1033,11 @@ function renderAI(r){
 // Inside claude.ai the page asks Claude directly; served from its own server it asks the
 // server, which holds the key. The prompt and the JSON shape are the same either way.
 const HTTP = location.protocol.startsWith("http");
+// signed out on the server: back to the sign-in page, and from there to this address
+if (HTTP) { const rawFetch = window.fetch.bind(window); window.fetch = async (url, opts) => {
+  const r = await rawFetch(url, opts);
+  if (r.status === 401 && String(url).startsWith("/api/") && !String(url).startsWith("/api/health")) location.href = "/login?next=" + encodeURIComponent(location.pathname + location.hash);
+  return r; }; }
 let SERVED = false;                                  // true once /api/health has answered: app.py is serving the page
 // ---------- the holding card: up whenever the page is waiting on Notion, the server or Claude ----------
 // It appears only once a wait has run a quarter of a second, and stays up half a second once
@@ -2295,6 +2302,7 @@ else render();
 // Served, the address decides: a campaign's draft from Notion on its own screen, the release kept in
 // this browser, or the campaigns to choose from. The file and the artifact keep what was open.
 serverHealth().then(async () => {
+  const u = S.health && S.health.user; if (u) { $("#who").textContent = u.name || u.email; $("#who").title = u.email; $("#who").hidden = false; $("#signout").hidden = false; }
   if (SERVED) { startBlank(); await route(); return; }
   const local = localGet(null);
   if (local) { restore(local); S.campaign = null; S.view = missing().length ? "facts" : "write"; }

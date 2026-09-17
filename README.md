@@ -345,12 +345,15 @@ page falls back to the whole set. Three more property names can be set if the pl
 filling the side panel: three openers, three hooks, three making lines and a line per card, each
 with where on the page it came from and the checks run on it. Use puts one into the email; "Three
 more" asks Claude for three others unlike the ones offered; "Write it myself" goes to that field
-in the email. The three openers follow the three house structures, one each: the classic "We're
-delighted to announce our latest collaboration with X – ‘Title’, a new limited edition print, …";
-"In our latest collaboration, X presents ‘Title’, a new limited edition print…"; and the image
-first, "[What happens in the work] in a new limited edition print by X.", which the email opens
-with the image clause selected, ready to be overwritten. With several works, an opener that names
-the work names all of them; naming one with a plural phrase is flagged. A sibling artwork whose
+in the email. The three openers follow the three house structures: the classic "We're delighted to
+announce our latest collaboration with X – ‘Title’, a new limited edition print, …" with a few
+words of idea; "In our latest collaboration, X presents ‘Title’, a new limited edition print…",
+where a foundation or estate presents when the collaboration is with one; and the image first,
+"[Princesses take centre stage] in a pair of new limited edition prints by X.", a subject and a
+verb with some flair, which the email opens with that clause selected, ready to be overwritten.
+One of each as a rule, with a second image-first version standing in where the classic or the
+presents structure sits badly. Two works can both be named; with three or more, none is, and the
+edition phrase carries them; an opener that breaks either is flagged. A sibling artwork whose
 page is identical to the first still gets a card line, written from its title to sit beside the
 first card rather than repeat it. "Made at Make-Ready" in the details decides whether the making
 line should say "printmakers at Make-Ready" or must not mention it.

@@ -452,8 +452,8 @@ const LEADS = [
   {name:"The work first", note:"one announcement in ten opens on the artwork",
    head:d=>`We're delighted to present `, tail:d=>` by ${S.facts.artist}`},
   // written whole: the shape is a start, and the sentence is then the writer's
-  {name:"The artist presents", note:"written whole, from this shape",
-   shape:d=>`In our ${S.facts.ordinal} collaboration, ${S.facts.artist} presents ${D().workIntro}${d.support}.`},
+  {name:"The artist presents", note:"written whole, from this shape; a foundation or estate presents when the collaboration is with one",
+   shape:d=>`In our ${S.facts.ordinal} collaboration, ${S.facts.collab_with && S.facts.collab_with !== S.facts.artist ? S.facts.collab_with : S.facts.artist} presents ${D().workIntro}${d.support}.`},
   {name:"An image first", note:"written whole: what happens in the work, then the edition",
    shape:d=>`[What happens in the work] in ${S.facts.edition_phrase} by ${S.facts.artist}${d.support}.`},
   {name:"In your own words", note:"the framed line as a starting point",
@@ -725,7 +725,8 @@ function checks(key, text){
     if (artist && !t.includes(artist)) out.push({k:"warn", t:`Does not give ${artist}'s full name.`});
     if (!/limited edition/.test(low)) out.push({k:"warn", t:"Does not say it is a limited edition."});
     { const d = D(), quoted = t.includes("‘"); if (d.cardTitles.length > 1 && !d.series) { const named = d.cardTitles.filter(x => quoted ? low.includes("‘" + x.toLowerCase() + "’") : low.includes(x.toLowerCase())).length;
-      if (named && named < d.cardTitles.length) out.push({k:"warn", t:`Names ${named} of the ${d.cardTitles.length} works but calls them ${f.edition_phrase}. Name all ${d.cardTitles.length}, or none.`}); } }
+      if (d.cardTitles.length === 2 && named === 1) out.push({k:"warn", t:`Names one of the two works but calls them ${f.edition_phrase}. Name both, or neither.`});
+      if (d.cardTitles.length >= 3 && named) out.push({k:"warn", t:`Names ${named} of the ${d.cardTitles.length} works. With more than two, name none: the edition phrase carries them.`}); } }
     if (!/[.]$/.test(t)) out.push({k:"warn", t:"Ends without a full stop."});
     if (t.split(/(?<=[.!?])\s+/).length > 1) out.push({k:"warn", t:"More than one sentence."});
     if (words > 35) out.push({k:"warn", t:`${words} words. Past openers ran 22 to 27.`});
@@ -879,7 +880,7 @@ function renderWrite(){
   wireFields($("#main")); wireLock($("#main"));
   if (S.focusField || S.selectImage) {                   // arriving from the suggestions: the field to write in, or the clause to overwrite
     const k = S.focusField || "opener", el = $("#main").querySelector(`.fld[data-k="${k}"]`);
-    if (el) { if (S.selectImage && k === "opener") { const t = el.textContent, end = t.indexOf(` in ${S.facts.edition_phrase}`); selectText(el, 0, end > 0 ? end : t.length); } else caret(el); S.focus = k; }
+    if (el) { if (S.selectImage && k === "opener") { const t = el.textContent, ends = [t.indexOf(` in ${S.facts.edition_phrase}`), t.indexOf(" in our ")].filter(i => i > 0), end = ends.length ? Math.min(...ends) : t.length; selectText(el, 0, end); } else caret(el); S.focus = k; }
     S.focusField = null; S.selectImage = false;
   }
   // the quote and the bio, written here: the pull quote in the email follows as it is typed
@@ -1245,17 +1246,20 @@ function suggestPrompt(more){                            // more: {key, have} as
     const rel = x.i === 0 ? "" : same ? " (its page is identical to artwork 1's)" : !(x.page.description||"").trim() ? " (no page written yet)" : ` (${pageDiff(x.i).replace(/\.$/, "").toLowerCase()})`;
     return `── Artwork ${x.i+1}: ${x.title}${rel}\n${same ? "(as artwork 1)" : (x.page.description || "").trim() || "(blank)"}\n   medium: ${x.page.medium || "(blank)"}`;
   }).join("\n\n");
-  const works = d.series ? `the ${f.series_name} series` : d.cardTitles.map(t => `‘${t}’`).join(" and ") || "the work";
+  const named = d.series ? `the ${f.series_name} series` : n >= 3 ? `${f.edition_phrase}` : d.cardTitles.map(t => `‘${t}’`).join(" and ") || "the work";
+  const works = n >= 3 && !d.series ? named : `${named}, ${f.edition_phrase}`;      // two works can both be named; three or more are not
+  const presenter = f.collab_with && f.collab_with !== f.artist ? f.collab_with : f.artist;
   const ben = f.beneficiary ? `, released in support of ${f.beneficiary}` : "";
   const mr = f.made_at_mr === "no" ? "The edition was not made at Make-Ready, so never mention Make-Ready." : 'Write "printmakers at Make-Ready" exactly, never "our printmakers"; the emails add "our".';
   const cardRule = i => `15 to 25 words, drawn from ${i == null ? "that artwork's own page" : `the page of artwork ${i + 1}, ${d.cardTitles[i]}`}. ${SPEC.card.rule}${n > 1 ? " Where the artwork's page is identical to artwork 1's, still write its line: take its subject from its title, and write it to sit beside the first card, the same register, a different detail or angle, never the first card's phrasing again; say in \"from\" that it was written from the title beside artwork 1's line." : ""}`;
   const RULES = {
     hook: `two sentences, 25 to 45 words in all, on the work. ${first ? "Do not name the artist at all: the artist's own posts carry this hook in the first person, so write it about the work, with the work or its subject as the subject of each sentence. " : "Name the artist once at most, by the surname alone (" + d.surname + "). "}It must read as well in the middle of an email as at the top of a post: no lede that assumes it is read first, no rhetorical question. Each version opens on a different one of these, as far as the page supports them: what happens in the work; what it was made from or how; where it comes from, a series, a year, a place.`,
     making: `one sentence, under 30 words, on how the edition was physically made. ${mr} If neither the pages nor the medium descriptions say how it was made, return one option with null text and say so in "from".${mediums.size > 1 ? ` The mediums differ between artworks (${[...mediums].map(m => '"' + m + '"').join("; ")}), so say only what is true of every artwork, or return null and say why.` : ""}`,
-    opener: `the announcement email's first sentence, whole, 22 to 30 words, ending in a full stop, naming the artist in full, ${f.artist}, and using this edition phrase as it is: "${f.edition_phrase}"${ben ? `, and saying that it is released in support of ${f.beneficiary}` : ""}. One idea of its own, not the hook's first sentence, which follows it. ${n > 1 && !d.series ? `There are ${n} works, so a structure that names the work names all of them, ${works}, never one of them with a plural phrase. ` : ""}Three structures, one each, in this order:
-  - classic: "We're delighted to announce our ${f.ordinal} collaboration with ${f.collab_with} – ${works}, ${f.edition_phrase}, [the idea, a few words]${ben}."
-  - presents: "In our ${f.ordinal} collaboration, ${f.artist} presents ${works}, ${f.edition_phrase}[, the idea]${ben}."
-  - image: "[What happens in the work: the image or its subject, 8 to 16 words, as a noun phrase] in ${f.edition_phrase} by ${f.artist}${ben}." The work is not named in this one; the headline and the cards name it.`
+    opener: `the announcement email's first sentence, whole, 22 to 30 words, ending in a full stop, naming the artist in full, ${f.artist}, and using this edition phrase as it is: "${f.edition_phrase}"${ben ? `, and saying that it is released in support of ${f.beneficiary}` : ""}. One idea of its own, not the hook's first sentence, which follows it. ${n === 2 && !d.series ? `There are two works: a structure that names the work names both, ${named}, never one of them with a plural phrase. ` : n >= 3 && !d.series ? `There are ${n} works, too many to name in an opener: name none of them and let the edition phrase carry them. ` : ""}Three structures:
+  - classic: "We're delighted to announce our ${f.ordinal} collaboration with ${f.collab_with} – ${works}, [the idea, a few words]${ben}."
+  - presents: "In our ${f.ordinal} collaboration, ${presenter} presents ${works}[, the idea]${ben}."${presenter !== f.artist ? ` The collaboration is with ${f.collab_with}, so it is they who present, and the sentence still names ${f.artist}.` : ""}
+  - image: "[What happens in the work, said with some flair: a subject and a verb, 3 to 8 words, like “Princesses take centre stage”, “SPAM takes flight” or “Ai Weiwei becomes a door god”] in ${f.edition_phrase} by ${f.artist}${ben}." If the clause itself names the artist, the tail is instead "in our ${f.ordinal} collaboration with the artist, ${f.edition_phrase}${ben}". Nothing the page does not say, so no nationality or description of the artist unless the page gives it. The work need not be named in this one; the headline and the cards name it.
+  One of each as a rule. Where the classic or the presents structure sits badly on this release, give a second image-first version in its place, so there are always three.`
   };
   const head = `You are drafting fragments of campaign copy for Avant Arte, a publisher of limited edition artworks, from product page${n>1?"s":""} a person has already written and approved. Every fragment must be a shortening or re-voicing of what is on the page${n>1?"s":""} or in the fields. Add no fact of any kind that is not there: no date, number, place, name, material, exhibition or claim. If a fragment cannot be written from the page${n>1?"s":""}, return null for its text and say why in "from".
 

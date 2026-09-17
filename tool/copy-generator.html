@@ -221,6 +221,10 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .genact .act{width:auto;padding:8px 14px}
 .rowbar{display:flex;align-items:center;gap:10px;margin:0 0 10px}
 .rowbar .act{width:auto;padding:5px 12px;font-size:12.5px;margin:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-left:2px;vertical-align:middle}
+.seg button{padding:1px 8px;font-size:11.5px;color:var(--ink-faint);background:transparent;border:none;border-radius:0}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--accent-soft);color:var(--accent);font-weight:500}
 .out>.rowbar{padding:14px 18px 0;margin:0}
 .out>.note{padding:0 18px 14px;margin:0}
 .out>.gencols{padding:12px 18px 0}
@@ -2359,14 +2363,14 @@ function renderPlan(changed){
     ${S.planErr ? `<p class="live">The rows could not be read: ${esc(S.planErr)}</p>` : ""}
     ${planHasNeeds() && !rows.length ? `<p class="live">No row in this campaign is ticked as needing copy. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Show every row</button></p>` : ""}
     ${groups.map(g => `<div class="groupline"><span class="lbl">${esc(g.channel)}</span></div>
-      ${g.items.map(p => `<details class="out" data-row="${esc(p.row.id)}"><summary><b>${esc(p.row.name)}</b>${p.row.live_date ? `<span class="note">${esc(p.row.live_date.slice(0, 10))}</span>` : ""}${p.row.copy ? `<span class="note">${rowSame(p) ? "already in the row" : p.keep ? "keeps its copy" : "will be replaced"}</span>${p.item && !rowSame(p) ? `<button class="act ghost keep" data-row="${esc(p.row.id)}" style="width:auto;padding:1px 8px;margin:0 0 0 4px;font-size:11.5px">${p.keep ? "Replace" : "Keep"}</button>` : ""}` : ""}<i>${p.item ? (SETOF[p.shape.family] === "tweets" || SETOF[p.shape.family] === "artistTweets" ? xLen(p.text) + " on X" : p.text.length + " chars") : ""}</i></summary>
+      ${g.items.map(p => `<details class="out" data-row="${esc(p.row.id)}"><summary><b>${esc(p.row.name)}</b>${p.row.live_date ? `<span class="note">${esc(p.row.live_date.slice(0, 10))}</span>` : ""}${p.row.copy ? (rowSame(p) ? `<span class="note">already in the row</span>` : p.item ? `<span class="seg" title="What happens to the copy already in this row"><button class="keep${p.keep ? "" : " on"}" data-row="${esc(p.row.id)}" data-keep="0">Replace</button><button class="keep${p.keep ? " on" : ""}" data-row="${esc(p.row.id)}" data-keep="1">Keep</button></span>` : `<span class="note">keeps its copy</span>`) : ""}<i>${p.item ? (SETOF[p.shape.family] === "tweets" || SETOF[p.shape.family] === "artistTweets" ? xLen(p.text) + " on X" : p.text.length + " chars") : ""}</i></summary>
         <div class="rowbar"><span class="lbl">Shape</span>${opts(p)}${p.item && p.shape ? redoBtn(SETOF[p.shape.family], {n: p.item.n, t: p.text}, "margin-left:auto") : ""}</div>${body(p)}</details>`).join("")}`).join("")}
     ${planHasNeeds() && rows.length ? `<p class="note" style="margin-top:18px">${S.showAll ? `Showing every row. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Only rows that need copy</button>` : `Only rows ticked Needs copy. <button class="act ghost" id="showall" style="width:auto;padding:3px 10px;font-size:12px">Show every row</button>`}</p>` : ""}`;
   open.forEach(id => { const d = $("#main").querySelector(`details[data-row="${CSS.escape(id)}"]`); if (d) d.open = true; });
   wireRedo();
   const sa = $("#showall"); if (sa) sa.onclick = () => { S.showAll = !S.showAll; afterShapeChange(); persist(); render(); };
   $("#main").querySelectorAll("select.shape").forEach(el => el.onchange = e => { S.shapes[el.dataset.row] = e.target.value; afterShapeChange(); persist(); render(); });
-  $("#main").querySelectorAll("button.keep").forEach(el => el.onclick = e => { e.preventDefault(); e.stopPropagation(); const p = items.find(p => p.row.id === el.dataset.row); S.keep[el.dataset.row] = p ? !p.keep : false; persist(); render(); });
+  $("#main").querySelectorAll("button.keep").forEach(el => el.onclick = e => { e.preventDefault(); e.stopPropagation(); S.keep[el.dataset.row] = el.dataset.keep === "1"; persist(); render(); });
 }
 
 // ═══════════════════════════════════════════════════ boot

@@ -1,5 +1,4 @@
 [EMAIL 1 · Monthly Preview, this release's paragraph · 240826]
-[PARAGRAPH] this release's paragraph, for the advisor's monthly email
 From Brooklyn-born artist Robert Longo comes Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print, released in support of Vote.org.
 
 Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year.
@@ -10,9 +9,9 @@ The edition will be allocated by a randomised draw, which closes at 17:00 UK tim
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 2 · Early/Exclusive access (LE) · 030926]
-[SUBJECT] Robert Longo – Early access 🔓
-[PREVIEW] A first look, plus access to a limited number of pre-orders.
-[BODY]
+Subject: Robert Longo – Early access 🔓
+Preview: A first look, plus access to a limited number of pre-orders.
+
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
 We're currently preparing the launch of our latest collaboration with Brooklyn-born artist Robert Longo – Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print, released in support of Vote.org.
@@ -27,18 +26,18 @@ Earlier orders will typically receive a lower edition number, with framed editio
 
 If you have any questions, please don't hesitate to get in touch by replying to this email.
 
-[CTA] Unlock early access
+CTA: Unlock early access
 
-[CARD] Untitled (Sandy, from the series “Men in the Cities”)
+Card: Untitled (Sandy, from the series “Men in the Cities”)
 One of the most iconic figures from a truly iconic series, Sandy is a striking exploration of urban alienation.
 
-[FOOTER] Especially for you.
+Footer: Especially for you.
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 3 · Early Access (LE Insiders), signed by the advisor · 030926]
-[SUBJECT] Robert Longo – Early access for Insiders 🔓
-[PREVIEW] A first look, plus early access to a limited number of pre-orders.
-[BODY]
+Subject: Robert Longo – Early access for Insiders 🔓
+Preview: A first look, plus early access to a limited number of pre-orders.
+
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
 I'm delighted to share our latest collaboration with Brooklyn-born artist Robert Longo – Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print, released in support of Vote.org.
@@ -56,27 +55,26 @@ Sam
 
 Art Advisor at Avant Arte
 
-[CTA] Unlock early access
+CTA: Unlock early access
 
-[CARD] Untitled (Sandy, from the series “Men in the Cities”)
+Card: Untitled (Sandy, from the series “Men in the Cities”)
 One of the most iconic figures from a truly iconic series, Sandy is a striking exploration of urban alienation.
 
-[FOOTER] Especially for you.
+Footer: Especially for you.
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 4 · Announcement (LE) · 070926]
-[SUBJECT] Robert Longo – A new limited edition silkscreen print
-[PREVIEW] Enter the draw for a chance to collect. Closes 29 September.
-[KICKER] Enter the draw
-[HEADLINE] Untitled (Sandy, from the series “Men in the Cities”)
-[BODY]
+Subject: Robert Longo – A new limited edition silkscreen print
+Preview: Enter the draw for a chance to collect. Closes 29 September.
+Kicker: Enter the draw
+Headline: Untitled (Sandy, from the series “Men in the Cities”)
+
 We're delighted to announce our latest collaboration with Brooklyn-born artist Robert Longo – Untitled (Sandy, from the series “Men in the Cities”), a new limited edition silkscreen print, released in support of Vote.org.
 
 Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year.
 
 To craft the edition, our printmakers at Make-Ready worked from the original Kodak transparencies, creating a high fidelity silkscreen of the original piece.
 
-[FEATURES]
 · Signed by the artist
 · Individually numbered
 · Free worldwide shipping
@@ -84,40 +82,39 @@ To craft the edition, our printmakers at Make-Ready worked from the original Kod
 
 Enter the draw for a chance to collect. Closes at 17:00 UK time on 29 September.
 
-[CTA] Enter the draw
+CTA: Enter the draw
 
-[CARD] Untitled (Sandy, from the series “Men in the Cities”)
+Card: Untitled (Sandy, from the series “Men in the Cities”)
 One of the most iconic figures from a truly iconic series, Sandy is a striking exploration of urban alienation.
 
-[QUOTE] It was really important to me that as I got older as an artist, I could still make work that meant something. I wanna make work that matters.
-[QUOTE ATTRIBUTION] Robert Longo
+Quote: “It was really important to me that as I got older as an artist, I could still make work that meant something. I wanna make work that matters.” – Robert Longo
 
-[FOOTER] Collect a limited edition silkscreen print
+Footer: Collect a limited edition silkscreen print
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 5 · Last chance (LE) · 280926]
-[SUBJECT] Robert Longo – Last chance to enter the draw
-[PREVIEW] The draw closes at 17:00 UK time on 29 September.
-[KICKER] Robert Longo
-[HEADLINE] Last chance to enter the draw
-[BODY]
+Subject: Robert Longo – Last chance to enter the draw
+Preview: The draw closes at 17:00 UK time on 29 September.
+Kicker: Robert Longo
+Headline: Last chance to enter the draw
+
 This is your final opportunity to enter the draw for Untitled (Sandy, from the series “Men in the Cities”), a limited edition silkscreen print by Robert Longo.
 
 Sandy is one of the best-known figures from Men in the Cities, and this is only the second time the series has been editioned in silkscreen, following the release of Eric last year.
 
 For a chance to collect, click the link below to enter the draw. The draw closes at 17:00 UK time on Tuesday, 29 September.
 
-[CTA] Enter the draw
+CTA: Enter the draw
 
-[CARD] Untitled (Sandy, from the series “Men in the Cities”)
+Card: Untitled (Sandy, from the series “Men in the Cities”)
 One of the most iconic figures from a truly iconic series, Sandy is a striking exploration of urban alienation.
 
-[FOOTER] Time is almost up
+Footer: Time is almost up
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 6 · First-time collector survey (LE) · 300926]
-[SUBJECT] Congratulations on your first Avant Arte edition
-[BODY]
+Subject: Congratulations on your first Avant Arte edition
+
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
 Thank you for adding our collaboration with Brooklyn-born artist Robert Longo to your collection. Great choice!
@@ -128,16 +125,16 @@ If you have two minutes to complete a short survey about your collecting journey
 
 Any questions? Reply to this email.
 
-[CTA] Complete survey
+CTA: Complete survey
 
-[CARD] Robert Longo
+Card: Robert Longo
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 7 · Non-purchaser survey (LE) · 300926]
-[SUBJECT] Robert Longo – Any feedback?
-[KICKER] Your feedback
-[HEADLINE] Robert Longo
-[BODY]
+Subject: Robert Longo – Any feedback?
+Kicker: Your feedback
+Headline: Robert Longo
+
 As someone who registered for updates but ultimately decided not to enter the draw for our collaboration with Brooklyn-born artist Robert Longo, we'd love your feedback.
 
 This two-minute survey will guide our future collaborations and help us recommend the right artists and editions for your collection.
@@ -146,5 +143,5 @@ As a thank you for taking part in the survey and helping us improve the collecto
 
 You can read the terms here.
 
-[CTA] Complete survey
-[FOOTER] What can we do better?
+CTA: Complete survey
+Footer: What can we do better?

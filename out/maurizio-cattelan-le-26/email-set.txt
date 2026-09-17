@@ -1,5 +1,4 @@
 [EMAIL 1 · Monthly Preview, this release's paragraph · 120126]
-[PARAGRAPH] this release's paragraph, for the advisor's monthly email
 From Italian artist Maurizio Cattelan comes Window, a new limited edition print, the artist's first print release with Avant Arte.
 
 Window reimagines Cattelan's legendary Comedian, the duct-taped banana, against hyper-realistic natural landscapes, grounding his provocative symbol in serene compositions of subtly absurd beauty.
@@ -10,9 +9,9 @@ The edition will be allocated by a randomised draw, which closes at 17:00 UK tim
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 2 · Early/Exclusive access (LE) · 220126]
-[SUBJECT] Maurizio Cattelan – Early access 🔓
-[PREVIEW] A first look, plus access to a limited number of pre-orders.
-[BODY]
+Subject: Maurizio Cattelan – Early access 🔓
+Preview: A first look, plus access to a limited number of pre-orders.
+
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
 We're currently preparing the launch of our latest collaboration with Italian artist Maurizio Cattelan – Window, a new limited edition print, the artist's first print release with Avant Arte.
@@ -27,18 +26,18 @@ Earlier orders will typically receive a lower edition number, with framed editio
 
 If you have any questions, please don't hesitate to get in touch by replying to this email.
 
-[CTA] Unlock early access
+CTA: Unlock early access
 
-[CARD] Window
+Card: Window
 The duct-taped banana of Comedian, transplanted from the gallery wall to a hyper-realistic landscape, in four silkscreen layers sealed with matte varnish.
 
-[FOOTER] Especially for you.
+Footer: Especially for you.
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 3 · Early Access (LE Insiders), signed by the advisor · 220126]
-[SUBJECT] Maurizio Cattelan – Early access for Insiders 🔓
-[PREVIEW] A first look, plus early access to a limited number of pre-orders.
-[BODY]
+Subject: Maurizio Cattelan – Early access for Insiders 🔓
+Preview: A first look, plus early access to a limited number of pre-orders.
+
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
 I'm delighted to share our latest collaboration with Italian artist Maurizio Cattelan – Window, a new limited edition print, the artist's first print release with Avant Arte.
@@ -56,27 +55,26 @@ Sam
 
 Art Advisor at Avant Arte
 
-[CTA] Unlock early access
+CTA: Unlock early access
 
-[CARD] Window
+Card: Window
 The duct-taped banana of Comedian, transplanted from the gallery wall to a hyper-realistic landscape, in four silkscreen layers sealed with matte varnish.
 
-[FOOTER] Especially for you.
+Footer: Especially for you.
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 4 · Announcement (LE) · 260126]
-[SUBJECT] Maurizio Cattelan – A new limited edition print
-[PREVIEW] Enter the draw for a chance to collect. Closes 20 February.
-[KICKER] Enter the draw
-[HEADLINE] Window
-[BODY]
+Subject: Maurizio Cattelan – A new limited edition print
+Preview: Enter the draw for a chance to collect. Closes 20 February.
+Kicker: Enter the draw
+Headline: Window
+
 We're delighted to announce our latest collaboration with Italian artist Maurizio Cattelan – Window, a new limited edition print, the artist's first print release with Avant Arte.
 
 Window reimagines Cattelan's legendary Comedian, the duct-taped banana, against hyper-realistic natural landscapes, grounding his provocative symbol in serene compositions of subtly absurd beauty.
 
 Each silkscreen print was produced by our printmakers at Make-Ready in four layers, sealed with a matte varnish.
 
-[FEATURES]
 · Signed by the artist
 · Individually numbered
 · Four silkscreen layers with a matte varnish seal
@@ -84,40 +82,39 @@ Each silkscreen print was produced by our printmakers at Make-Ready in four laye
 
 Enter the draw for a chance to collect. Closes at 17:00 UK time on 20 February.
 
-[CTA] Enter the draw
+CTA: Enter the draw
 
-[CARD] Window
+Card: Window
 The duct-taped banana of Comedian, transplanted from the gallery wall to a hyper-realistic landscape, in four silkscreen layers sealed with matte varnish.
 
-[QUOTE] A comedian is doomed to make people laugh.
-[QUOTE ATTRIBUTION] Maurizio Cattelan
+Quote: “A comedian is doomed to make people laugh.” – Maurizio Cattelan
 
-[FOOTER] Collect a limited edition print
+Footer: Collect a limited edition print
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 5 · Last chance (LE) · 190226]
-[SUBJECT] Maurizio Cattelan – Last chance to enter the draw
-[PREVIEW] The draw closes at 17:00 UK time on 20 February.
-[KICKER] Maurizio Cattelan
-[HEADLINE] Last chance to enter the draw
-[BODY]
+Subject: Maurizio Cattelan – Last chance to enter the draw
+Preview: The draw closes at 17:00 UK time on 20 February.
+Kicker: Maurizio Cattelan
+Headline: Last chance to enter the draw
+
 This is your final opportunity to enter the draw for Window, a limited edition print by Maurizio Cattelan.
 
 Window reimagines Cattelan's legendary Comedian, the duct-taped banana, against hyper-realistic natural landscapes, grounding his provocative symbol in serene compositions of subtly absurd beauty.
 
 For a chance to collect, click the link below to enter the draw. The draw closes at 17:00 UK time on Friday, 20 February.
 
-[CTA] Enter the draw
+CTA: Enter the draw
 
-[CARD] Window
+Card: Window
 The duct-taped banana of Comedian, transplanted from the gallery wall to a hyper-realistic landscape, in four silkscreen layers sealed with matte varnish.
 
-[FOOTER] Time is almost up
+Footer: Time is almost up
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 6 · First-time collector survey (LE) · 210226]
-[SUBJECT] Congratulations on your first Avant Arte edition
-[BODY]
+Subject: Congratulations on your first Avant Arte edition
+
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
 Thank you for adding our collaboration with Italian artist Maurizio Cattelan to your collection. Great choice!
@@ -128,16 +125,16 @@ If you have two minutes to complete a short survey about your collecting journey
 
 Any questions? Reply to this email.
 
-[CTA] Complete survey
+CTA: Complete survey
 
-[CARD] Maurizio Cattelan
+Card: Maurizio Cattelan
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 7 · Non-purchaser survey (LE) · 210226]
-[SUBJECT] Maurizio Cattelan – Any feedback?
-[KICKER] Your feedback
-[HEADLINE] Maurizio Cattelan
-[BODY]
+Subject: Maurizio Cattelan – Any feedback?
+Kicker: Your feedback
+Headline: Maurizio Cattelan
+
 As someone who registered for updates but ultimately decided not to enter the draw for our collaboration with Italian artist Maurizio Cattelan, we'd love your feedback.
 
 This two-minute survey will guide our future collaborations and help us recommend the right artists and editions for your collection.
@@ -146,5 +143,5 @@ As a thank you for taking part in the survey and helping us improve the collecto
 
 You can read the terms here.
 
-[CTA] Complete survey
-[FOOTER] What can we do better?
+CTA: Complete survey
+Footer: What can we do better?

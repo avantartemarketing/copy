@@ -1,5 +1,4 @@
 [EMAIL 1 · Monthly Preview, this release's paragraph · 070826]
-[PARAGRAPH] this release's paragraph, for the advisor's monthly email
 From the Salvador Dalí Estate comes three new limited edition prints bringing together some of Dalí's most renowned paintings.
 
 Originally painted between 1933 and 1934, Millet's Architectonic Angelus, The Spectre of Sex Appeal and The Phantom Cart are prime examples of Dalí's fascination with dreams, desire and the subconscious. Each is charged with surreal and erotic suggestion.
@@ -10,9 +9,9 @@ The edition will be allocated by a randomised draw, which closes at 14:00 UK tim
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 2 · Early/Exclusive access (LE) · 190826]
-[SUBJECT] Salvador Dalí – Early access 🔓
-[PREVIEW] A first look, plus access to a limited number of pre-orders.
-[BODY]
+Subject: Salvador Dalí – Early access 🔓
+Preview: A first look, plus access to a limited number of pre-orders.
+
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
 We're currently preparing the launch of our debut collaboration with the Salvador Dalí Estate – three new limited edition prints bringing together some of Dalí's most renowned paintings.
@@ -27,22 +26,22 @@ Earlier orders will typically receive a lower edition number, with framed editio
 
 If you have any questions, please don't hesitate to get in touch by replying to this email.
 
-[CTA] Unlock early access
+CTA: Unlock early access
 
-[CARD] The Spectre of Sex Appeal
+Card: The Spectre of Sex Appeal
 The human form made strange and architectural, a swollen body held up by crutches on an empty shore.
-[CARD] Millet's Architectonic Angelus
+Card: Millet's Architectonic Angelus
 Millet's painting of quiet piety rebuilt as two monumental stone forms; Dalí's original hangs in Madrid's Reina Sofía.
-[CARD] The Phantom Cart
+Card: The Phantom Cart
 A wagon crossing an empty plain towards a distant city, its passengers and the city's towers merging into one shifting illusion.
 
-[FOOTER] Especially for you.
+Footer: Especially for you.
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 3 · Early Access (LE Insiders), signed by the advisor · 190826]
-[SUBJECT] Salvador Dalí – Early access for Insiders 🔓
-[PREVIEW] A first look, plus early access to a limited number of pre-orders.
-[BODY]
+Subject: Salvador Dalí – Early access for Insiders 🔓
+Preview: A first look, plus early access to a limited number of pre-orders.
+
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
 I'm delighted to share our debut collaboration with the Salvador Dalí Estate – three new limited edition prints bringing together some of Dalí's most renowned paintings.
@@ -60,31 +59,30 @@ Sam
 
 Art Advisor at Avant Arte
 
-[CTA] Unlock early access
+CTA: Unlock early access
 
-[CARD] The Spectre of Sex Appeal
+Card: The Spectre of Sex Appeal
 The human form made strange and architectural, a swollen body held up by crutches on an empty shore.
-[CARD] Millet's Architectonic Angelus
+Card: Millet's Architectonic Angelus
 Millet's painting of quiet piety rebuilt as two monumental stone forms; Dalí's original hangs in Madrid's Reina Sofía.
-[CARD] The Phantom Cart
+Card: The Phantom Cart
 A wagon crossing an empty plain towards a distant city, its passengers and the city's towers merging into one shifting illusion.
 
-[FOOTER] Especially for you.
+Footer: Especially for you.
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 4 · Announcement (LE) · 210826]
-[SUBJECT] Salvador Dalí – Three new limited edition prints
-[PREVIEW] Enter the draw for a chance to collect. Closes 11 September.
-[KICKER] Enter the draw
-[HEADLINE] The Spectre of Sex Appeal, Millet's Architectonic Angelus and The Phantom Cart
-[BODY]
+Subject: Salvador Dalí – Three new limited edition prints
+Preview: Enter the draw for a chance to collect. Closes 11 September.
+Kicker: Enter the draw
+Headline: The Spectre of Sex Appeal, Millet's Architectonic Angelus and The Phantom Cart
+
 We're delighted to announce our debut collaboration with the Salvador Dalí Estate – three new limited edition prints bringing together some of Dalí's most renowned paintings.
 
 Originally painted between 1933 and 1934, Millet's Architectonic Angelus, The Spectre of Sex Appeal and The Phantom Cart are prime examples of Dalí's fascination with dreams, desire and the subconscious. Each is charged with surreal and erotic suggestion.
 
 Each print was created in close collaboration with the Salvador Dalí Estate by our printmakers at Make-Ready, and is finished with a bespoke debossed estate stamp.
 
-[FEATURES]
 · Individually numbered
 · Authenticated with a bespoke debossed Salvador Dalí Estate stamp
 · An edition of 400
@@ -92,45 +90,45 @@ Each print was created in close collaboration with the Salvador Dalí Estate by 
 
 Enter the draw for a chance to collect. Closes at 14:00 UK time on 11 September.
 
-[CTA] Enter the draw
+CTA: Enter the draw
 
-[CARD] The Spectre of Sex Appeal
+Card: The Spectre of Sex Appeal
 The human form made strange and architectural, a swollen body held up by crutches on an empty shore.
-[CARD] Millet's Architectonic Angelus
+Card: Millet's Architectonic Angelus
 Millet's painting of quiet piety rebuilt as two monumental stone forms; Dalí's original hangs in Madrid's Reina Sofía.
-[CARD] The Phantom Cart
+Card: The Phantom Cart
 A wagon crossing an empty plain towards a distant city, its passengers and the city's towers merging into one shifting illusion.
 
-[FOOTER] Collect three limited edition prints
+Footer: Collect three limited edition prints
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 5 · Last chance (LE) · 100926]
-[SUBJECT] Salvador Dalí – Last chance to enter the draw
-[PREVIEW] The draw closes at 14:00 UK time on 11 September.
-[KICKER] Salvador Dalí
-[HEADLINE] Last chance to enter the draw
-[BODY]
+Subject: Salvador Dalí – Last chance to enter the draw
+Preview: The draw closes at 14:00 UK time on 11 September.
+Kicker: Salvador Dalí
+Headline: Last chance to enter the draw
+
 This is your final opportunity to enter the draw for The Spectre of Sex Appeal, Millet's Architectonic Angelus and The Phantom Cart, three limited edition prints by Salvador Dalí.
 
 Originally painted between 1933 and 1934, Millet's Architectonic Angelus, The Spectre of Sex Appeal and The Phantom Cart are prime examples of Dalí's fascination with dreams, desire and the subconscious. Each is charged with surreal and erotic suggestion.
 
 For a chance to collect, click the link below to enter the draw. The draw closes at 14:00 UK time on Friday, 11 September.
 
-[CTA] Enter the draw
+CTA: Enter the draw
 
-[CARD] The Spectre of Sex Appeal
+Card: The Spectre of Sex Appeal
 The human form made strange and architectural, a swollen body held up by crutches on an empty shore.
-[CARD] Millet's Architectonic Angelus
+Card: Millet's Architectonic Angelus
 Millet's painting of quiet piety rebuilt as two monumental stone forms; Dalí's original hangs in Madrid's Reina Sofía.
-[CARD] The Phantom Cart
+Card: The Phantom Cart
 A wagon crossing an empty plain towards a distant city, its passengers and the city's towers merging into one shifting illusion.
 
-[FOOTER] Time is almost up
+Footer: Time is almost up
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 6 · First-time collector survey (LE) · 120926]
-[SUBJECT] Congratulations on your first Avant Arte edition
-[BODY]
+Subject: Congratulations on your first Avant Arte edition
+
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
 Thank you for adding our collaboration with the Salvador Dalí Estate to your collection. Great choice!
@@ -141,16 +139,16 @@ If you have two minutes to complete a short survey about your collecting journey
 
 Any questions? Reply to this email.
 
-[CTA] Complete survey
+CTA: Complete survey
 
-[CARD] Salvador Dalí
+Card: Salvador Dalí
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 7 · Non-purchaser survey (LE) · 120926]
-[SUBJECT] Salvador Dalí – Any feedback?
-[KICKER] Your feedback
-[HEADLINE] Salvador Dalí
-[BODY]
+Subject: Salvador Dalí – Any feedback?
+Kicker: Your feedback
+Headline: Salvador Dalí
+
 As someone who registered for updates but ultimately decided not to enter the draw for our collaboration with the Salvador Dalí Estate, we'd love your feedback.
 
 This two-minute survey will guide our future collaborations and help us recommend the right artists and editions for your collection.
@@ -159,5 +157,5 @@ As a thank you for taking part in the survey and helping us improve the collecto
 
 You can read the terms here.
 
-[CTA] Complete survey
-[FOOTER] What can we do better?
+CTA: Complete survey
+Footer: What can we do better?

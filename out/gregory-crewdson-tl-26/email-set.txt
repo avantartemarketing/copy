@@ -1,16 +1,15 @@
 [EMAIL 1 · Announcement (TL Non-flow) · 100626]
-[SUBJECT] Gregory Crewdson – Six new limited edition prints
-[PREVIEW] Launching 30 June. Register for updates.
-[KICKER] Launching 30 June
-[HEADLINE] The Dream House series by Gregory Crewdson
-[BODY]
+Subject: Gregory Crewdson – Six new limited edition prints
+Preview: Launching 30 June. Register for updates.
+Kicker: Launching 30 June
+Headline: The Dream House series by Gregory Crewdson
+
 We're delighted to announce our latest collaboration with New York-based artist Gregory Crewdson – six new limited edition prints from his iconic Dream House series.
 
 Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape.
 
 Faithfully translated by our printmakers at Make-Ready, the six editions are drawn from the twelve staged photographs of the original series.
 
-[FEATURES]
 · Signed by the artist
 · Individually numbered
 · Free worldwide shipping
@@ -20,21 +19,20 @@ The edition will be available to collect for 48 hours only, starting at 17:00 UK
 
 Click below to learn more and register for updates.
 
-[CTA] Discover the collaboration
+CTA: Discover the collaboration
 
-[CARD] Untitled
+Card: Untitled
 This collection brings together six new limited edition prints. Meticulous, still, and unsettling, Crewdson's photographs construct a distinctly American psychological landscape with a Lynchian atmosphere, existing somewhere between the familiar and the uncanny.
 
-[QUOTE] that moment of transcendence, where one is transported into another place, into a perfect, still world.
-[QUOTE ATTRIBUTION] Gregory Crewdson
+Quote: “that moment of transcendence, where one is transported into another place, into a perfect, still world.” – Gregory Crewdson
 
-[FOOTER] Launching 30 June
+Footer: Launching 30 June
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 2 · Welcome (TL Flow) · 100626]
-[SUBJECT] Welcome to Avant Arte
-[PREVIEW] Where the art world is more accessible.
-[BODY]
+Subject: Welcome to Avant Arte
+Preview: Where the art world is more accessible.
+
 Welcome {{ personalization_token('contact.firstname', 'to Avant Arte') }}!
 
 Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems.
@@ -43,12 +41,11 @@ Our upcoming collaboration with New York-based artist Gregory Crewdson is the la
 
 Let us know if you have any questions. We're excited to see what you collect.
 
-[CTA] Complete collector profile
-[FOOTER] Where the art world is more accessible
+CTA: Complete collector profile
+Footer: Where the art world is more accessible
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 3 · Monthly Preview, this release's paragraph · 160626]
-[PARAGRAPH] this release's paragraph, for the advisor's monthly email
 From New York-based artist Gregory Crewdson comes six new limited edition prints from his iconic Dream House series.
 
 Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape.
@@ -59,9 +56,9 @@ The edition will be available to collect for 48 hours only, from 17:00 UK time o
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 4 · Early Access (TL Insiders), signed by the advisor · 290626]
-[SUBJECT] Gregory Crewdson – Early access for Insiders 🔓
-[PREVIEW] Collect 24 hours before everyone else.
-[BODY]
+Subject: Gregory Crewdson – Early access for Insiders 🔓
+Preview: Collect 24 hours before everyone else.
+
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
 I'm delighted to share our latest collaboration with New York-based artist Gregory Crewdson – six new limited edition prints from his iconic Dream House series.
@@ -79,25 +76,24 @@ Curtis
 
 Art Advisor at Avant Arte
 
-[CTA] Unlock early access
+CTA: Unlock early access
 
-[CARD] Untitled
+Card: Untitled
 This collection brings together six new limited edition prints. Meticulous, still, and unsettling, Crewdson's photographs construct a distinctly American psychological landscape with a Lynchian atmosphere, existing somewhere between the familiar and the uncanny.
 
-[FOOTER] 24 hours ahead of the public launch
+Footer: 24 hours ahead of the public launch
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 5 · Early Access (TL Flow) · 290626]
-[SUBJECT] Gregory Crewdson – Early access 🔓
-[PREVIEW] Collect 24 hours before everyone else.
-[BODY]
+Subject: Gregory Crewdson – Early access 🔓
+Preview: Collect 24 hours before everyone else.
+
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
 Our latest collaboration with New York-based artist Gregory Crewdson launches tomorrow at 17:00 UK time and will be available to collect for 48 hours only.
 
 Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape.
 
-[FEATURES]
 · Signed by the artist
 · Individually numbered
 · Free worldwide shipping
@@ -109,21 +105,20 @@ As a welcome gesture, enjoy 10% off our in-house framing on your first purchase 
 
 Unlock early access using the link below.
 
-[CTA] Unlock early access
-[FOOTER] 24 hours ahead of the public launch
+CTA: Unlock early access
+Footer: 24 hours ahead of the public launch
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 6 · Early access (TL Artist PP Non Flow) · 290626]
-[SUBJECT] Gregory Crewdson – Early access for past collectors
-[PREVIEW] Order before everyone else.
-[BODY]
+Subject: Gregory Crewdson – Early access for past collectors
+Preview: Order before everyone else.
+
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
 Our latest collaboration with New York-based artist Gregory Crewdson launches tomorrow at 17:00 UK time and will be available to collect for 48 hours only.
 
 Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape.
 
-[FEATURES]
 · Signed by the artist
 · Individually numbered
 · Free worldwide shipping
@@ -137,27 +132,26 @@ Earlier orders will typically receive a lower edition number, with framed editio
 
 If you have any questions, please don't hesitate to get in touch by replying to this email.
 
-[CTA] Unlock early access
+CTA: Unlock early access
 
-[CARD] Untitled
+Card: Untitled
 This collection brings together six new limited edition prints. Meticulous, still, and unsettling, Crewdson's photographs construct a distinctly American psychological landscape with a Lynchian atmosphere, existing somewhere between the familiar and the uncanny.
 
-[FOOTER] 24 hours ahead of the public launch
+Footer: 24 hours ahead of the public launch
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 7 · Now Live (TL Flow and Non-flow) · 300626]
-[SUBJECT] Gregory Crewdson – Available now, for 48 hours only
-[PREVIEW] 48 hours, starting now.
-[KICKER] Collect a print by Gregory Crewdson
-[HEADLINE] 48 hours, starting now
-[BODY]
+Subject: Gregory Crewdson – Available now, for 48 hours only
+Preview: 48 hours, starting now.
+Kicker: Collect a print by Gregory Crewdson
+Headline: 48 hours, starting now
+
 Our latest collaboration with New York-based artist Gregory Crewdson is now available to collect for 48 hours only – six new limited edition prints from his iconic Dream House series.
 
 Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape.
 
 Faithfully translated by our printmakers at Make-Ready, the six editions are drawn from the twelve staged photographs of the original series.
 
-[FEATURES]
 · Signed by the artist
 · Individually numbered
 · Free worldwide shipping
@@ -167,40 +161,39 @@ The opportunity to collect an edition ends at 17:00 UK time on Thursday, 02 July
 
 As a welcome gesture, enjoy 10% off our in-house framing on your first purchase using the code Crewdson-0626-10 at checkout.
 
-[CTA] Buy now
+CTA: Buy now
 
-[CARD] Untitled
+Card: Untitled
 This collection brings together six new limited edition prints. Meticulous, still, and unsettling, Crewdson's photographs construct a distinctly American psychological landscape with a Lynchian atmosphere, existing somewhere between the familiar and the uncanny.
 
-[QUOTE] that moment of transcendence, where one is transported into another place, into a perfect, still world.
-[QUOTE ATTRIBUTION] Gregory Crewdson
+Quote: “that moment of transcendence, where one is transported into another place, into a perfect, still world.” – Gregory Crewdson
 
-[FOOTER] Collect six limited edition prints
+Footer: Collect six limited edition prints
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 8 · Halfway (TL Flow) · 010726]
-[SUBJECT] Gregory Crewdson – 24 hours to go
-[KICKER] Collect a print by Gregory Crewdson
-[HEADLINE] 24 hours down, 24 to go
-[CTA] Buy now
-[FOOTER] There's still time to add a print to your collection.
+Subject: Gregory Crewdson – 24 hours to go
+Kicker: Collect a print by Gregory Crewdson
+Headline: 24 hours down, 24 to go
+CTA: Buy now
+Footer: There's still time to add a print to your collection.
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 9 · Last chance (TL Flow) · 020726]
-[SUBJECT] Gregory Crewdson – Last chance to collect
-[PREVIEW] Time is almost up.
-[KICKER] Gregory Crewdson
-[HEADLINE] Last chance to collect
-[BODY]
+Subject: Gregory Crewdson – Last chance to collect
+Preview: Time is almost up.
+Kicker: Gregory Crewdson
+Headline: Last chance to collect
+
 It's now or never for our latest collaboration with New York-based artist Gregory Crewdson – six limited edition prints will be available to order until 17:00 UK time on Thursday, 02 July.
 
 After this time, the edition size for each artwork will be confirmed, and the works will no longer be available to purchase.
 
 As a reminder, you can enjoy 10% off our in-house framing on your first purchase using the code Crewdson-0626-10 at checkout.
 
-[CTA] Buy now
+CTA: Buy now
 
-[CARD] Untitled
+Card: Untitled
 This collection brings together six new limited edition prints. Meticulous, still, and unsettling, Crewdson's photographs construct a distinctly American psychological landscape with a Lynchian atmosphere, existing somewhere between the familiar and the uncanny.
 
-[FOOTER] Time is almost up
+Footer: Time is almost up

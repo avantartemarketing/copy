@@ -1,16 +1,15 @@
 [EMAIL 1 · Announcement (TL Non-flow) · 060126]
-[SUBJECT] Ai Weiwei – A quartet of new limited edition embroideries
-[PREVIEW] Launching 28 January. Register for updates.
-[KICKER] Launching 28 January
-[HEADLINE] Self-Portrait Embroidery by Ai Weiwei
-[BODY]
+Subject: Ai Weiwei – A quartet of new limited edition embroideries
+Preview: Launching 28 January. Register for updates.
+Kicker: Launching 28 January
+Headline: Self-Portrait Embroidery by Ai Weiwei
+
 We're delighted to announce our latest collaboration with Ai Weiwei – a quartet of new limited edition embroideries, offered individually, in pairs or as a complete quartet.
 
 Self-Portrait Embroidery pixelates an image of the artist with a shaved head and a scar, the result of police brutality following a Citizens' Investigation he led into the 2008 earthquake in Sichuan. The defiant self-portrait becomes four textile works of approximately 460,000 stitches each, in the pixelated style of his 2016 toy brick works.
 
 Each embroidery was produced in close collaboration with the artist, translating the pixelated texture and bold presence of the original toy brick works into approximately 460,000 stitches.
 
-[FEATURES]
 · Framed
 · Signed by the artist via a sticker at the back
 · Individually numbered
@@ -21,18 +20,18 @@ The edition will be available to collect for one week only, starting at 14:00 UK
 
 Click below to learn more and register for updates.
 
-[CTA] Discover the collaboration
+CTA: Discover the collaboration
 
-[CARD] Self-Portrait Embroidery
+Card: Self-Portrait Embroidery
 The artist's defiant self-portrait, first made in toy bricks in 2016, rendered in approximately 460,000 stitches and offered in four colour combinations.
 
-[FOOTER] Launching 28 January
+Footer: Launching 28 January
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 2 · Welcome (TL Flow) · 060126]
-[SUBJECT] Welcome to Avant Arte
-[PREVIEW] Where the art world is more accessible.
-[BODY]
+Subject: Welcome to Avant Arte
+Preview: Where the art world is more accessible.
+
 Welcome {{ personalization_token('contact.firstname', 'to Avant Arte') }}!
 
 Avant Arte began with a simple mission – to make collecting art more accessible. Since then, we've collaborated with hundreds of inspiring artists, from rising stars to icons like Ai Weiwei, Jenny Holzer, Lee Ufan and Carrie Mae Weems.
@@ -41,12 +40,11 @@ Our upcoming collaboration with Ai Weiwei is the latest in this lineage. If you'
 
 Let us know if you have any questions. We're excited to see what you collect.
 
-[CTA] Complete collector profile
-[FOOTER] Where the art world is more accessible
+CTA: Complete collector profile
+Footer: Where the art world is more accessible
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 3 · Monthly Preview, this release's paragraph · 140126]
-[PARAGRAPH] this release's paragraph, for the advisor's monthly email
 From Ai Weiwei comes a quartet of new limited edition embroideries, offered individually, in pairs or as a complete quartet.
 
 Self-Portrait Embroidery pixelates an image of the artist with a shaved head and a scar, the result of police brutality following a Citizens' Investigation he led into the 2008 earthquake in Sichuan. The defiant self-portrait becomes four textile works of approximately 460,000 stitches each, in the pixelated style of his 2016 toy brick works.
@@ -57,9 +55,9 @@ The edition will be available to collect for one week only, from 14:00 UK time o
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 4 · Early Access (TL Insiders), signed by the advisor · 270126]
-[SUBJECT] Ai Weiwei – Early access for Insiders 🔓
-[PREVIEW] Collect 24 hours before everyone else.
-[BODY]
+Subject: Ai Weiwei – Early access for Insiders 🔓
+Preview: Collect 24 hours before everyone else.
+
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
 I'm delighted to share our latest collaboration with Ai Weiwei – a quartet of new limited edition embroideries, offered individually, in pairs or as a complete quartet.
@@ -77,25 +75,24 @@ Sam
 
 Art Advisor at Avant Arte
 
-[CTA] Unlock early access
+CTA: Unlock early access
 
-[CARD] Self-Portrait Embroidery
+Card: Self-Portrait Embroidery
 The artist's defiant self-portrait, first made in toy bricks in 2016, rendered in approximately 460,000 stitches and offered in four colour combinations.
 
-[FOOTER] 24 hours ahead of the public launch
+Footer: 24 hours ahead of the public launch
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 5 · Early Access (TL Flow) · 270126]
-[SUBJECT] Ai Weiwei – Early access 🔓
-[PREVIEW] Collect 24 hours before everyone else.
-[BODY]
+Subject: Ai Weiwei – Early access 🔓
+Preview: Collect 24 hours before everyone else.
+
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
 Our latest collaboration with Ai Weiwei launches tomorrow at 14:00 UK time and will be available to collect for one week only.
 
 Self-Portrait Embroidery pixelates an image of the artist with a shaved head and a scar, the result of police brutality following a Citizens' Investigation he led into the 2008 earthquake in Sichuan. The defiant self-portrait becomes four textile works of approximately 460,000 stitches each, in the pixelated style of his 2016 toy brick works.
 
-[FEATURES]
 · Framed
 · Signed by the artist via a sticker at the back
 · Individually numbered
@@ -106,21 +103,20 @@ As a thank you for registering for updates, we're offering you the chance to col
 
 Unlock early access using the link below.
 
-[CTA] Unlock early access
-[FOOTER] 24 hours ahead of the public launch
+CTA: Unlock early access
+Footer: 24 hours ahead of the public launch
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 6 · Early access (TL Artist PP Non Flow) · 270126]
-[SUBJECT] Ai Weiwei – Early access for past collectors
-[PREVIEW] Order before everyone else.
-[BODY]
+Subject: Ai Weiwei – Early access for past collectors
+Preview: Order before everyone else.
+
 Hi {{ personalization_token('contact.firstname', 'there') }},
 
 Our latest collaboration with Ai Weiwei launches tomorrow at 14:00 UK time and will be available to collect for one week only.
 
 Self-Portrait Embroidery pixelates an image of the artist with a shaved head and a scar, the result of police brutality following a Citizens' Investigation he led into the 2008 earthquake in Sichuan. The defiant self-portrait becomes four textile works of approximately 460,000 stitches each, in the pixelated style of his 2016 toy brick works.
 
-[FEATURES]
 · Framed
 · Signed by the artist via a sticker at the back
 · Individually numbered
@@ -135,27 +131,26 @@ Earlier orders will typically receive a lower edition number, with framed editio
 
 If you have any questions, please don't hesitate to get in touch by replying to this email.
 
-[CTA] Unlock early access
+CTA: Unlock early access
 
-[CARD] Self-Portrait Embroidery
+Card: Self-Portrait Embroidery
 The artist's defiant self-portrait, first made in toy bricks in 2016, rendered in approximately 460,000 stitches and offered in four colour combinations.
 
-[FOOTER] 24 hours ahead of the public launch
+Footer: 24 hours ahead of the public launch
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 7 · Now Live (TL Flow and Non-flow) · 280126]
-[SUBJECT] Ai Weiwei – Available now, for one week only
-[PREVIEW] One week, starting now.
-[KICKER] Collect an embroidery by Ai Weiwei
-[HEADLINE] One week, starting now
-[BODY]
+Subject: Ai Weiwei – Available now, for one week only
+Preview: One week, starting now.
+Kicker: Collect an embroidery by Ai Weiwei
+Headline: One week, starting now
+
 Our latest collaboration with Ai Weiwei is now available to collect for one week only – a quartet of new limited edition embroideries, offered individually, in pairs or as a complete quartet.
 
 Self-Portrait Embroidery pixelates an image of the artist with a shaved head and a scar, the result of police brutality following a Citizens' Investigation he led into the 2008 earthquake in Sichuan. The defiant self-portrait becomes four textile works of approximately 460,000 stitches each, in the pixelated style of his 2016 toy brick works.
 
 Each embroidery was produced in close collaboration with the artist, translating the pixelated texture and bold presence of the original toy brick works into approximately 460,000 stitches.
 
-[FEATURES]
 · Framed
 · Signed by the artist via a sticker at the back
 · Individually numbered
@@ -164,54 +159,54 @@ Each embroidery was produced in close collaboration with the artist, translating
 
 The opportunity to collect an edition ends at 14:00 UK time on Wednesday, 04 February. Click the link below to add an embroidery to your collection.
 
-[CTA] Buy now
+CTA: Buy now
 
-[CARD] Self-Portrait Embroidery
+Card: Self-Portrait Embroidery
 The artist's defiant self-portrait, first made in toy bricks in 2016, rendered in approximately 460,000 stitches and offered in four colour combinations.
 
-[FOOTER] Collect a quartet of limited edition embroideries
+Footer: Collect a quartet of limited edition embroideries
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 8 · 5 days to go (TL Flow) · 300126]
-[SUBJECT] Ai Weiwei – 5 days left
-[KICKER] Collect an embroidery by Ai Weiwei
-[HEADLINE] 2 days down, 5 days to go
-[CTA] Buy an embroidery
-[FOOTER] Add an embroidery to your collection
+Subject: Ai Weiwei – 5 days left
+Kicker: Collect an embroidery by Ai Weiwei
+Headline: 2 days down, 5 days to go
+CTA: Buy an embroidery
+Footer: Add an embroidery to your collection
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 9 · 3 days to go (TL Flow) · 010226]
-[SUBJECT] Ai Weiwei – 3 days to go
-[KICKER] Self-Portrait Embroidery by Ai Weiwei
-[HEADLINE] Three days left to collect
-[BODY]
+Subject: Ai Weiwei – 3 days to go
+Kicker: Self-Portrait Embroidery by Ai Weiwei
+Headline: Three days left to collect
+
 There are just three days left to collect a quartet of limited edition embroideries by Ai Weiwei.
 
 Self-Portrait Embroidery pixelates an image of the artist with a shaved head and a scar, the result of police brutality following a Citizens' Investigation he led into the 2008 earthquake in Sichuan. The defiant self-portrait becomes four textile works of approximately 460,000 stitches each, in the pixelated style of his 2016 toy brick works.
 
 Click the link to collect before 14:00 UK time on Wednesday, 04 February.
 
-[CTA] Buy an embroidery
+CTA: Buy an embroidery
 
-[CARD] Self-Portrait Embroidery
+Card: Self-Portrait Embroidery
 The artist's defiant self-portrait, first made in toy bricks in 2016, rendered in approximately 460,000 stitches and offered in four colour combinations.
 
-[FOOTER] Add an embroidery to your collection
+Footer: Add an embroidery to your collection
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 10 · Last chance (TL Flow) · 030226]
-[SUBJECT] Ai Weiwei – Last chance to collect
-[PREVIEW] Time is almost up.
-[KICKER] Ai Weiwei
-[HEADLINE] Last chance to collect
-[BODY]
+Subject: Ai Weiwei – Last chance to collect
+Preview: Time is almost up.
+Kicker: Ai Weiwei
+Headline: Last chance to collect
+
 It's now or never for our latest collaboration with Ai Weiwei – a quartet of limited edition embroideries will be available to order until 14:00 UK time on Wednesday, 04 February.
 
 After this time, the edition size for each artwork will be confirmed, and the works will no longer be available to purchase.
 
-[CTA] Buy now
+CTA: Buy now
 
-[CARD] Self-Portrait Embroidery
+Card: Self-Portrait Embroidery
 The artist's defiant self-portrait, first made in toy bricks in 2016, rendered in approximately 460,000 stitches and offered in four colour combinations.
 
-[FOOTER] Time is almost up
+Footer: Time is almost up

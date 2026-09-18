@@ -23,8 +23,6 @@ We're currently on track to ship your {% if variant == "framed" %}framed {% endi
 
 You can expect more updates along the way, but please don't hesitate to contact us if you have any questions.
 
-Footer: An update on your order
-
 {% if not loop.last %}
 ════════════════════════════════════════════════
 {% endif %}

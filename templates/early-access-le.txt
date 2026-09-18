@@ -35,4 +35,3 @@ Card: {{ a.title }}
 {{ a.card_line }}
 
 {% endfor %}
-Footer: Especially for you.

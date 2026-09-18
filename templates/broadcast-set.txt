@@ -1,7 +1,7 @@
 {#
   THE BROADCAST SET — messages for the Instagram broadcast channel: the announcement, now-live and
   last-chance emails' body copy, as one message each, with the features as sentences rather than
-  bullets and "link in bio" where the email has a button. No markers, cards, quote or footer.
+  bullets and "link in bio" where the email has a button. No markers, cards or quote.
 #}
 {% set draw = release.mechanic == "draw" %}
 {% set ordinal = artist.collaboration_ordinal %}

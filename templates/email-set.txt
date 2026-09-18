@@ -6,7 +6,7 @@
   · Halfway (48-hour window) or 5 days to go + 3 days to go (one-week window) · Last chance (TL Flow / LE)
   · First-time collector survey (LE) · Non-purchaser survey (LE) · this release's paragraph for the Monthly Preview.
   The artist's own email is rare and stays hand-written. The same lines live in tool/release-copy.xlsx.
-  Each part of the email is on a labelled line, as HubSpot's modules go: Subject, Preview, Kicker, Headline, then the body, CTA, Card, Quote, Footer
+  Each part of the email is on a labelled line, as HubSpot's modules go: Subject, Preview, Kicker, Headline, then the body, CTA, Card, Quote
 #}
 {% set draw = release.mechanic == "draw" %}
 {% set ordinal = artist.collaboration_ordinal %}
@@ -93,7 +93,6 @@ CTA: {{ "Enter the draw" if draw else "Discover the collaboration" }}
 
 {{ cards() }}
 {{ quote_block() }}
-Footer: {{ ("Collect " ~ cp) if draw else ("Launching " ~ release.launch_at|ukdate) }}
 {% elif key == "welcome" %}
 Subject: Welcome to Avant Arte
 Preview: Where the art world is more accessible.
@@ -107,7 +106,6 @@ Our upcoming collaboration with {{ collab }} is the latest in this lineage. If y
 Let us know if you have any questions. We're excited to see what you collect.
 
 CTA: Complete collector profile
-Footer: Where the art world is more accessible
 {% elif key == "early_access_tl" or key == "early_access_pp" %}
 Subject: {{ artist.name }} – {{ "Early access for past collectors" if key == "early_access_pp" else "Early access 🔓" }}
 Preview: {{ "Order before everyone else." if key == "early_access_pp" else "Collect 24 hours before everyone else." }}
@@ -142,7 +140,6 @@ CTA: Unlock early access
 
 {{ cards() }}
 {% endif %}
-Footer: 24 hours ahead of the public launch
 {% elif key == "insiders_ea" %}
 Subject: {{ artist.name }} – Early access for Insiders 🔓
 Preview: {{ "A first look, plus early access to a limited number of pre-orders." if draw else "Collect 24 hours before everyone else." }}
@@ -173,7 +170,6 @@ Art Advisor at Avant Arte
 CTA: Unlock early access
 
 {{ cards() }}
-Footer: {{ "Especially for you." if draw else "24 hours ahead of the public launch" }}
 {% elif key == "early_access_le" %}
 Subject: {{ artist.name }} – Early access 🔓
 Preview: A first look, plus access to a limited number of pre-orders.
@@ -195,7 +191,6 @@ Explore the artwork and place your order via the private link below. Use code {{
 CTA: Unlock early access
 
 {{ cards() }}
-Footer: Especially for you.
 {% elif key == "live" %}
 Subject: {{ artist.name }} – Available now, for {{ release.window }} only
 Preview: {{ release.window|cap_first }}, starting now.
@@ -219,19 +214,16 @@ CTA: Buy now
 
 {{ cards() }}
 {{ quote_block() }}
-Footer: Collect {{ cp }}
 {% elif key == "halfway" %}
 Subject: {{ artist.name }} – 24 hours to go
 Kicker: Collect {{ a_unit }} by {{ artist.name }}
 Headline: 24 hours down, 24 to go
 CTA: Buy now
-Footer: There's still time to add {{ a_unit }} to your collection.
 {% elif key == "five_days" %}
 Subject: {{ artist.name }} – 5 days left
 Kicker: Collect {{ a_unit }} by {{ artist.name }}
 Headline: 2 days down, 5 days to go
 CTA: Buy {{ a_unit }}
-Footer: Add {{ a_unit }} to your collection
 {% elif key == "three_days" %}
 Subject: {{ artist.name }} – 3 days to go
 Kicker: {{ work|cap_first }} by {{ artist.name }}
@@ -250,7 +242,6 @@ Click the link to collect before {{ close_line }}.
 CTA: Buy {{ a_unit }}
 
 {{ cards() }}
-Footer: Add {{ a_unit }} to your collection
 {% elif key == "last_chance" %}
 Subject: {{ artist.name }} – Last chance to {{ "enter the draw" if draw else "collect" }}
 Preview: {{ ("The draw closes at " ~ release.closes_at|uktime ~ " on " ~ release.closes_at|ukdate ~ ".") if draw else "Time is almost up." }}
@@ -276,7 +267,6 @@ After this time, the edition size{{ " for each artwork" if plural else "" }} wil
 CTA: {{ "Enter the draw" if draw else "Buy now" }}
 
 {{ cards() }}
-Footer: Time is almost up
 {% elif key == "survey_first" %}
 Subject: Congratulations on your first Avant Arte edition
 
@@ -307,7 +297,6 @@ As a thank you for taking part in the survey and helping us improve the collecto
 You can read the terms here.
 
 CTA: Complete survey
-Footer: What can we do better?
 {% elif key == "monthly_preview" %}
 From {{ collab }} comes {{ work_intro }}{{ support }}.
 

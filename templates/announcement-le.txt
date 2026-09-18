@@ -41,4 +41,3 @@ Card: {{ a.title }}
 Quote: “{{ artist.quote }}” – {{ artist.quote_attribution }}
 
 {% endif %}
-Footer: Collect {{ edition|collect_phrase }}

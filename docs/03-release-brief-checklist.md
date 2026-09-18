@@ -24,8 +24,8 @@ the extra card lines. Nothing else in the fourteen-email sequence is written per
 | **Quote sentence** ("To Gregory, Dream House represents “…”") | one frame filled by hand, because the quote has to fit the grammar | when a usable artist quote exists |
 | **Frame description** ("Framer's choice") | one paragraph, 60 words max | time-limited releases with a bespoke frame; used in the Halfway email and framing deep dive |
 | **Delay reason** | 1 sentence, 25 words max | only when a delay email is needed |
-| **Bespoke headline or footer** ("'Guncaps' decoded", "From his iconic 'Dream House' series") | one line | optional; the default is a frame |
-| **Sustain or deep-dive body** | 150 to 300 words, editorial | when the campaign has one. Stays human-written; the template supplies its opener, CTA and footer |
+| **Bespoke headline** ("'Guncaps' decoded") | one line | optional; the default is a frame |
+| **Sustain or deep-dive body** | 150 to 300 words, editorial | when the campaign has one. Stays human-written; the template supplies its opener and CTA |
 
 ## C. Facts typed once per release
 
@@ -74,7 +74,7 @@ the extra card lines. Nothing else in the fourteen-email sequence is written per
 ## D. Derived, so nobody types it
 
 Internal email names in the `DDMMYY_TYPE_Campaign - Sub-type` convention; every subject
-except the Announcement's; preview text; kickers, headlines and footers; "a trio of new
+except the Announcement's; preview text; kickers and headlines; "a trio of new
 limited edition prints"; the production sentence; every deadline and dispatch sentence;
 "Closes tomorrow at 17:00 UK time"; the framed and unframed variants; the Last Chance
 recap; the survey emails; the edition-size confirmation.

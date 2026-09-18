@@ -226,12 +226,10 @@ lines = [
  ("email · live · opener", "Our {ordinal} collaboration with {collab_with} is now available to collect for {window} only – {work_intro}{support}."),
  ("email · live · closing line", "The opportunity to collect an edition ends at {close_time} on {close_weekday}, {close_date_dd}. Click the link below to add {add_what} to your collection."),
  ("email · halfway · headline", "24 hours down, 24 to go"),
- ("email · halfway · footer", "There's still time to add {a_unit} to your collection."),
  ("email · 5 days · headline", "2 days down, 5 days to go"),
  ("email · 3 days · headline", "Three days left to collect"),
  ("email · 3 days · 1", "There are just three days left to collect {collect_phrase} by {artist}."),
  ("email · 3 days · 2", "Click the link to collect before {close_time} on {close_weekday}, {close_date_dd}."),
- ("email · days to go · footer", "Add {a_unit} to your collection"),
  ("EMAILS · last chance", None),
  ("email · last chance, timed · 1", "It's now or never for our {ordinal} collaboration with {collab_with} – {collect_phrase} will be available to order until {close_time} on {close_weekday}, {close_date_dd}."),
  ("email · last chance, timed · 2", "After this time, the edition size{each_artwork} will be confirmed, and the {work_word} will no longer be available to purchase."),
@@ -247,7 +245,6 @@ lines = [
  ("email · non-purchaser survey · 2", "This two-minute survey will guide our future collaborations and help us recommend the right artists and editions for your collection."),
  ("email · non-purchaser survey · 3", "As a thank you for taking part in the survey and helping us improve the collector experience, you'll be entered into a draw to win a €500 Avant Arte gift card."),
  ("email · non-purchaser survey · terms", "You can read the terms here."),
- ("email · non-purchaser survey · footer", "What can we do better?"),
  ("EMAILS · monthly preview", None),
  ("email · monthly preview · opener", "From {collab_with} comes {work_intro}{support}."),
  ("email · monthly preview · when, draw", "The edition will be allocated by a randomised draw, which closes at {close_time} on {close_date}."),
@@ -341,7 +338,7 @@ ts.freeze_panes = "D4"
 es = wb.create_sheet("Emails")
 es["A1"] = "The emails, assembled"; es["A1"].font = TITLE
 es["A2"] = "Every cell below is a formula over Inputs and Lines. Body paragraphs are the fixed sentences with the same hook, making and quote dropped in. The 'Used?' column says when a row does not apply to this release."; es["A2"].font = NOTE
-heads = ["#", "Email (comms plan name)", "For", "Used?", "Subject", "Preview", "Kicker", "Headline", "Body", "CTA", "Card", "Quote", "Footer", "Full email, ready to paste", "Characters"]
+heads = ["#", "Email (comms plan name)", "For", "Used?", "Subject", "Preview", "Kicker", "Headline", "Body", "CTA", "Card", "Quote", "Full email, ready to paste", "Characters"]
 for i, h in enumerate(heads, 1):
     c = es.cell(row=3, column=i, value=h); c.font = BOLD; c.fill = GREY
 A = IB("artist"); T = lambda s: f'"{s}"'
@@ -362,62 +359,61 @@ USED = {
 E = ""  # empty cell
 card = IB("card"); qline = IB("quote_line"); hook = IB("hook"); kicker = LC("email · kicker · collect"); buy_one = T("Buy ") + "&" + IB("a_unit")
 emails = [
- # name, for, used, subject, preview, kicker, headline, body, cta, card, quote, footer
+ # name, for, used, subject, preview, kicker, headline, body, cta, card, quote
  ("Announcement (TL Non-flow) · Announcement (LE)", "both", "both",
   LC("email · announce · subject"),
   sel(T("Enter the draw for a chance to collect. Closes ")+"&"+IB("close_date")+'&"."', T("Launching ")+"&"+IB("launch_date")+'&". Register for updates."'),
   sel(T("Enter the draw"), T("Launching ")+"&"+IB("launch_date")),
   sel(IB("Work_email"), IB("Work_email")+'&" by "&'+A),
   P(f'IF({IB("opener")}="",{LC("email · announce · opener")},{IB("opener")})', hook, IB("making_ours"), f'IF(OR({IB("opener")}="",{IB("opener_names_beneficiary")}),{IB("features_list")},{IB("features_list_support")})', sel(LC("email · draw line"), P(LC("email · announce · launch line, timed"), LC("email · announce · register line")))),
-  sel(T("Enter the draw"), T("Discover the collaboration")), card, qline,
-  sel(T("Collect ")+"&"+IB("collect_phrase"), T("Launching ")+"&"+IB("launch_date"))),
+  sel(T("Enter the draw"), T("Discover the collaboration")), card, qline),
  ("Welcome (TL Flow)", "timed", "timed", T("Welcome to Avant Arte"), T("Where the art world is more accessible."), E, E,
   P(LC("email · welcome · 1"), LC("email · welcome · 2"), LC("email · welcome · 3"), LC("email · welcome · 4")),
-  T("Complete collector profile"), E, E, T("Where the art world is more accessible")),
+  T("Complete collector profile"), E, E),
  ("Early Access (TL Flow)", "timed", "timed", A+'&" – Early access 🔓"', T("Collect 24 hours before everyone else."), E, E,
   P(LC("email · greeting"), LC("email · early access, timed · opener"), hook, IB("features_list_support"), LC("email · early access, timed · registered line"), framing_welcome, LC("email · early access, timed · unlock line")),
-  T("Unlock early access"), E, E, T("24 hours ahead of the public launch")),
+  T("Unlock early access"), E, E),
  ("Early access (TL Artist PP Non Flow)", "timed", "timed", A+'&" – Early access for past collectors"', T("Order before everyone else."), E, E,
   P(LC("email · greeting"), LC("email · early access, timed · opener"), hook, IB("features_list_support"), LC("email · early access, timed · past collectors line"), LC("email · early access, timed · unlock line"), LC("email · edition numbers line"), LC("email · questions line")),
-  T("Unlock early access"), card, E, T("24 hours ahead of the public launch")),
+  T("Unlock early access"), card, E),
  ("Early Access (TL Insiders) · Early Access (LE Insiders), signed by the advisor", "both", "both", A+'&" – Early access for Insiders 🔓"',
   sel(T("A first look, plus early access to a limited number of pre-orders."), T("Collect 24 hours before everyone else.")), E, E,
   P(LC("email · greeting"), LC("email · insiders · opener"), hook, sel(LC("email · insiders · mechanics, draw"), LC("email · insiders · mechanics, timed")), sel(LC("email · insiders · code line, draw"), LC("email · insiders · link line, timed")), LC("email · questions line"), LC("email · insiders · sign-off")),
-  T("Unlock early access"), card, E, sel(T("Especially for you."), T("24 hours ahead of the public launch"))),
+  T("Unlock early access"), card, E),
  ("Early/Exclusive access (LE)", "draw", "draw", A+'&" – Early access 🔓"', T("A first look, plus access to a limited number of pre-orders."), E, E,
   P(LC("email · greeting"), LC("email · early access, draw · 1"), hook, LC("email · early access, draw · 2"), LC("email · early access, draw · 3"), LC("email · edition numbers line"), LC("email · questions line")),
-  T("Unlock early access"), card, E, T("Especially for you.")),
+  T("Unlock early access"), card, E),
  ("Now Live (TL Flow) · Now Live (TL Non-flow)", "timed", "timed", A+'&" – Available now, for "&'+IB("window")+'&" only"', IB("window_cap")+'&", starting now."', kicker, IB("window_cap")+'&", starting now"',
   P(LC("email · live · opener"), hook, IB("making_ours"), IB("features_list_support"), LC("email · live · closing line"), framing_welcome),
-  T("Buy now"), card, qline, T("Collect ")+"&"+IB("collect_phrase")),
- ("Halfway (TL Flow)", "timed, 48 hours", "timed 48h", A+'&" – 24 hours to go"', E, kicker, LC("email · halfway · headline"), E, T("Buy now"), E, E, LC("email · halfway · footer")),
- ("5 days to go (TL Flow)", "timed, one week", "timed week", A+'&" – 5 days left"', E, kicker, LC("email · 5 days · headline"), E, buy_one, E, E, LC("email · days to go · footer")),
+  T("Buy now"), card, qline),
+ ("Halfway (TL Flow)", "timed, 48 hours", "timed 48h", A+'&" – 24 hours to go"', E, kicker, LC("email · halfway · headline"), E, T("Buy now"), E, E),
+ ("5 days to go (TL Flow)", "timed, one week", "timed week", A+'&" – 5 days left"', E, kicker, LC("email · 5 days · headline"), E, buy_one, E, E),
  ("3 days to go (TL Flow)", "timed, one week", "timed week", A+'&" – 3 days to go"', E, IB("Work_email")+'&" by "&'+A, LC("email · 3 days · headline"),
-  P(LC("email · 3 days · 1"), hook, LC("email · 3 days · 2"), framing_reminder), buy_one, card, E, LC("email · days to go · footer")),
+  P(LC("email · 3 days · 1"), hook, LC("email · 3 days · 2"), framing_reminder), buy_one, card, E),
  ("Last chance (TL Flow) · Last chance (LE)", "both", "both", A+'&" – Last chance to "&'+sel(T("enter the draw"), T("collect")),
   sel(T("The draw closes at ")+"&"+IB("close_time")+'&" on "&'+IB("close_date")+'&"."', T("Time is almost up.")), A, sel(T("Last chance to enter the draw"), T("Last chance to collect")),
   sel(P(LC("email · last chance, draw · 1"), hook, LC("email · last chance, draw · 2")), P(LC("email · last chance, timed · 1"), LC("email · last chance, timed · 2"), framing_reminder)),
-  sel(T("Enter the draw"), T("Buy now")), card, E, T("Time is almost up")),
+  sel(T("Enter the draw"), T("Buy now")), card, E),
  ("First-time collector survey (LE)", "draw, after the draw closes", "draw", LC("email · first-time survey · subject"), E, E, E,
   P(LC("email · greeting"), LC("email · first-time survey · 1"), LC("email · first-time survey · 2"), LC("email · first-time survey · 3"), LC("email · first-time survey · 4")),
-  T("Complete survey"), A, E, E),
+  T("Complete survey"), A, E),
  ("Non-purchaser survey (LE)", "draw, after the draw closes", "draw", A+'&" – Any feedback?"', E, T("Your feedback"), A,
   P(LC("email · non-purchaser survey · 1"), LC("email · non-purchaser survey · 2"), LC("email · non-purchaser survey · 3"), LC("email · non-purchaser survey · terms")),
-  T("Complete survey"), E, E, LC("email · non-purchaser survey · footer")),
+  T("Complete survey"), E, E),
  ("Monthly Preview · this release's paragraph", "both; the advisor's monthly email is one paragraph per release, this is this release's", "both", E, E, E, E,
   P(LC("email · monthly preview · opener"), hook, IB("making_ours"), sel(LC("email · monthly preview · when, draw"), LC("email · monthly preview · when, timed"))),
-  E, E, E, E),
+  E, E, E),
 ]
-for i, (name, use, used, subj, prev, kick, head, body, cta, cardf, quotef, foot) in enumerate(emails):
+for i, (name, use, used, subj, prev, kick, head, body, cta, cardf, quotef) in enumerate(emails):
     rr = 4 + i
     guard = lambda expr: '=""' if expr == "" else f'=IF($D{rr}<>"yes","",{expr})'
     full = (f'=IF(D{rr}<>"yes",D{rr},IF(E{rr}="","","Subject: "&E{rr})&IF(F{rr}="","",{NL}&"Preview: "&F{rr})&IF(G{rr}="","",{NL}&"Kicker: "&G{rr})&IF(H{rr}="","",{NL}&"Headline: "&H{rr})'
-            f'&IF(I{rr}="","",IF(E{rr}&F{rr}&G{rr}&H{rr}="","",{PP})&I{rr})&IF(J{rr}="","",{PP}&"CTA: "&J{rr})&IF(K{rr}="","",{PP}&"Card: "&K{rr})&IF(L{rr}="","",{PP}&"Quote: "&L{rr})&IF(M{rr}="","",{PP}&"Footer: "&M{rr}))')
-    vals = [i + 1, name, use, "=" + USED[used]] + [guard(x) for x in (subj, prev, kick, head, body, cta, cardf, quotef, foot)] + [full, f"=LEN(N{rr})"]
+            f'&IF(I{rr}="","",IF(E{rr}&F{rr}&G{rr}&H{rr}="","",{PP})&I{rr})&IF(J{rr}="","",{PP}&"CTA: "&J{rr})&IF(K{rr}="","",{PP}&"Card: "&K{rr})&IF(L{rr}="","",{PP}&"Quote: "&L{rr}))')
+    vals = [i + 1, name, use, "=" + USED[used]] + [guard(x) for x in (subj, prev, kick, head, body, cta, cardf, quotef)] + [full, f"=LEN(M{rr})"]
     for col, v in enumerate(vals, 1):
         c = es.cell(row=rr, column=col, value=v); c.font = ARIAL; c.alignment = WRAP; c.border = BOX
     es.row_dimensions[rr].height = 300 if body else 90
-for col, w in zip("ABCDEFGHIJKLMNO", [4, 30, 16, 16, 34, 30, 22, 26, 90, 16, 30, 34, 26, 96, 11]): es.column_dimensions[col].width = w
+for col, w in zip("ABCDEFGHIJKLMN", [4, 30, 16, 16, 34, 30, 22, 26, 90, 16, 30, 34, 96, 11]): es.column_dimensions[col].width = w
 es.freeze_panes = "E4"
 
 # ================================================================= Rules
@@ -428,7 +424,7 @@ rules = [
  ("Skeleton, posts", "Every post is: status line, substance, features line, action line, and a hashtag on the announcement only. Coming Soon opens with the bio."),
  ("Insiders", "The Insiders account posts the same caption as the main feed. The plan says which: Announcement, Now Live and Halfway for a timed edition, Announcement for a draw. The Channels column on Posts carries this. Stories are image-led and stay outside the sheet."),
  ("Twitter", "A tweet is the post's status line with the X handle, the hook on the announcement only, the beneficiary named once, and an action line that ends with the link: sign up for updates, enter the draw, or buy a print. No features line, no hashtag, no bio. Same deadline form. Coming soon names the artist and not the work."),
- ("Skeleton, emails", "Every email is: subject, preview, kicker, headline, body paragraphs, CTA, card, quote, footer. Bodies are fixed sentences from the Lines sheet with the same fragments dropped in. Halfway and 5 days to go have no body: they are image-led."),
+ ("Skeleton, emails", "Every email is: subject, preview, kicker, headline, body paragraphs, CTA, card, quote. Bodies are fixed sentences from the Lines sheet with the same fragments dropped in. Halfway and 5 days to go have no body: they are image-led."),
  ("The hook carries the voice", "The hook is where a release sounds like itself, and it can be as editorial as the writer likes: 'Folklore says a changeling is a child swapped at birth for something not quite human. Grayson Perry's version is the generation raised by screens, and he means it to disturb.' The one test is that it must read as well in the middle of an email as at the top of a post, because it appears in 16 slots and most of them are middle paragraphs. That rules out a sentence which assumes it is opening: a rhetorical question, or an aside about the artist that never describes the work."),
  ("Naming the work", "The opener's tail is the title (single print only), the edition phrase, and the qualifier if one is written: 'The Changeling, a new limited edition print'; 'a quartet of new limited edition prints spanning five decades of the artist's career'; 'six new limited edition prints from his iconic Dream House series'. A pair or a quartet takes no title; the hook names the work. The same tail is used by the Insiders email, LE early access, Now Live and the Monthly Preview paragraph."),
  ("Fragments", "Four per release, written once: bio (2 to 3 sentences, Coming Soon only), hook (2 to 3 sentences about the work, in every post and email), making (one sentence on how it was made), quote (verbatim). The hook and bio must not repeat each other."),

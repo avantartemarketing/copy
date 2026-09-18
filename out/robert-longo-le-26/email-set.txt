@@ -31,8 +31,6 @@ CTA: Unlock early access
 Card: Untitled (Sandy, from the series “Men in the Cities”)
 One of the most iconic figures from a truly iconic series, Sandy is a striking exploration of urban alienation.
 
-Footer: Especially for you.
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 3 · Early Access (LE Insiders), signed by the advisor · 030926]
 Subject: Robert Longo – Early access for Insiders 🔓
@@ -59,8 +57,6 @@ CTA: Unlock early access
 
 Card: Untitled (Sandy, from the series “Men in the Cities”)
 One of the most iconic figures from a truly iconic series, Sandy is a striking exploration of urban alienation.
-
-Footer: Especially for you.
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 4 · Announcement (LE) · 070926]
@@ -89,8 +85,6 @@ One of the most iconic figures from a truly iconic series, Sandy is a striking e
 
 Quote: “It was really important to me that as I got older as an artist, I could still make work that meant something. I wanna make work that matters.” – Robert Longo
 
-Footer: Collect a limited edition silkscreen print
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 5 · Last chance (LE) · 280926]
 Subject: Robert Longo – Last chance to enter the draw
@@ -108,8 +102,6 @@ CTA: Enter the draw
 
 Card: Untitled (Sandy, from the series “Men in the Cities”)
 One of the most iconic figures from a truly iconic series, Sandy is a striking exploration of urban alienation.
-
-Footer: Time is almost up
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 6 · First-time collector survey (LE) · 300926]
@@ -144,4 +136,3 @@ As a thank you for taking part in the survey and helping us improve the collecto
 You can read the terms here.
 
 CTA: Complete survey
-Footer: What can we do better?

@@ -31,8 +31,6 @@ CTA: Unlock early access
 Card: Window
 The duct-taped banana of Comedian, transplanted from the gallery wall to a hyper-realistic landscape, in four silkscreen layers sealed with matte varnish.
 
-Footer: Especially for you.
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 3 · Early Access (LE Insiders), signed by the advisor · 220126]
 Subject: Maurizio Cattelan – Early access for Insiders 🔓
@@ -59,8 +57,6 @@ CTA: Unlock early access
 
 Card: Window
 The duct-taped banana of Comedian, transplanted from the gallery wall to a hyper-realistic landscape, in four silkscreen layers sealed with matte varnish.
-
-Footer: Especially for you.
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 4 · Announcement (LE) · 260126]
@@ -89,8 +85,6 @@ The duct-taped banana of Comedian, transplanted from the gallery wall to a hyper
 
 Quote: “A comedian is doomed to make people laugh.” – Maurizio Cattelan
 
-Footer: Collect a limited edition print
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 5 · Last chance (LE) · 190226]
 Subject: Maurizio Cattelan – Last chance to enter the draw
@@ -108,8 +102,6 @@ CTA: Enter the draw
 
 Card: Window
 The duct-taped banana of Comedian, transplanted from the gallery wall to a hyper-realistic landscape, in four silkscreen layers sealed with matte varnish.
-
-Footer: Time is almost up
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 6 · First-time collector survey (LE) · 210226]
@@ -144,4 +136,3 @@ As a thank you for taking part in the survey and helping us improve the collecto
 You can read the terms here.
 
 CTA: Complete survey
-Footer: What can we do better?

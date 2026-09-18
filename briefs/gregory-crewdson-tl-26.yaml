@@ -72,7 +72,6 @@ context:
   hook: "Originally commissioned by the New York Times in 2002, Dream House was shot inside an abandoned Vermont home with a cast including Julianne Moore, Philip Seymour Hoffman, Tilda Swinton, William H. Macy and Gwyneth Paltrow. The series transforms suburban America into a cinematic psychological landscape."   # about the work; as editorial as you like, but it must read as well mid-email as at the top of a post
   qualifier: "from his iconic Dream House series"   # a few words after the edition phrase in the email opener; blank for none
   quote_sentence: "To Gregory, Dream House represents “that moment of transcendence, where one is transported into another place, into a perfect, still world.”"   # FRAME filled by hand: "To {first name}, {work} represents “{quote}”"
-  footer: From his iconic 'Dream House' series
   artist_line: "It's been meaningful to see the response to this work again after all these years. These images were originally created in 2002 in an abandoned home in Vermont, as part of a larger exploration of stillness, narrative and psychological tension."
   artist_thanks: ""
   social:

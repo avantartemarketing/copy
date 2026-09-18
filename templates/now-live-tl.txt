@@ -27,4 +27,3 @@ Card: {{ a.title }}
 {{ a.card_line }}
 
 {% endfor %}
-Footer: {{ context.footer or "Collect " ~ (edition|collect_phrase) }}

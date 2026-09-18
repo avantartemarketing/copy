@@ -89,7 +89,7 @@ Measured on the two rendered campaigns in `out/`:
 
 The Sustain and deep-dive emails are the exception: they are editorial, 70% or more of the
 words are bounded, and they should stay human-written. The tool can still supply their
-frame, CTA and footer.
+frame and CTA.
 
 ## 3. The brief
 
@@ -101,7 +101,7 @@ See `briefs/robert-longo-le-26.yaml` for the full annotated example.
 |---|---|---|
 | `release` | campaign code, mechanic (draw / timed / ranked auction), window, early access date and code, launch date, close date, framing code, fundraiser | internal names, subjects, every deadline sentence, the framing smart-content block |
 | `artist` | name, surname, first name, the exact words after "collaboration with", debut / latest / second, partner estate or foundation, quote and attribution | opener frame, recap frame, quote block |
-| `edition` | unit (print / sculpture / collectable), count, medium, size, how it is signed, numbered, technique facts | "a trio of new limited edition prints", the production sentence, footers |
+| `edition` | unit (print / sculpture / collectable), count, medium, size, how it is signed, numbered, technique facts | "a trio of new limited edition prints", the production sentence |
 | `artworks[]` | title, short title, series, facts, card line | headline, cards, "enter the draw for X, Y and Z" |
 | `context` | opener choice, artist facts, subject hook, hook, Early Access note, recap | the bounded slots |
 | `post_purchase` | update dates, framed and unframed ship windows, delay phrase | the whole TRNS sequence |
@@ -311,7 +311,7 @@ python3 tool/build_release_copy.py
 
 Each rendered file carries the HubSpot internal name in your convention, the subject, the
 preview text, and the body with each part on a labelled line (`Kicker:`, `Headline:`, then the
-body, `CTA:`, `Card:`, `Quote:`, `Footer:`) so it maps onto your HubSpot template
+body, `CTA:`, `Card:`, `Quote:`) so it maps onto your HubSpot template
 one block at a time.
 
 **Running it on Render.** `app.py` serves the same page from a small Flask server, so it runs

@@ -198,7 +198,7 @@ def check(brief_path):
     chunks = [c for c in render(brief, "email-set").split("════════════════════════════════════════════════════════════════") if c.strip()]
     keys = [k for k, _, _ in email_phases(brief["release"], brief["artist"])]
     for key, chunk in zip(keys, chunks):
-        ok &= compare(f"email · {key}", template_email_lines(chunk), excel_email_lines(ev.get("Emails", f"N{EMAIL_ROW[key]}")), report)
+        ok &= compare(f"email · {key}", template_email_lines(chunk), excel_email_lines(ev.get("Emails", f"M{EMAIL_ROW[key]}")), report)
     print("\n".join(report))
     return ok
 

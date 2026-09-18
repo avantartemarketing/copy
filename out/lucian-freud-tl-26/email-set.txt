@@ -26,8 +26,6 @@ Four portraits across five decades, from Girl in Bed in 1953 to the late Self-Po
 
 Quote: “The difficulties of painting yourself are psychological, you've got to try to paint yourself as another person.” – Lucian Freud
 
-Footer: Launching 14 April
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 2 · Welcome (TL Flow) · 160326]
 Subject: Welcome to Avant Arte
@@ -42,7 +40,6 @@ Our upcoming collaboration with the Lucian Freud Estate is the latest in this li
 Let us know if you have any questions. We're excited to see what you collect.
 
 CTA: Complete collector profile
-Footer: Where the art world is more accessible
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 3 · Monthly Preview, this release's paragraph · 310326]
@@ -81,8 +78,6 @@ CTA: Unlock early access
 Card: Portraits, 1952–2002
 Four portraits across five decades, from Girl in Bed in 1953 to the late Self-Portrait (Reflection) of 2002, available individually, as pairs or as the complete quartet.
 
-Footer: 24 hours ahead of the public launch
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 5 · Early Access (TL Flow) · 130426]
 Subject: Lucian Freud – Early access 🔓
@@ -106,7 +101,6 @@ As a welcome gesture, enjoy 10% off our in-house framing on your first purchase 
 Unlock early access using the link below.
 
 CTA: Unlock early access
-Footer: 24 hours ahead of the public launch
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 6 · Early access (TL Artist PP Non Flow) · 130426]
@@ -137,8 +131,6 @@ CTA: Unlock early access
 Card: Portraits, 1952–2002
 Four portraits across five decades, from Girl in Bed in 1953 to the late Self-Portrait (Reflection) of 2002, available individually, as pairs or as the complete quartet.
 
-Footer: 24 hours ahead of the public launch
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 7 · Now Live (TL Flow and Non-flow) · 140426]
 Subject: Lucian Freud – Available now, for 48 hours only
@@ -168,15 +160,12 @@ Four portraits across five decades, from Girl in Bed in 1953 to the late Self-Po
 
 Quote: “The difficulties of painting yourself are psychological, you've got to try to paint yourself as another person.” – Lucian Freud
 
-Footer: Collect a quartet of limited edition prints
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 8 · Halfway (TL Flow) · 150426]
 Subject: Lucian Freud – 24 hours to go
 Kicker: Collect a print by Lucian Freud
 Headline: 24 hours down, 24 to go
 CTA: Buy now
-Footer: There's still time to add a print to your collection.
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 9 · Last chance (TL Flow) · 160426]
@@ -195,5 +184,3 @@ CTA: Buy now
 
 Card: Portraits, 1952–2002
 Four portraits across five decades, from Girl in Bed in 1953 to the late Self-Portrait (Reflection) of 2002, available individually, as pairs or as the complete quartet.
-
-Footer: Time is almost up

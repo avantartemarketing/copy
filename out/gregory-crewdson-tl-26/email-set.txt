@@ -26,8 +26,6 @@ This collection brings together six new limited edition prints. Meticulous, stil
 
 Quote: “that moment of transcendence, where one is transported into another place, into a perfect, still world.” – Gregory Crewdson
 
-Footer: Launching 30 June
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 2 · Welcome (TL Flow) · 100626]
 Subject: Welcome to Avant Arte
@@ -42,7 +40,6 @@ Our upcoming collaboration with New York-based artist Gregory Crewdson is the la
 Let us know if you have any questions. We're excited to see what you collect.
 
 CTA: Complete collector profile
-Footer: Where the art world is more accessible
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 3 · Monthly Preview, this release's paragraph · 160626]
@@ -81,8 +78,6 @@ CTA: Unlock early access
 Card: Untitled
 This collection brings together six new limited edition prints. Meticulous, still, and unsettling, Crewdson's photographs construct a distinctly American psychological landscape with a Lynchian atmosphere, existing somewhere between the familiar and the uncanny.
 
-Footer: 24 hours ahead of the public launch
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 5 · Early Access (TL Flow) · 290626]
 Subject: Gregory Crewdson – Early access 🔓
@@ -106,7 +101,6 @@ As a welcome gesture, enjoy 10% off our in-house framing on your first purchase 
 Unlock early access using the link below.
 
 CTA: Unlock early access
-Footer: 24 hours ahead of the public launch
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 6 · Early access (TL Artist PP Non Flow) · 290626]
@@ -137,8 +131,6 @@ CTA: Unlock early access
 Card: Untitled
 This collection brings together six new limited edition prints. Meticulous, still, and unsettling, Crewdson's photographs construct a distinctly American psychological landscape with a Lynchian atmosphere, existing somewhere between the familiar and the uncanny.
 
-Footer: 24 hours ahead of the public launch
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 7 · Now Live (TL Flow and Non-flow) · 300626]
 Subject: Gregory Crewdson – Available now, for 48 hours only
@@ -168,15 +160,12 @@ This collection brings together six new limited edition prints. Meticulous, stil
 
 Quote: “that moment of transcendence, where one is transported into another place, into a perfect, still world.” – Gregory Crewdson
 
-Footer: Collect six limited edition prints
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 8 · Halfway (TL Flow) · 010726]
 Subject: Gregory Crewdson – 24 hours to go
 Kicker: Collect a print by Gregory Crewdson
 Headline: 24 hours down, 24 to go
 CTA: Buy now
-Footer: There's still time to add a print to your collection.
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 9 · Last chance (TL Flow) · 020726]
@@ -195,5 +184,3 @@ CTA: Buy now
 
 Card: Untitled
 This collection brings together six new limited edition prints. Meticulous, still, and unsettling, Crewdson's photographs construct a distinctly American psychological landscape with a Lynchian atmosphere, existing somewhere between the familiar and the uncanny.
-
-Footer: Time is almost up

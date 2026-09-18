@@ -1522,8 +1522,7 @@ function asideFacts(){
   const rows = [
     ["Opener reads", openerText()],
     ["Status line", d.series?`Announcing ${f.edition_phrase} by ${d.named}, from ${d.work}.`:`Announcing ${d.work}, ${f.edition_phrase} by ${d.named}.`],
-    ["Deadline", d.draw?`Closes ${d.closeDate} at ${d.closeTime}.`:`Available for ${f.window} from ${d.launchTime} on ${d.launchDate}.`],
-    ["Footer", d.draw?`Collect ${d.collectPhrase}`:`Launching ${d.launchDate}`]
+    ["Deadline", d.draw?`Closes ${d.closeDate} at ${d.closeTime}.`:`Available for ${f.window} from ${d.launchTime} on ${d.launchDate}.`]
   ];
   return `<div class="panel"><span class="lbl">From these facts</span><h2>Built from the details</h2>
     <section>
@@ -1570,22 +1569,22 @@ function pairUp(mine, srv){
   const pairs = mine.map(x => { const ks = nkeys(x.n); const i = left.findIndex(a => ks.includes(nkey(a.name))); return {x, a: i < 0 ? null : left.splice(i, 1)[0]}; });
   return {pairs, extra: left};
 }
-// the page's email is the body copy; the templates' carries the subject, preview, quote and footer lines around it
-const MARK = /^(Subject|Preview|Footer|Quote): /;
+// the page's email is the body copy; the templates' carries the subject, preview and quote lines around it
+const MARK = /^(Subject|Preview|Quote): /;
 // line by line: a paragraph is one line in both, and the image-led emails are only labelled lines
 function emailParas(text){
   return text.split("\n").map(norm).filter(l => l && !MARK.test(l) && l !== "No body: this one is image-led.");
 }
 // an email as it reads: the subject, preview, kicker and headline set off at the top, the body as
-// paragraphs, the CTA, cards, quote and footer labelled
+// paragraphs, the CTA, cards and quote labelled
 function emailHTML(text){
   const tok = esc;
   const lines = (text || "").replace(/\r/g, "").split("\n");
   const head = []; let i = 0;
   while (i < lines.length && /^(Subject|Preview|Kicker|Headline): /.test(lines[i])) { head.push(lines[i].match(/^(\w+): (.*)$/)); i++; }
-  const chunks = lines.slice(i).join("\n").replace(/\n(?=(CTA|Card|Quote|Footer): )/g, "\n\n").trim().split(/\n\s*\n/).filter(Boolean);   // a labelled line is a block of its own
+  const chunks = lines.slice(i).join("\n").replace(/\n(?=(CTA|Card|Quote): )/g, "\n\n").trim().split(/\n\s*\n/).filter(Boolean);   // a labelled line is a block of its own
   const para = c => {
-    const m = c.match(/^(CTA|Card|Quote|Footer): ([\s\S]*)$/);
+    const m = c.match(/^(CTA|Card|Quote): ([\s\S]*)$/);
     if (!m) return `<p>${tok(c)}</p>`;
     const [first, ...rest] = m[2].split("\n");
     return `<p class="em ${m[1].toLowerCase()}"><span class="lbl">${m[1]}</span>${m[1] === "Card" ? `<b>${tok(first)}</b>${rest.length ? "\n" + tok(rest.join("\n")) : ""}` : tok(m[2])}</p>`;

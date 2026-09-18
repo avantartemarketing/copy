@@ -17,7 +17,7 @@ import yaml
 
 # The free-text fields. Everything else in the brief is a fact or a menu choice.
 BOUNDED_KEYS = {"hook", "card_line", "subject_hook", "early_access_note", "technique_sentence",
-                "recap", "quote_sentence", "footer", "delay_phrase", "artist_line", "artist_thanks", "artist_bio", "hook_short", "detail", "technique_clause", "making", "qualifier", "opener"}
+                "recap", "quote_sentence", "delay_phrase", "artist_line", "artist_thanks", "artist_bio", "hook_short", "detail", "technique_clause", "making", "qualifier", "opener"}
 
 BANNED = [
     # sales-page urgency the brand has never used

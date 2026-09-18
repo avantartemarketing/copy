@@ -25,8 +25,6 @@ CTA: Discover the collaboration
 Card: Self-Portrait Embroidery
 The artist's defiant self-portrait, first made in toy bricks in 2016, rendered in approximately 460,000 stitches and offered in four colour combinations.
 
-Footer: Launching 28 January
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 2 · Welcome (TL Flow) · 060126]
 Subject: Welcome to Avant Arte
@@ -41,7 +39,6 @@ Our upcoming collaboration with Ai Weiwei is the latest in this lineage. If you'
 Let us know if you have any questions. We're excited to see what you collect.
 
 CTA: Complete collector profile
-Footer: Where the art world is more accessible
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 3 · Monthly Preview, this release's paragraph · 140126]
@@ -80,8 +77,6 @@ CTA: Unlock early access
 Card: Self-Portrait Embroidery
 The artist's defiant self-portrait, first made in toy bricks in 2016, rendered in approximately 460,000 stitches and offered in four colour combinations.
 
-Footer: 24 hours ahead of the public launch
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 5 · Early Access (TL Flow) · 270126]
 Subject: Ai Weiwei – Early access 🔓
@@ -104,7 +99,6 @@ As a thank you for registering for updates, we're offering you the chance to col
 Unlock early access using the link below.
 
 CTA: Unlock early access
-Footer: 24 hours ahead of the public launch
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 6 · Early access (TL Artist PP Non Flow) · 270126]
@@ -136,8 +130,6 @@ CTA: Unlock early access
 Card: Self-Portrait Embroidery
 The artist's defiant self-portrait, first made in toy bricks in 2016, rendered in approximately 460,000 stitches and offered in four colour combinations.
 
-Footer: 24 hours ahead of the public launch
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 7 · Now Live (TL Flow and Non-flow) · 280126]
 Subject: Ai Weiwei – Available now, for one week only
@@ -164,15 +156,12 @@ CTA: Buy now
 Card: Self-Portrait Embroidery
 The artist's defiant self-portrait, first made in toy bricks in 2016, rendered in approximately 460,000 stitches and offered in four colour combinations.
 
-Footer: Collect a quartet of limited edition embroideries
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 8 · 5 days to go (TL Flow) · 300126]
 Subject: Ai Weiwei – 5 days left
 Kicker: Collect an embroidery by Ai Weiwei
 Headline: 2 days down, 5 days to go
 CTA: Buy an embroidery
-Footer: Add an embroidery to your collection
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 9 · 3 days to go (TL Flow) · 010226]
@@ -191,8 +180,6 @@ CTA: Buy an embroidery
 Card: Self-Portrait Embroidery
 The artist's defiant self-portrait, first made in toy bricks in 2016, rendered in approximately 460,000 stitches and offered in four colour combinations.
 
-Footer: Add an embroidery to your collection
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 10 · Last chance (TL Flow) · 030226]
 Subject: Ai Weiwei – Last chance to collect
@@ -208,5 +195,3 @@ CTA: Buy now
 
 Card: Self-Portrait Embroidery
 The artist's defiant self-portrait, first made in toy bricks in 2016, rendered in approximately 460,000 stitches and offered in four colour combinations.
-
-Footer: Time is almost up

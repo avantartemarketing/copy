@@ -25,8 +25,6 @@ Collect a limited edition print by Grayson Perry, exploring modern youth shaped 
 
 Quote: “Beauty and seriousness are perhaps the most shocking tactics left to artists these days.” – Grayson Perry
 
-Footer: Launching 30 April
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 2 · Welcome (TL Flow) · 080426]
 Subject: Welcome to Avant Arte
@@ -41,7 +39,6 @@ Our upcoming collaboration with Grayson Perry is the latest in this lineage. If 
 Let us know if you have any questions. We're excited to see what you collect.
 
 CTA: Complete collector profile
-Footer: Where the art world is more accessible
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 3 · Monthly Preview, this release's paragraph · 160426]
@@ -80,8 +77,6 @@ CTA: Unlock early access
 Card: The Changeling
 Collect a limited edition print by Grayson Perry, exploring modern youth shaped by technology, produced in vivid detail through a 9-colour silkscreen print.
 
-Footer: 24 hours ahead of the public launch
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 5 · Early Access (TL Flow) · 290426]
 Subject: Grayson Perry – Early access 🔓
@@ -103,7 +98,6 @@ As a thank you for registering for updates, we're offering you the chance to col
 Unlock early access using the link below.
 
 CTA: Unlock early access
-Footer: 24 hours ahead of the public launch
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 6 · Early access (TL Artist PP Non Flow) · 290426]
@@ -134,8 +128,6 @@ CTA: Unlock early access
 Card: The Changeling
 Collect a limited edition print by Grayson Perry, exploring modern youth shaped by technology, produced in vivid detail through a 9-colour silkscreen print.
 
-Footer: 24 hours ahead of the public launch
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 7 · Now Live (TL Flow and Non-flow) · 300426]
 Subject: Grayson Perry – Available now, for one week only
@@ -163,15 +155,12 @@ Collect a limited edition print by Grayson Perry, exploring modern youth shaped 
 
 Quote: “Beauty and seriousness are perhaps the most shocking tactics left to artists these days.” – Grayson Perry
 
-Footer: Collect a limited edition print
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 8 · 5 days to go (TL Flow) · 020526]
 Subject: Grayson Perry – 5 days left
 Kicker: Collect a print by Grayson Perry
 Headline: 2 days down, 5 days to go
 CTA: Buy a print
-Footer: Add a print to your collection
 
 ════════════════════════════════════════════════════════════════
 [EMAIL 9 · 3 days to go (TL Flow) · 040526]
@@ -190,8 +179,6 @@ CTA: Buy a print
 Card: The Changeling
 Collect a limited edition print by Grayson Perry, exploring modern youth shaped by technology, produced in vivid detail through a 9-colour silkscreen print.
 
-Footer: Add a print to your collection
-
 ════════════════════════════════════════════════════════════════
 [EMAIL 10 · Last chance (TL Flow) · 060526]
 Subject: Grayson Perry – Last chance to collect
@@ -207,5 +194,3 @@ CTA: Buy now
 
 Card: The Changeling
 Collect a limited edition print by Grayson Perry, exploring modern youth shaped by technology, produced in vivid detail through a 9-colour silkscreen print.
-
-Footer: Time is almost up
